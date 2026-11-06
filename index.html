@@ -78,6 +78,40 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 @keyframes s{to{transform:rotate(360deg)}}
 .sync{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-left:6px;vertical-align:middle}
 .sync.busy{background:#fbbf24}
+.steps{display:flex;align-items:center;margin-top:12px;gap:4px}
+.step{flex:none;display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:12px;color:#aebbd0;font-weight:600;font-size:14px}
+.step .n{width:24px;height:24px;border-radius:50%;border:2px solid #4b5f7d;display:grid;place-items:center;font-size:13px;font-weight:800}
+.step.on{background:#fff;color:var(--navy)}
+.step.on .n{border-color:var(--navy);background:var(--navy);color:#fff}
+.step.ok .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.steps .ln{flex:1;height:2px;background:#33486a;min-width:6px}
+.dest{background:var(--card);border-radius:var(--r);padding:18px 16px;margin-bottom:12px}
+.dest .lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+.dest .place{font-size:21px;font-weight:800;margin:6px 0 4px;word-break:break-word}
+.dest .when{color:var(--mut);font-size:14px}
+.maps{display:grid;gap:10px;margin-bottom:12px}
+.mapbtn{display:flex;align-items:center;gap:12px;padding:16px;border-radius:14px;background:var(--card);font-weight:700;font-size:16px;color:var(--txt);text-decoration:none}
+.mapbtn.main{background:var(--dev);color:#fff}
+.mapbtn .ic{width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,.08);display:grid;place-items:center;font-size:19px;flex:none}
+.mapbtn.main .ic{background:rgba(255,255,255,.18)}
+.mapbtn .go{margin-left:auto;opacity:.6;font-size:20px}
+.aviso{background:var(--warnbg);color:var(--warn);padding:12px 14px;border-radius:12px;font-weight:600;font-size:14px;margin-bottom:12px}
+.furg{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.furg .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.furg .mat{font-size:20px;font-weight:800;letter-spacing:.06em;text-decoration:none!important;color:var(--txt)!important}
+.plate{display:inline-block;border:2px solid var(--txt);border-radius:6px;padding:2px 10px;font-weight:800;letter-spacing:.08em;font-size:18px;background:#fff;color:#14202e}
+.plate::before{content:"E";display:inline-block;background:#1e4fb5;color:#fff;font-size:11px;padding:2px 4px;margin:-2px 8px -2px -10px;border-radius:3px 0 0 3px;vertical-align:middle}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--mut)}.kv dd{margin:0;font-weight:600;word-break:break-word}
+.edit{font-size:14px;font-weight:700;color:var(--dev);padding:6px 10px;border-radius:10px;background:var(--devbg)}
+.salida{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:17px;margin-bottom:12px}
+.salida.sent{background:var(--okbg);color:var(--ok)}
+.salida[disabled]{opacity:.7}
+.fld{display:block;margin-bottom:10px}
+.fld span{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:4px}
+.fld input,.fld textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;margin:0;min-height:0;background:#fff;color:var(--txt)}
+.sheet{max-height:88vh;overflow:auto}
+.link{display:block;width:100%;text-align:center;padding:12px;color:var(--mut);font-weight:600;font-size:14px}
 </style>
 </head>
 <body>
@@ -90,7 +124,8 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 // La clave llega en el enlace (#k=...) y se guarda en este móvil
 let KEY = '';
 try{ const m = location.hash.match(/k=([\w-]+)/); if(m){ localStorage.setItem('ck_key', m[1]); history.replaceState(null,'',location.pathname); } KEY = localStorage.getItem('ck_key') || ''; }catch(e){ const m = location.hash.match(/k=([\w-]+)/); KEY = m ? m[1] : ''; }
-const S = { vista:'lista', filtro:'prox', q:'', presus:[], num:null, items:[], opciones:[], modo:'carga', pend:0 };
+const S = { vista:'lista', filtro:'prox', q:'', presus:[], num:null, items:[], opciones:[], modo:'carga', pend:0, furg:{}, enviando:false };
+let SALIDAS = {}; try{ SALIDAS = JSON.parse(localStorage.getItem('ck_salidas')||'{}'); }catch(e){}
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const vib = n => { try{ navigator.vibrate && navigator.vibrate(n) }catch(e){} };
@@ -141,7 +176,7 @@ function vistaLista(){
         </div></button>`;
     }).join('');
   return `<header>
-    <div class="hrow"><h1>Carga de material<span class="sync" id="dot"></span></h1><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
+    <div class="hrow"><h1>Carga de material<span class="sync" id="dot"></span></h1><button class="ref" onclick="abrirFurg()" aria-label="Furgoneta">🚐</button><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
     <input class="search" placeholder="Buscar nº o cliente…" value="${esc(S.q)}" oninput="S.q=this.value;redibujarLista()">
     <div class="seg"><button class="${S.filtro==='prox'?'on':''}" onclick="S.filtro='prox';render()">Próximos</button><button class="${S.filtro==='todos'?'on':''}" onclick="S.filtro='todos';render()">Todos</button></div>
   </header><main id="lista">${body}</main>`;
@@ -153,7 +188,7 @@ async function abrir(num, refresco){
   const nuevo = !refresco; S.vista='det'; S.num=num; if(nuevo) S.items=[];
   const p = S.presus.find(x=>x.num===num);
   // Si ya está cargado todo y no devuelto, abre en modo descarga
-  if(nuevo) S.modo = p && p.total && p.cargados===p.total && p.devueltos<p.total ? 'dev' : 'carga';
+  if(nuevo) S.modo = !p || !p.total || p.cargados<p.total ? 'carga' : (p.devueltos>0 ? 'dev' : 'ruta');
   if(nuevo){ try{history.pushState({v:'det'},'')}catch(e){} render(); window.scrollTo(0,0); }
   try{ const r = await call('ckMaterial', num); S.items=r.items; S.opciones=r.opciones; actualizarResumen(); }catch(e){ toast('Error: '+e.message); }
   if(S.vista==='det' && S.num===num) render();
@@ -164,6 +199,7 @@ function vistaDet(){
   const hk = S.modo==='carga' ? 'hCarga' : 'hDev';
   const tot = S.items.length, hechos = S.items.filter(i=>i[k]).length;
   const pend = S.items.filter(i=>!i[k]), ok = S.items.filter(i=>i[k]);
+  let foot0 = null;
   const fila = i => `<div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''}" onclick="toggle(${i.fila})">
       <div class="chk">${i[k]?'✓':''}</div>
       <div class="qty">${esc(i.cant)}</div>
@@ -172,21 +208,102 @@ function vistaDet(){
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">⚠︎</button>
     </div>`;
   let body;
-  if(!tot) body = `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
+  if(tot && S.modo==='ruta'){ const r = vistaRuta(p, tot); body = r.body; foot0 = r.foot; }
+  else if(!tot) body = `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
   else body = `
     <div class="prog"><div class="big">${hechos}<span> / ${tot} ${S.modo==='carga'?'cargados':'devueltos'}</span></div>
       <div class="track"><div class="fill ${S.modo==='dev'?'dev':''}" style="width:${hechos/tot*100}%"></div></div></div>
     ${hechos===tot?`<div class="done-banner ${S.modo==='dev'?'dev':''}">${S.modo==='carga'?'✓ Todo cargado en la furgoneta':'✓ Todo devuelto al almacén'}</div>`:''}
     ${pend.length?`<div class="sec">Pendiente (${pend.length})</div>${pend.map(fila).join('')}`:''}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} (${ok.length})</div>${ok.map(fila).join('')}`:''}`;
-  const foot = tot ? `<div class="foot"><button class="btn ${hechos===tot?'sec2':''}" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':(S.modo==='carga'?'Marcar todo como cargado':'Marcar todo como devuelto')}</button></div>` : '';
+  const faltan = tot - hechos;
+  const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo==='carga'
+    ? `<div class="foot"><div class="row2"><button class="btn sec2" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':'Marcar todo'}</button><button class="btn" onclick="irA('ruta', ${faltan})">Siguiente →</button></div></div>`
+    : `<div class="foot"><button class="btn ${hechos===tot?'sec2':''}" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':'Marcar todo como devuelto'}</button></div>`;
   return `<header>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.evento)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">↻</button></div>
-    <div class="seg"><button class="${S.modo==='carga'?'on':''}" onclick="S.modo='carga';render()">🚚 Cargar</button><button class="${S.modo==='dev'?'on':''}" onclick="S.modo='dev';render()">🏠 Descargar</button></div>
+    ${tot ? stepper(tot) : ''}
   </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
 }
+function stepper(tot){
+  const c = S.items.filter(i=>i.cargado).length, d = S.items.filter(i=>i.devuelto).length;
+  const ok = { carga: c===tot, ruta: d>0, dev: d===tot };
+  const pasos = [['carga','1','Cargar'],['ruta','2','Ruta'],['dev','3','Descargar']];
+  return `<div class="steps">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span>${t}</button>`).join('<span class="ln"></span>')}</div>`;
+}
+function irA(m, faltan){
+  if(faltan && !confirm(`Faltan ${faltan} artículos por cargar. ¿Pasar a la ruta igualmente?`)) return;
+  S.modo = m; render(); window.scrollTo(0,0);
+}
+function destino(l){ return String(l||'').replace(/["“”«»]/g,'').replace(/\s*\|\s*/g,', ').trim(); }
+function vistaRuta(p, tot){
+  const c = S.items.filter(i=>i.cargado).length;
+  const q = encodeURIComponent(destino(p.lugar));
+  const aviso = c<tot ? `<div class="aviso">⚠ Faltan ${tot-c} artículos por cargar</div>` : '';
+  const body = !p.lugar
+    ? `${aviso}<div class="dest"><div class="lbl">Destino</div><div class="place">Sin lugar</div><div class="when">Este bolo no tiene el lugar rellenado en la pestaña Bolos.</div></div>`
+    : `${aviso}<div class="dest"><div class="lbl">Destino</div><div class="place">${esc(p.lugar)}</div><div class="when">Montaje ${esc(p.montaje)}${p.desmontaje&&p.desmontaje!==p.montaje?' · Desmontaje '+esc(p.desmontaje):''}</div></div>
+      ${btnSalida(p)}
+      ${tarjetaFurg()}
+      <div class="maps">
+        <a class="mapbtn main" onclick="salidaAuto()" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener"><span class="ic">🧭</span>Abrir en Mapas<span class="go">›</span></a>
+        <a class="mapbtn" onclick="salidaAuto()" href="https://www.google.com/maps/dir/?api=1&destination=${q}&travelmode=driving" target="_blank" rel="noopener"><span class="ic">📍</span>Google Maps<span class="go">›</span></a>
+        <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">🚐</span>Waze<span class="go">›</span></a>
+      </div>
+      <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
+  const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: descarga en almacén →</button></div>`;
+  return { body, foot };
+}
+function btnSalida(p){
+  const h = SALIDAS[p.num];
+  if(S.enviando) return `<button class="salida" disabled>Enviando correo…</button>`;
+  if(h) return `<button class="salida sent" onclick="salida(true)">✓ Salida avisada a las ${esc(h)} · Reenviar</button>`;
+  return `<button class="salida" onclick="salida()">🚐 Me dirijo al lugar</button>`;
+}
+function tarjetaFurg(){
+  const f = S.furg || {};
+  if(!f.matricula && !f.marca && !f.modelo) return `<div class="furg"><div class="top"><b>Furgoneta</b><button class="edit" onclick="abrirFurg()">Añadir datos</button></div><div class="meta">Pon la matrícula, marca y modelo para que salgan en el correo.</div></div>`;
+  const kv = [['Marca',f.marca],['Modelo',f.modelo],['Color',f.color],['Conductor',f.conductor],['Notas',f.notas]].filter(x=>x[1]).map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('');
+  return `<div class="furg"><div class="top">${f.matricula?`<span class="plate">${esc(f.matricula)}</span>`:'<b>Furgoneta</b>'}<button class="edit" onclick="abrirFurg()">Editar</button></div><dl class="kv" style="margin:0">${kv}</dl></div>`;
+}
+function guardarSalida(num, h){ SALIDAS[num]=h; try{ localStorage.setItem('ck_salidas', JSON.stringify(SALIDAS)); }catch(e){} }
+async function salida(reenviar){
+  if(S.enviando) return;
+  if(reenviar && !confirm('¿Reenviar el correo de salida?')) return;
+  const num = S.num; S.enviando = true; render();
+  try{ const h = await call('ckSalida', num); guardarSalida(num, h); vib(30); toast('Correo enviado a andreuufl@gmail.com'); }
+  catch(e){ toast('No se envió el correo: '+e.message); }
+  S.enviando = false; render();
+}
+function salidaAuto(){
+  if(SALIDAS[S.num] || S.enviando) return;
+  const num = S.num, now = new Date(), z=n=>String(n).padStart(2,'0');
+  guardarSalida(num, z(now.getHours())+':'+z(now.getMinutes()));
+  try{ fetch(API + '?k=' + encodeURIComponent(KEY) + '&a=ckSalida&p=' + encodeURIComponent(JSON.stringify([num])) + '&t=' + Date.now(), { credentials:'omit', keepalive:true }); }catch(e){}
+  setTimeout(render, 300);
+}
+async function cargarFurg(){ try{ S.furg = await call('ckFurgoneta') || {}; if(S.vista==='det') render(); }catch(e){} }
+function abrirFurg(){
+  const f = S.furg || {};
+  const campo = (id, t, ph) => `<label class="fld"><span>${t}</span><input id="f_${id}" value="${esc(f[id])}" placeholder="${ph}" autocomplete="off"></label>`;
+  $('#sheet').innerHTML = `<h3>🚐 Furgoneta</h3><div class="meta" style="margin-bottom:12px">Estos datos salen en la app y en el correo de salida.</div>
+    ${campo('matricula','Matrícula','1234 ABC')}
+    <div class="row2">${campo('marca','Marca','Ej. Renault')}${campo('modelo','Modelo','Ej. Master L3H2')}</div>
+    <div class="row2">${campo('color','Color','Blanca')}${campo('conductor','Conductor','Nombre')}</div>
+    <label class="fld"><span>Notas (ITV, seguro, gasoil, llaves…)</span><textarea id="f_notas" rows="3">${esc(f.notas)}</textarea></label>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarFurg()">Guardar</button></div>`;
+  $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open'));
+}
+async function guardarFurg(){
+  const f = {}; ['matricula','marca','modelo','color','conductor','notas'].forEach(c=> f[c] = ($('#f_'+c).value||'').trim());
+  f.matricula = f.matricula.toUpperCase();
+  const prev = S.furg; S.furg = f; cerrarSheet(); render();
+  try{ S.furg = await call('ckGuardarFurgoneta', f); toast('Furgoneta guardada'); render(); }
+  catch(e){ S.furg = prev; render(); toast('No se guardó: '+e.message); }
+}
+function copiar(t){ try{ navigator.clipboard.writeText(t).then(()=>toast('Dirección copiada'),()=>toast(t)); }catch(e){ toast(t); } }
 function actualizarResumen(){
   const p = S.presus.find(x=>x.num===S.num); if(!p) return;
   p.cargados = S.items.filter(i=>i.cargado).length;
@@ -243,7 +360,7 @@ function render(){ $('#app').innerHTML = S.vista==='lista' ? vistaLista() : vist
 window.addEventListener('popstate', ()=>{ if(S.vista==='det'){ S.vista='lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(S.pend || !KEY) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
 if(!KEY){ document.getElementById('app').innerHTML = '<div class="empty" style="padding-top:30vh">Abre la app con el enlace que lleva la clave.</div>'; }
-else cargarLista();
+else { cargarLista(); cargarFurg(); }
 </script>
 </body>
 </html>
