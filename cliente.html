@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16243a">
+<meta name="robots" content="noindex">
+<title>Tu evento · Dreamscape Events</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#16243a;--navy2:#22344f;--gold:#c9a66b;--bg:#f4f2ee;--card:#fff;--txt:#14202e;--mut:#6b7686;--line:#e6e2da;--ok:#1f9d55}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 22px) max(20px,env(safe-area-inset-right)) 26px max(20px,env(safe-area-inset-left))}
+.bw{font-family:Fraunces,Georgia,serif;letter-spacing:.26em;font-size:17px;color:#ece7de;display:block}
+.bs{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.3em;font-size:9.5px;color:var(--gold);display:block;margin-top:5px;text-transform:uppercase}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:28px;line-height:1.15;margin:26px 0 6px;text-wrap:balance}
+.sub{opacity:.75;font-size:15px}
+main{max-width:640px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 32px) max(16px,env(safe-area-inset-left))}
+.card{background:var(--card);border-radius:18px;padding:18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,32,46,.05)}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:flex;gap:12px;align-items:flex-start;position:relative;padding-bottom:16px}
+.tl li:last-child{padding-bottom:0}
+.tl li::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line)}
+.tl li:last-child::before{display:none}
+.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:14px;color:#fff;background:#fff;z-index:1}
+.tl li.ok .dot{background:var(--ok);border-color:var(--ok)}
+.tl li.now .dot{border-color:var(--gold);background:var(--gold)}
+.tl b{display:block}.tl small{color:var(--mut)}
+.tl li:not(.ok):not(.now) b{color:var(--mut);font-weight:500}
+.mat{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.mat:first-of-type{border-top:0}
+.q{min-width:38px;font-weight:800;text-align:right;color:var(--navy);font-variant-numeric:tabular-nums}
+.btn{display:block;width:100%;text-align:center;padding:16px;border-radius:14px;border:0;background:var(--navy);color:#fff;font:inherit;font-weight:700;font-size:16px;text-decoration:none;cursor:pointer}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn[disabled]{opacity:.6}
+.stars{display:flex;gap:6px;justify-content:center;margin:6px 0 14px}
+.stars button{font-size:40px;line-height:1;background:none;border:0;color:#d9d3c7;cursor:pointer;padding:2px}
+.stars button.on{color:var(--gold)}
+textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;min-height:80px;margin-bottom:12px}
+.center{text-align:center}.mut{color:var(--mut)}
+.loading{text-align:center;color:var(--mut);padding:60px 0}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:s .8s linear infinite;margin:0 auto 10px}
+@keyframes s{to{transform:rotate(360deg)}}
+footer{text-align:center;color:var(--mut);font-size:13px;margin-top:20px}
+footer a{color:var(--mut)}
+</style>
+</head>
+<body>
+<header><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span><h1 id="tit">Tu evento</h1><div class="sub" id="sub"></div></header>
+<main id="app"><div class="loading"><div class="spin"></div>Cargando…</div></main>
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwEQlNLMpsPbUDbgc3p12dKbyeVm17cIY_-XH3YmIzadhPqSUu12ZoHwxZ4xAfff45-/exec';
+const T = (location.hash || '').slice(1);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let D = null, nota = 0;
+async function api(a, args, post){
+  const r = post ? await fetch(API, { method:'POST', body: JSON.stringify({ a, p:args }), credentials:'omit' })
+                 : await fetch(API + '?a=' + a + '&p=' + encodeURIComponent(JSON.stringify(args)) + '&t=' + Date.now(), { credentials:'omit' });
+  const j = await r.json(); if(!j.ok) throw new Error(j.e || 'Error'); return j.r;
+}
+const PASOS = [['preparando','Preparando el material','En nuestro almacén'],['cargado','Material cargado','Listo para salir'],['camino','De camino','Salida'],['montando','Montando','Llegada'],['montado','Montaje terminado','Todo listo para tu evento'],['terminado','Evento terminado','Material recogido']];
+function pinta(){
+  const i = PASOS.findIndex(p => p[0] === D.estado);
+  const hora = { camino: D.salida, montando: D.llegada, montado: D.finMontaje || D.firmaHora };
+  $('#tit').textContent = D.evento || 'Tu evento';
+  $('#sub').textContent = [D.montaje, D.lugar].filter(Boolean).join(' · ');
+  const val = D.valoracion
+    ? `<div class="card center"><div class="lbl">Tu valoración</div><div style="font-size:34px;color:var(--gold)">${'★'.repeat(D.valoracion.nota)}<span style="color:#d9d3c7">${'★'.repeat(5-D.valoracion.nota)}</span></div><p class="mut" style="margin:6px 0 ${D.valoracion.nota>=4?'14px':'0'}">¡Gracias por contarnos tu experiencia!</p>${D.valoracion.nota>=4?resena():''}</div>`
+    : (i >= 4 ? `<div class="card center" id="valBox"><div class="lbl">¿Qué tal ha ido?</div><p class="mut" style="margin:0">Tu opinión nos ayuda a mejorar.</p>
+        <div class="stars">${[1,2,3,4,5].map(n=>`<button aria-label="${n} estrellas" onclick="estrella(${n})">★</button>`).join('')}</div>
+        <textarea id="com" placeholder="Cuéntanos algo (opcional)"></textarea><button class="btn" id="valBtn" onclick="valorar()" disabled>Enviar valoración</button></div>` : '');
+  $('#app').innerHTML = `
+    <div class="card"><div class="lbl">Estado</div><ul class="tl">${PASOS.map((p,n)=>`<li class="${n<i||(n===i&&n===PASOS.length-1)?'ok':n===i?'now':''}"><span class="dot">${n<i||(n===i&&n===PASOS.length-1)?'✓':''}</span><span><b>${p[1]}</b><small>${n<=i && hora[p[0]] ? p[2] + ' · ' + esc(hora[p[0]]) : n===i ? p[2] : ''}</small></span></li>`).join('')}</ul></div>
+    ${D.firma ? `<div class="card"><div class="lbl">Albarán de entrega</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.firma)}</b>${D.firmaHora?' · '+esc(D.firmaHora):''}.</p><button class="btn gold" id="albBtn" onclick="albaran()">Descargar albarán (PDF)</button></div>` : ''}
+    ${val}
+    <div class="card"><div class="lbl">Material confirmado (${D.material.length})</div>${D.material.map(m=>`<div class="mat"><span class="q">${esc(m.cant)}</span><span>${esc(m.material)}</span></div>`).join('')}</div>
+    <footer>Dreamscape Events &amp; Productions · <a href="https://eventsandproductionsap.com" target="_blank" rel="noopener">eventsandproductionsap.com</a></footer>`;
+}
+function resena(){
+  const u = D.resena || 'https://www.google.com/search?q=' + encodeURIComponent('Dreamscape Events Barcelona reseñas');
+  return `<a class="btn gold" href="${esc(u)}" target="_blank" rel="noopener">Dejar una reseña en Google</a>`;
+}
+function estrella(n){ nota = n; document.querySelectorAll('.stars button').forEach((b,i)=>b.classList.toggle('on', i<n)); $('#valBtn').disabled = false; }
+async function valorar(){
+  const b = $('#valBtn'); b.disabled = true; b.textContent = 'Enviando…';
+  try{ D.valoracion = await api('ckValorar', [T, nota, $('#com').value.trim()], true); pinta(); }
+  catch(e){ b.disabled = false; b.textContent = 'Enviar valoración'; alert('No se pudo enviar: ' + e.message); }
+}
+async function albaran(){
+  const b = $('#albBtn'); b.disabled = true; b.textContent = 'Preparando el PDF…';
+  try{
+    const r = await api('ckAlbaranCliente', [T]);
+    const bin = atob(r.b64), arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([arr], { type:'application/pdf' }));
+    const a = document.createElement('a'); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    b.textContent = 'Descargar albarán (PDF)';
+  }catch(e){ b.textContent = 'No se pudo descargar. Inténtalo de nuevo.'; }
+  b.disabled = false;
+}
+(async () => {
+  if(!T){ $('#app').innerHTML = '<div class="card center">Este enlace no es válido. Pide uno nuevo a Dreamscape Events.</div>'; return; }
+  try{ D = await api('ckCliente', [T]); pinta(); }
+  catch(e){ $('#app').innerHTML = `<div class="card center">${/conexi|fetch/i.test(e.message)?'No hay conexión. Vuelve a intentarlo en un momento.':'Este enlace no es válido. Pide uno nuevo a Dreamscape Events.'}</div>`; }
+})();
+</script>
+</body>
+</html>

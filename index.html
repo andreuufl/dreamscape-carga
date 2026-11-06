@@ -194,6 +194,15 @@ main > .hrow2{background:var(--card);padding:12px 14px;border-radius:12px;margin
 .sw.on{background:var(--okbg);color:var(--ok)}
 .codigo{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:17px}
 .codigo select{border:0;background:transparent;font:inherit;font-size:14px;color:var(--txt)}
+.card.alerta.azul{background:var(--devbg);color:var(--dev);border-color:#b7d0ee}.card.alerta.azul .meta{color:#2c5282}
+.cerrado{background:var(--okbg);border:1.5px solid #a7dfbd;border-radius:var(--r);padding:14px 16px;margin-bottom:12px;color:var(--ok)}
+.cerrado .meta{color:#2f7a4f}
+.tot>div{display:flex;justify-content:space-between;padding:4px 0}.tot span{color:var(--mut)}.tot .big2 b{font-size:20px}
+.mant.venc{border-left:4px solid #c0392b}.mant.pronto{border-left:4px solid var(--warn)}
+.when2{font-size:13px;font-weight:700;white-space:nowrap;color:var(--mut)}.mant.venc .when2{color:#c0392b}.mant.pronto .when2{color:var(--warn)}
+.rent{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.pct{font-size:20px;font-weight:800;color:var(--ok);text-align:right;flex:none}.pct small{display:block;font-size:12px;color:var(--mut);font-weight:600}
+.pct.medio{color:var(--warn)}.pct.bajo{color:#c0392b}
 .link{display:block;width:100%;text-align:center;padding:12px;color:var(--mut);font-weight:600;font-size:14px}
 </style>
 </head>
@@ -246,7 +255,7 @@ async function cargarLista(){
   S.vista='lista'; S.num=null; render();
   try{ S.presus = await call('ckPresupuestos'); }catch(e){ toast('Error: '+e.message); }
   if(S.vista==='lista') render();
-  call('ckPendientes').then(r=>{ S.pendientes=r; if(S.vista==='lista') render(); }).catch(()=>{});
+  cargarAvisos();
 }
 function filtrados(){
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -277,7 +286,7 @@ function vistaLista(){
     <div class="hrow"><h1>${esc(((S.yo||{}).usuario||{}).rol==='tecnico' ? 'Hola, '+S.yo.usuario.nombre : 'Carga de material')}<span class="sync" id="dot"></span></h1><button class="ref" onclick="abrirMenu()" aria-label="Menú">☰</button><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
     <input class="search" placeholder="Buscar nº o cliente…" value="${esc(S.q)}" oninput="S.q=this.value;redibujarLista()">
     <div class="seg"><button class="${S.filtro==='prox'?'on':''}" onclick="S.filtro='prox';render()">Próximos</button><button class="${S.filtro==='todos'?'on':''}" onclick="S.filtro='todos';render()">Todos</button></div>
-  </header><main id="lista">${tarjetasHoy()}${pendHtml}${body}</main>`;
+  </header><main id="lista">${tarjetasHoy()}${pendHtml}${tarjetasAvisos()}${body}</main>`;
 }
 function redibujarLista(){ const m=document.createElement('div'); m.innerHTML=vistaLista(); $('#lista').innerHTML=m.querySelector('#lista').innerHTML; }
 
@@ -329,6 +338,7 @@ function vistaDet(){
     <button class="scan" onclick="abrirScan()"><span class="ic">⌗</span>Escanear código QR del material</button>
     ${hechos===tot?`<div class="done-banner ${S.modo==='dev'?'dev':''}">${S.modo==='carga'?'✓ Todo cargado en la furgoneta':'✓ Todo devuelto al almacén'}</div>`:''}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
+    ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?'<button class="btn" onclick="verFactura()">🧾 Datos factura</button>':''}<button class="btn sec2" onclick="pedirValoracion()">⭐ Pedir valoración</button></div></div>`:''}
     ${pend.length?`<div class="sec">Pendiente (${pend.length})</div>${pend.map(fila).join('')}`:''}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} (${ok.length})</div>${ok.map(fila).join('')}`:''}`;
   }
@@ -340,7 +350,7 @@ function vistaDet(){
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.evento)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
-      <button class="ref" onclick="abrirFicha()" aria-label="Ficha del bolo">ℹ</button>
+      <button class="ref" onclick="abrirMas()" aria-label="Más opciones del bolo">⋯</button>
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">↻</button></div>
     ${tot ? stepper(tot) : ''}
   </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
@@ -553,7 +563,7 @@ async function enviarFirma(){
   if(!firmaTrazo){ toast('Falta la firma'); return; }
   const c = $('#pad'), w = document.createElement('canvas'); w.width = c.width; w.height = c.height;
   const x = w.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w.width,w.height); x.drawImage(c,0,0);
-  const png = w.toDataURL('image/png');
+  let png = ''; for(const q of [.6,.45,.3]){ const s2 = document.createElement('canvas'); const r2 = Math.min(1, 700/w.width); s2.width = Math.round(w.width*r2); s2.height = Math.round(w.height*r2); s2.getContext('2d').drawImage(w,0,0,s2.width,s2.height); png = s2.toDataURL('image/jpeg', q); if(png.length < 45000) break; }
   const b = $('#btnFirmar'); b.disabled = true; b.textContent = 'Enviando…';
   try{ const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
   catch(e){ b.disabled = false; b.textContent = 'Firmar y enviar'; toast('No se envió: '+e.message); }
@@ -704,7 +714,7 @@ async function guardarInc(quitar){
 /* =========================================================
    SIN COBERTURA: caché de lecturas y cola de cambios
    ========================================================= */
-const LECT = ['ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes'];
+const LECT = ['ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes','ckAvisos','ckMantenimiento','ckReparaciones'];
 function cacheGet(k){ try{ const v = localStorage.getItem('ck_c_'+k); return v ? JSON.parse(v) : undefined; }catch(e){ return undefined; } }
 function cacheSet(k, v){ try{ localStorage.setItem('ck_c_'+k, JSON.stringify(v)); }catch(e){ limpiarCache(); } }
 function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_c_ckMaterial')===0||k.indexOf('ck_c_ckBolo')===0).slice(0,-6).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
@@ -784,11 +794,14 @@ function abrirMenu(){
   const it = (ic, t, f, sub) => `<button class="mitem" onclick="cerrarSheet();${f}"><span class="ic">${ic}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
   abrirSheet(`<h3>Menú</h3><div class="meta" style="margin-bottom:10px">${esc(u.nombre||'')}${u.rol==='admin'?' · Administrador':' · Técnico'}</div>
     ${esAdmin()? it('📊','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias'):''}
+    ${it('🛠','En reparación','verRep()','Equipos rotos o dañados')}
+    ${it('🔧','Mantenimiento','verMant()','ITV, revisiones, pilas, lámparas…')}
     ${it('🔎','Consultar un equipo','abrirScan(\'consulta\')','Escanea su QR y mira su historial')}
     ${it('⌗','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     ${it('🚐','Furgonetas','cargarFurgos().then(abrirFurgos)')}
     ${esAdmin()? it('👥','Accesos del equipo','verAccesos()','Códigos para Paula y el resto'):''}
     ${esAdmin()? it('☑','Checklist de montaje','editarChecklist()','Pasos que se revisan en cada montaje'):''}
+    ${esAdmin()? it('⚙','Ajustes','abrirAjustes()','Enlace de reseñas de Google'):''}
     ${it('⬇','Instalar en el móvil','ayudaInstalar()')}
     ${it('↩','Cerrar sesión','salirSesion()')}`);
 }
@@ -1027,6 +1040,7 @@ function vistaResumen(){
   const barras = (obj, fmt) => { const ks = Object.keys(obj||{}); const mx = Math.max(1, ...ks.map(k=>obj[k])); return ks.length ? ks.sort((a,b)=>obj[b]-obj[a]).map(k=>`<div class="bar2"><span>${esc(k)}</span><div class="bt"><div style="width:${obj[k]/mx*100}%"></div></div><b>${fmt(obj[k])}</b></div>`).join('') : '<div class="meta">Sin datos este mes.</div>'; };
   const body = r.cargando ? `<div class="loading"><div class="spin"></div>Calculando…</div>` : r.error ? `<div class="empty">${esc(r.error)}</div>` : `
     <div class="tiles"><div class="tile"><b>${(r.bolos||[]).length}</b><span>bolos</span></div><div class="tile"><b>${eur(r.facturado)}</b><span>presupuestado</span></div><div class="tile"><b>${eur(r.totalGastos)}</b><span>gastos</span></div><div class="tile ${(r.incidencias||[]).length?'warn':''}"><b>${(r.incidencias||[]).length}</b><span>incidencias</span></div></div>
+    ${bloqueRentabilidad(r)}
     <div class="furg"><b>Horas por persona</b><div style="margin-top:10px">${barras(r.horas, v=>v+' h')}</div></div>
     <div class="furg"><b>Gastos por tipo</b><div style="margin-top:10px">${barras(r.gastos, eur)}</div></div>
     <div class="furg"><b>Material más usado</b><div style="margin-top:10px">${barras(Object.fromEntries((r.top||[]).map(x=>[x.material,x.cant])), v=>v+' uds')}</div></div>
@@ -1038,8 +1052,204 @@ function vistaResumen(){
     <div class="mesnav"><button onclick="moverMes(-1)" aria-label="Mes anterior">‹</button><b>${esc(nombreMes)}</b><button onclick="moverMes(1)" aria-label="Mes siguiente">›</button></div></header><main>${body}</main>`;
 }
 
+/* =========================================================
+   AVISOS AL ABRIR LA APP
+   ========================================================= */
+function tarjetasAvisos(){
+  const a = S.avisos || {};
+  let h = '';
+  if((a.mantenimiento||[]).length){
+    const v = a.mantenimiento.filter(m=>m.dias<0).length;
+    h += `<button class="card alerta" onclick="verMant()"><b>🔧 Mantenimiento: ${a.mantenimiento.length} ${a.mantenimiento.length>1?'tareas':'tarea'}${v?` (${v} vencida${v>1?'s':''})`:' esta semana'}</b><div class="meta">${esc(a.mantenimiento.slice(0,3).map(m=>m.equipo+' · '+m.tarea).join(' / '))}</div></button>`;
+  }
+  if(a.reparaciones) h += `<button class="card alerta azul" onclick="verRep()"><b>🛠 ${a.reparaciones} ${a.reparaciones>1?'equipos':'equipo'} en reparación</b><div class="meta">No cuentan como disponibles hasta que los marques arreglados.</div></button>`;
+  return h;
+}
+async function cargarAvisos(){
+  try{
+    const a = await call('ckAvisos'); S.avisos = a; S.pendientes = a.pendientes || [];
+    if((a.nuevos||[]).length) toast('Bolo nuevo: te he enviado el material a preparar');
+    else if((a.recordados||[]).length) toast('Recordatorio de mañana enviado al equipo');
+    if(S.vista==='lista') render();
+  }catch(e){}
+}
+
+/* =========================================================
+   ACCIONES DEL BOLO (⋯)
+   ========================================================= */
+function abrirMas(){
+  const p = S.presus.find(x=>x.num===S.num) || {};
+  const it = (ic, t, f, sub) => `<button class="mitem" onclick="${f}"><span class="ic">${ic}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
+  abrirSheet(`<h3>${esc(p.num||'')} · ${esc(p.evento||'')}</h3>
+    ${it('ℹ','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
+    ${it('🔗','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
+    ${it('⭐','Pedir valoración','pedirValoracion()','Puntuación y reseña en Google')}
+    ${it('📣','Enviar recordatorio al equipo','recordatorio()','Correo con hora, lugar, material y furgoneta')}
+    ${it('📅','Añadir a mi calendario','calendario()','Crea el evento en el calendario del móvil')}
+    ${esAdmin()? it('🧾','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}`);
+}
+async function tokenCliente(){
+  const f = ficha();
+  if(f.token) return f.token;
+  const t = await call('ckTokenCliente', S.num);
+  if(S.bolo){ S.bolo.ficha.token = t; guardarBoloCache(); }
+  return t;
+}
+function urlCliente(t){ return location.origin + location.pathname.replace(/[^/]*$/, '') + 'cliente.html#' + t; }
+async function enlaceCliente(){
+  try{
+    const t = await tokenCliente(), u = urlCliente(t), f = ficha(), p = S.presus.find(x=>x.num===S.num)||{};
+    const msg = `Hola${f.contacto?' '+f.contacto.split(' ')[0]:''}, aquí puedes seguir el montaje de ${p.evento||'tu evento'} y descargar el albarán cuando esté firmado: ${u}`;
+    abrirSheet(`<h3>🔗 Enlace para el cliente</h3><div class="meta" style="margin-bottom:10px">Solo con este enlace se puede ver. No muestra precios.</div>
+      <div class="codigo" style="font-size:13px;word-break:break-all"><span class="sel">${esc(u)}</span></div>
+      <div class="row2" style="margin-top:12px">${f.telefono?`<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${telIntl(f.telefono)}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:`<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a>`}<button class="btn sec2" onclick="copiar('${u}')">Copiar</button></div>
+      <a class="link" href="${u}" target="_blank" rel="noopener">Ver la página como el cliente</a>`);
+  }catch(e){ toast(e.red?'Necesitas conexión para crear el enlace':'Error: '+e.message); }
+}
+async function pedirValoracion(){
+  try{
+    const t = await tokenCliente(), u = urlCliente(t) , f = ficha(), p = S.presus.find(x=>x.num===S.num)||{};
+    const msg = `Hola${f.contacto?' '+f.contacto.split(' ')[0]:''}, gracias por confiar en Dreamscape Events para ${p.evento||'tu evento'}. ¿Nos dejas tu valoración? Son 10 segundos: ${u}`;
+    abrirSheet(`<h3>⭐ Pedir valoración</h3>${f.valoracion?`<div class="done-banner">Ya valoró: ${'★'.repeat(f.valoracion.nota)}${f.valoracion.comentario?' · «'+esc(f.valoracion.comentario)+'»':''}</div>`:''}
+      <div class="meta" style="margin-bottom:12px">El cliente puntúa en su página. Si pone 4 o 5 estrellas, le sale el botón para dejar la reseña en Google.</div>
+      <div class="row2"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${f.telefono?telIntl(f.telefono):''}?text=${encodeURIComponent(msg)}">WhatsApp</a><button class="btn sec2" onclick="copiar(${JSON.stringify(msg).replace(/"/g,'&quot;')})">Copiar mensaje</button></div>`);
+  }catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+async function recordatorio(){
+  if(!confirm('¿Enviar el recordatorio por correo a ti y a los técnicos del bolo?')) return;
+  cerrarSheet();
+  try{ const r = await call('ckRecordatorio', S.num); toast('Recordatorio enviado a ' + r.length + (r.length>1?' personas':' persona')); }
+  catch(e){ toast(e.red?'Necesitas conexión para enviarlo':'Error: '+e.message); }
+}
+function calendario(){
+  const p = S.presus.find(x=>x.num===S.num)||{}, f = ficha();
+  const d = new Date(p.ts || Date.now()), z = n => String(n).padStart(2,'0');
+  const ymd = x => x.getFullYear()+z(x.getMonth()+1)+z(x.getDate());
+  const fin = new Date(d.getTime()+864e5);
+  const lineas = [f.horario&&('Horario: '+f.horario), f.contacto&&('Contacto: '+f.contacto+(f.telefono?' '+f.telefono:'')), f.acceso&&('Acceso: '+f.acceso), (f.tecnicos||[]).length&&('Técnicos: '+f.tecnicos.join(', ')), 'App: '+location.origin+location.pathname].filter(Boolean).join('\\n');
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Dreamscape Events//Carga//ES','BEGIN:VEVENT','UID:'+String(p.num).replace(/\W/g,'')+'@dreamscape','DTSTAMP:'+ymd(new Date())+'T000000Z','DTSTART;VALUE=DATE:'+ymd(d),'DTEND;VALUE=DATE:'+ymd(fin),'SUMMARY:'+String(p.evento||'Bolo').replace(/[,;]/g,' ')+' ('+p.num+')','LOCATION:'+destino(p.lugar).replace(/[,;]/g,' '),'DESCRIPTION:'+lineas.replace(/[,;]/g,' '),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a'); a.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); a.download = 'bolo-' + String(p.num).replace(/\//g,'-') + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+  cerrarSheet(); toast('Abriendo el calendario…');
+}
+
+/* =========================================================
+   FACTURA
+   ========================================================= */
+async function verFactura(){
+  S.vista='factura'; S.fac=null; render(); window.scrollTo(0,0);
+  try{ S.fac = await call('ckFactura', S.num); }catch(e){ S.fac = { error: e.red?'Necesitas conexión':e.message }; }
+  if(S.vista==='factura') render();
+}
+const eur2 = n => (Number(n)||0).toLocaleString('es-ES', { style:'currency', currency:'EUR' });
+function textoFactura(f){
+  return `Cliente: ${f.cliente}\nCIF: ${f.cif}\nPresupuesto: ${f.num}\nEvento: ${f.evento} ${f.fecha}\n\n` + f.lineas.map(l=>`${l.cant} x ${l.material}${l.a3?' ['+l.a3+']':''}${l.precio?' · '+eur2(l.precio)+' = '+eur2(l.importe):''}`).join('\n') + `\n\nBase: ${eur2(f.base)}\nIVA 21%: ${eur2(f.iva)}\nTotal: ${eur2(f.total)}`;
+}
+function vistaFactura(){
+  const f = S.fac;
+  const body = !f ? `<div class="loading"><div class="spin"></div>Preparando…</div>` : f.error ? `<div class="empty">${esc(f.error)}</div>` : `
+    <div class="furg"><dl class="kv" style="margin:0"><dt>Cliente</dt><dd>${esc(f.cliente)}</dd><dt>CIF</dt><dd class="sel">${esc(f.cif||'—')}</dd>${f.poblacion?`<dt>Población</dt><dd>${esc(f.poblacion)}</dd>`:''}<dt>Evento</dt><dd>${esc(f.evento)} · ${esc(f.fecha)}</dd></dl></div>
+    <div class="furg"><b>Conceptos</b>${f.lineas.map(l=>`<div class="grow"><div style="flex:1;min-width:0"><b>${esc(l.cant)} × ${esc(l.material)}</b><div class="meta">${esc(l.a3?'A3: '+l.a3:l.codigo)}${l.precio?' · '+eur2(l.precio)+' / ud':' · sin precio en catálogo'}</div></div><div class="gimp"><b>${l.precio?eur2(l.importe):'—'}</b></div></div>`).join('')}</div>
+    <div class="furg tot"><div><span>Base (presupuesto)</span><b>${eur2(f.base)}</b></div><div><span>IVA 21 %</span><b>${eur2(f.iva)}</b></div><div class="big2"><span>Total</span><b>${eur2(f.total)}</b></div>
+      ${Math.abs(f.sumaCatalogo-f.base)>0.5?`<div class="meta" style="margin-top:8px">Los precios de catálogo suman ${eur2(f.sumaCatalogo)}. Manda la base del presupuesto aceptado (con descuentos y servicios).</div>`:''}</div>`;
+  const foot = f && !f.error ? `<div class="foot"><button class="btn" onclick="copiar(textoFactura(S.fac))">Copiar todo para A3Factura</button></div>` : '';
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='det';render()" aria-label="Volver">‹</button><div style="flex:1;min-width:0"><h1>Datos para la factura</h1><div class="sub">${esc(S.num||'')}</div></div></div></header><main>${body}</main>${foot}`;
+}
+
+/* =========================================================
+   REPARACIONES
+   ========================================================= */
+async function verRep(){
+  S.vista='rep'; S.rep=null; render(); window.scrollTo(0,0);
+  try{ S.rep = await call('ckReparaciones'); }catch(e){ S.rep = { error: e.red?'Necesitas conexión':e.message }; }
+  if(S.vista==='rep') render();
+}
+function vistaRep(){
+  const r = S.rep;
+  const fila = (x, abierta) => `<div class="furg"><div class="top"><b>${esc(x.material)}</b>${abierta?`<span class="tag">${esc(x.cant)} ud${x.cant>1?'s':''}</span>`:`<span class="meta">${esc(x.estado)} · ${esc(x.cierre)}</span>`}</div>
+    <div class="meta">⚠ ${esc(x.incidencia)}${x.nota?': '+esc(x.nota):''}</div><div class="meta">${esc(x.num)} · ${esc(x.fecha)}${x.usuario?' · '+esc(x.usuario):''}</div>
+    ${abierta?`<div class="row2" style="margin-top:10px"><button class="btn" onclick="reparar('${esc(x.id)}','Arreglado')">✓ Arreglado</button><button class="btn sec2" onclick="repMas('${esc(x.id)}',${Number(x.cant)||1})">Más…</button></div>`:''}</div>`;
+  const body = !r ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : r.error ? `<div class="empty">${esc(r.error)}</div>` : `
+    <div class="meta" style="margin:0 4px 12px">Cuando una incidencia es «Roto» o «Dañado», el equipo entra aquí solo y deja de contar como disponible en el aviso de stock.</div>
+    ${(r.abiertas||[]).length ? r.abiertas.map(x=>fila(x,true)).join('') : '<div class="empty" style="padding:20px">No hay nada en reparación 👍</div>'}
+    ${(r.cerradas||[]).length?`<div class="sec">Últimos cerrados</div>${r.cerradas.map(x=>fila(x,false)).join('')}`:''}`;
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>En reparación</h1></div></header><main>${body}</main>`;
+}
+async function reparar(id, estado, cant){
+  try{ await call('ckReparar', id, estado||'', cant||0); toast(estado==='Arreglado'?'Vuelve a estar disponible':estado==='Baja'?'Dado de baja':'Guardado'); cerrarSheet(); verRep(); cargarAvisos(); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+function repMas(id, cant){
+  abrirSheet(`<h3>Reparación</h3><label class="fld"><span>Unidades en reparación</span><input id="repCant" inputmode="numeric" value="${cant}"></label>
+    <div class="row2"><button class="btn sec2" onclick="reparar('${id}','',$('#repCant').value)">Guardar unidades</button><button class="btn sec2 danger" onclick="if(confirm('¿Dar de baja este equipo?'))reparar('${id}','Baja')">Dar de baja</button></div>`);
+}
+
+/* =========================================================
+   MANTENIMIENTO
+   ========================================================= */
+async function verMant(){
+  S.vista='mant'; S.mant=null; render(); window.scrollTo(0,0);
+  try{ S.mant = await call('ckMantenimiento'); }catch(e){ S.mant = { error: e.red?'Necesitas conexión':e.message }; }
+  if(S.vista==='mant') render();
+}
+function cuando(d){ return d==null ? 'Sin fecha' : d<0 ? `Vencido hace ${-d} día${d<-1?'s':''}` : d===0 ? 'Hoy' : d===1 ? 'Mañana' : `En ${d} días`; }
+function vistaMant(){
+  const l = S.mant;
+  const body = !l ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : l.error ? `<div class="empty">${esc(l.error)}</div>` : `
+    <div class="meta" style="margin:0 4px 12px">ITV y seguro de la furgoneta, pilas de micros, lámparas, revisiones… La app avisa una semana antes.</div>
+    ${l.length ? l.map((m,i)=>`<div class="furg mant ${m.dias!=null&&m.dias<0?'venc':m.dias!=null&&m.dias<=7?'pronto':''}"><div class="top"><div style="min-width:0"><b>${esc(m.equipo)}</b><div class="meta">${esc(m.tarea)}</div></div><span class="when2">${esc(cuando(m.dias))}</span></div>
+      <div class="meta">${m.fecha?esc(m.fecha.split('-').reverse().join('/')):''}${m.cada?' · cada '+m.cada+' días':''}${m.ultima?' · última: '+esc(m.ultima):''}${m.nota?' · '+esc(m.nota):''}</div>
+      <div class="row2" style="margin-top:10px"><button class="btn" onclick="hechoMant('${esc(m.id)}')">✓ Hecho</button><button class="btn sec2" onclick="editarMant(${i})">Editar</button></div></div>`).join('') : '<div class="empty" style="padding:20px">Aún no hay tareas de mantenimiento.</div>'}`;
+  const foot = l && !l.error ? `<div class="foot"><button class="btn" onclick="editarMant(-1)">+ Nueva tarea</button></div>` : '';
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>Mantenimiento</h1></div></header><main>${body}</main>${foot}`;
+}
+function editarMant(i){
+  const m = i>=0 ? S.mant[i] : { fecha:'', cada:'' };
+  const sug = [...new Set([...(S.furgos||[]).map(f=>'Furgoneta '+f.matricula), 'Micrófonos inalámbricos', 'Máquina de humo', 'Cabezas móviles'])];
+  abrirSheet(`<h3>${i>=0?'Editar tarea':'Nueva tarea'}</h3>
+    <label class="fld"><span>Equipo</span><input id="mEq" list="mSug" value="${esc(m.equipo||'')}" placeholder="Ej. Furgoneta 6463MWJ"><datalist id="mSug">${sug.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
+    <label class="fld"><span>Tarea</span><input id="mTa" value="${esc(m.tarea||'')}" placeholder="Ej. ITV, cambio de pilas, revisión"></label>
+    <div class="row2"><label class="fld"><span>Próxima fecha</span><input id="mFe" type="date" value="${esc(m.fecha||'')}"></label><label class="fld"><span>Repetir cada (días)</span><input id="mCa" inputmode="numeric" value="${esc(m.cada||'')}" placeholder="Ej. 365"></label></div>
+    <label class="fld"><span>Nota</span><input id="mNo" value="${esc(m.nota||'')}"></label>
+    <div class="row2">${i>=0?`<button class="btn sec2 danger" onclick="borrarMant('${esc(m.id)}')">Eliminar</button>`:`<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>`}<button class="btn" onclick="guardarMant('${esc(m.id||'')}')">Guardar</button></div>`);
+}
+async function guardarMant(id){
+  const it = { id, equipo:$('#mEq').value.trim(), tarea:$('#mTa').value.trim(), fecha:$('#mFe').value, cada:$('#mCa').value, nota:$('#mNo').value.trim() };
+  if(!it.equipo || !it.tarea){ toast('Pon el equipo y la tarea'); return; }
+  try{ S.mant = await call('ckGuardarMant', it); cerrarSheet(); toast('Guardado'); render(); cargarAvisos(); }catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+async function borrarMant(id){ if(!confirm('¿Eliminar esta tarea?')) return; try{ S.mant = await call('ckBorrarMant', id); cerrarSheet(); render(); cargarAvisos(); }catch(e){ toast('Error: '+e.message); } }
+async function hechoMant(id){ try{ S.mant = await call('ckHechoMant', id); vib(20); toast('Hecho. Fecha actualizada'); render(); cargarAvisos(); }catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); } }
+
+/* =========================================================
+   AJUSTES
+   ========================================================= */
+function abrirAjustes(){
+  const c = (S.yo||{}).config || {};
+  abrirSheet(`<h3>⚙ Ajustes</h3>
+    <label class="fld"><span>Enlace para dejar reseña en Google</span><input id="ajRes" value="${esc(c.resenaUrl||'')}" placeholder="https://g.page/r/…/review"></label>
+    <div class="meta" style="margin:-4px 0 12px">Lo encuentras en tu Perfil de Empresa de Google → «Pedir reseñas». Si lo dejas vacío, se usa una búsqueda de Dreamscape Events en Google.</div>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarAjustes()">Guardar</button></div>`);
+}
+async function guardarAjustes(){
+  try{ const c = await call('ckGuardarConfig', { resenaUrl: $('#ajRes').value.trim() }); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Ajustes guardados'); }
+  catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* Rentabilidad dentro del resumen */
+function bloqueRentabilidad(r){
+  const l = r.rentabilidad || [];
+  if(!l.length) return '';
+  const sinPrecio = l.some(x=>x.horasSinPrecio);
+  return `<div class="furg"><b>Rentabilidad real</b><div class="meta" style="margin:4px 0 8px">Importe del presupuesto menos lo gastado de verdad (horas y gastos apuntados).</div>
+    ${l.map(x=>`<div class="rent"><div style="min-width:0"><b>${esc(x.num)} · ${esc(x.evento)}</b><div class="meta">${eur(x.importe)} − ${eur(x.real)}${x.horas?' · '+x.horas+' h':''}${x.previsto?' · previsto '+eur(x.previsto):''}</div></div><div class="pct ${x.pct<20?'bajo':x.pct<40?'medio':''}">${x.pct}%<small>${eur(x.margen)}</small></div></div>`).join('')}
+    ${sinPrecio?`<div class="aviso" style="margin:10px 0 0">Hay horas sin valorar: pon el €/hora de cada persona en la pestaña Equipo.</div>`:''}</div>`;
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin }; $('#app').innerHTML = (V[S.vista] || vistaDet)(); dot(); pintarRed(); }
+function render(){ const V = { lista:vistaLista, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant }; $('#app').innerHTML = (V[S.vista] || vistaDet)(); dot(); pintarRed(); }
 function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
