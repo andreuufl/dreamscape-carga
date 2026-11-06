@@ -11,12 +11,17 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <title>Carga · Dreamscape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,460&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root{--navy:#16243a;--navy2:#22344f;--bg:#f2f4f7;--card:#fff;--txt:#14202e;--mut:#6b7686;--line:#e3e7ec;--ok:#1f9d55;--okbg:#e5f6ec;--dev:#2b6cb0;--devbg:#e6f0fa;--warn:#d97706;--warnbg:#fff4e0;--r:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px}
+.brand{display:flex;flex-direction:column;align-items:flex-start;line-height:1;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand .bw{font-family:Fraunces,"Iowan Old Style","Palatino Linotype",Georgia,serif;font-weight:460;letter-spacing:.26em;color:#ece7de;font-size:17px}
+.brand .bs{font-family:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.3em;color:#c9a66b;font-size:9.5px;margin-top:5px;text-transform:uppercase}
 .hrow{display:flex;align-items:center;gap:10px}
 .hrow h1{font-size:20px;margin:0;font-weight:700;flex:1;min-width:0}
 .sub{font-size:13px;opacity:.75;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -176,6 +181,7 @@ function vistaLista(){
         </div></button>`;
     }).join('');
   return `<header>
+    <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><h1>Carga de material<span class="sync" id="dot"></span></h1><button class="ref" onclick="abrirFurg()" aria-label="Furgoneta">🚐</button><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
     <input class="search" placeholder="Buscar nº o cliente…" value="${esc(S.q)}" oninput="S.q=this.value;redibujarLista()">
     <div class="seg"><button class="${S.filtro==='prox'?'on':''}" onclick="S.filtro='prox';render()">Próximos</button><button class="${S.filtro==='todos'?'on':''}" onclick="S.filtro='todos';render()">Todos</button></div>
@@ -221,6 +227,7 @@ function vistaDet(){
     ? `<div class="foot"><div class="row2"><button class="btn sec2" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':'Marcar todo'}</button><button class="btn" onclick="irA('ruta', ${faltan})">Siguiente →</button></div></div>`
     : `<div class="foot"><button class="btn ${hechos===tot?'sec2':''}" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':'Marcar todo como devuelto'}</button></div>`;
   return `<header>
+    <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.evento)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">↻</button></div>
