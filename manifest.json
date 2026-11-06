@@ -1,0 +1,16 @@
+{
+  "name": "Carga · Dreamscape Events",
+  "short_name": "Carga",
+  "description": "Checklist de carga, ruta, montaje y vuelta del material de Dreamscape Events",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16243a",
+  "theme_color": "#16243a",
+  "lang": "es",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

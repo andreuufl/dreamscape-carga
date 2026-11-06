@@ -8,7 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Carga">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.png">
 <title>Carga · Dreamscape</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,6 +153,47 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 .label span{font-family:Fraunces,Georgia,serif;letter-spacing:.2em;font-size:8px;color:#a8844a}
 @media (max-width:520px){ .step:not(.on) .t{display:none} .step{padding:8px} }
 @media print{ .noprint,.toast,.foot{display:none!important} body{background:#fff} main.etiq{padding:0} .labels{grid-template-columns:repeat(3,1fr)} .sec{margin-top:8px} }
+.redbar{position:fixed;left:0;right:0;top:0;z-index:40;background:#b45309;color:#fff;text-align:center;font-size:13px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px}
+.login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px max(24px,env(safe-area-inset-left));background:var(--navy);color:#fff}
+.login .brand.big .bw{font-size:26px}.login .brand.big{border:0;margin-bottom:28px}
+.login h1{font-size:26px;margin:0 0 6px}.login p{opacity:.75;margin:0 0 20px}
+.login input{width:100%;padding:16px;border-radius:14px;border:0;font:inherit;font-size:18px;margin-bottom:12px;background:#fff;color:#14202e}
+.login .btn{background:#c9a66b;color:#16243a}.login .meta{color:#fca5a5;margin-top:10px}
+.mitem{width:100%;display:flex;align-items:center;gap:14px;padding:12px 4px;border-bottom:1px solid var(--line);text-align:left}
+.mitem .ic{width:40px;height:40px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-size:19px;flex:none}
+.mitem b{display:block;font-size:16px}.mitem small{color:var(--mut);font-size:13px}
+.pasos{padding-left:20px;line-height:1.6}.sel{user-select:all;-webkit-user-select:all;font-family:ui-monospace,Menlo,monospace}
+.hoy{background:var(--navy);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px}
+.hoy.man{background:var(--navy2)}
+.hoy .lbl{font-size:12px;font-weight:800;letter-spacing:.08em;color:#c9a66b}
+.hoy .hev{font-size:20px;font-weight:800;margin:6px 0 4px}.hoy .hlug{opacity:.85;font-size:14px}
+.hoy .hst{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;opacity:.85;margin:10px 0 12px}
+.hoy .btn{background:#c9a66b;color:#16243a}
+.mapbtn.avisa{width:100%;margin-bottom:12px;text-align:left}
+.btn.wa{background:#25d366;color:#fff;text-align:center;text-decoration:none;display:block}
+a.btn{display:block;text-align:center;text-decoration:none}
+.ck{width:100%;display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);text-align:left}
+.ck .cb{width:26px;height:26px;border-radius:8px;border:2px solid #c3cad4;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:15px}
+.ck.on .cb{background:var(--ok);border-color:var(--ok)}.ck b{font-weight:600;font-size:15px}.ck.on b{color:var(--mut)}
+.ck small{display:block;color:var(--mut);font-size:12px}
+.grow{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.gimp{text-align:right;font-size:13px;color:var(--mut);display:flex;flex-direction:column}.gimp b{color:var(--txt);font-size:15px}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.fgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border-radius:14px;padding:14px}.tile b{display:block;font-size:22px;font-weight:800}.tile span{color:var(--mut);font-size:13px}
+.tile.warn b{color:var(--warn)}
+.hrow2{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+main > .hrow2{background:var(--card);padding:12px 14px;border-radius:12px;margin-bottom:8px;border:0}
+.bar2{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr auto;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.bar2 span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{height:8px;background:var(--line);border-radius:6px;overflow:hidden}.bt div{height:100%;background:var(--dev);border-radius:6px}
+.mesnav{display:flex;align-items:center;justify-content:space-between;margin-top:12px;background:var(--navy2);border-radius:12px;padding:4px}
+.mesnav button{width:44px;height:40px;border-radius:9px;color:#fff;font-size:22px}.mesnav b{}
+.sw{padding:8px 12px;border-radius:20px;background:var(--bg);font-weight:700;font-size:13px;color:var(--mut)}
+.sw.on{background:var(--okbg);color:var(--ok)}
+.codigo{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:17px}
+.codigo select{border:0;background:transparent;font:inherit;font-size:14px;color:var(--txt)}
 .link{display:block;width:100%;text-align:center;padding:12px;color:var(--mut);font-weight:600;font-size:14px}
 </style>
 </head>
@@ -176,22 +218,24 @@ async function call(fn, ...args){
   S.pend++; dot();
   try{
     const u = API + '?k=' + encodeURIComponent(KEY) + '&a=' + fn + '&p=' + encodeURIComponent(JSON.stringify(args)) + '&t=' + Date.now();
-    const r = await fetch(u, { credentials: 'omit', cache: 'no-store' });
-    const j = await r.json();
+    let j;
+    try{ const r = await fetch(u, { credentials: 'omit', cache: 'no-store' }); j = await r.json(); }
+    catch(e){ const ck = LECT.includes(fn) ? cacheGet(fn+JSON.stringify(args)) : undefined; if(ck !== undefined){ S.offline = true; pintarRed(); return ck; } const er = new Error('Sin conexión'); er.red = true; throw er; }
     if(!j.ok) throw new Error(j.e || 'Error');
+    if(LECT.includes(fn)) cacheSet(fn+JSON.stringify(args), j.r);
+    if(S.offline){ S.offline = false; pintarRed(); }
     return j.r;
-  }catch(e){
-    throw new Error(e.message === 'Failed to fetch' || e.name === 'TypeError' ? 'Sin conexión' : e.message);
   }finally{ S.pend--; dot(); }
 }
 async function callPost(fn, ...args){
   S.pend++; dot();
   try{
-    const r = await fetch(API, { method:'POST', body: JSON.stringify({ k:KEY, a:fn, p:args }), credentials:'omit' });
-    const j = await r.json();
+    let j;
+    try{ const r = await fetch(API, { method:'POST', body: JSON.stringify({ k:KEY, a:fn, p:args }), credentials:'omit' }); j = await r.json(); }
+    catch(e){ const er = new Error('Sin conexión'); er.red = true; throw er; }
     if(!j.ok) throw new Error(j.e || 'Error');
     return j.r;
-  }catch(e){ throw new Error(e.name === 'TypeError' ? 'Sin conexión' : e.message); }
+  }
   finally{ S.pend--; dot(); }
 }
 function dot(){ const d = $('#dot'); if(d) d.className = 'sync' + (S.pend ? ' busy' : ''); }
@@ -230,24 +274,26 @@ function vistaLista(){
   const pendHtml = (S.pendientes||[]).map(x=>`<button class="card alerta" onclick="abrir('${esc(x.num)}')"><b>⚠ Material sin devolver</b><div class="meta">${esc(x.num)} · ${esc(x.evento)} · ${x.n} artículos</div></button>`).join('');
   return `<header>
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
-    <div class="hrow"><h1>Carga de material<span class="sync" id="dot"></span></h1><button class="ref" onclick="verEtiquetas()" aria-label="Etiquetas QR">⌗</button><button class="ref" onclick="cargarFurgos().then(abrirFurgos)" aria-label="Furgonetas">🚐</button><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
+    <div class="hrow"><h1>${esc(((S.yo||{}).usuario||{}).rol==='tecnico' ? 'Hola, '+S.yo.usuario.nombre : 'Carga de material')}<span class="sync" id="dot"></span></h1><button class="ref" onclick="abrirMenu()" aria-label="Menú">☰</button><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
     <input class="search" placeholder="Buscar nº o cliente…" value="${esc(S.q)}" oninput="S.q=this.value;redibujarLista()">
     <div class="seg"><button class="${S.filtro==='prox'?'on':''}" onclick="S.filtro='prox';render()">Próximos</button><button class="${S.filtro==='todos'?'on':''}" onclick="S.filtro='todos';render()">Todos</button></div>
-  </header><main id="lista">${pendHtml}${body}</main>`;
+  </header><main id="lista">${tarjetasHoy()}${pendHtml}${body}</main>`;
 }
 function redibujarLista(){ const m=document.createElement('div'); m.innerHTML=vistaLista(); $('#lista').innerHTML=m.querySelector('#lista').innerHTML; }
 
 /* ---------- DETALLE ---------- */
 async function abrir(num, refresco){
-  const nuevo = !refresco; S.vista='det'; S.num=num; if(nuevo){ S.items=[]; S.bolo=null; }
+  const nuevo = !refresco; S.vista='det'; S.num=num; if(nuevo){ const cm = cacheGet('ckMaterial'+JSON.stringify([num])); S.items = cm ? cm.items : []; S.opciones = cm ? cm.opciones : []; S.bolo = cacheGet('ckBolo'+JSON.stringify([num])) || null; S.gastos = cacheGet('ckGastos'+JSON.stringify([num])) || []; S.fotos = null; }
   const p = S.presus.find(x=>x.num===num);
   if(nuevo){
     const f = (S.bolo||{}).ficha || {};
     S.modo = !p || !p.total || p.cargados<p.total ? 'carga' : (p.devueltos>0 ? 'dev' : 'ruta');
   }
   if(nuevo){ try{history.pushState({v:'det'},'')}catch(e){} render(); window.scrollTo(0,0); }
-  const [rm, rb] = await Promise.allSettled([call('ckMaterial', num), call('ckBolo', num)]);
-  if(rm.status==='fulfilled'){ S.items=rm.value.items; S.opciones=rm.value.opciones; actualizarResumen(); } else toast('Error: '+rm.reason.message);
+  if(COLA.length){ await vaciarCola(); }
+  const [rm, rb, rg] = await Promise.allSettled([call('ckMaterial', num), call('ckBolo', num), call('ckGastos', num)]);
+  if(rg.status==='fulfilled') S.gastos = rg.value || [];
+  if(rm.status==='fulfilled'){ if(!COLA.length){ S.items=rm.value.items; S.opciones=rm.value.opciones; } actualizarResumen(); } else if(!S.items.length) toast('Error: '+rm.reason.message);
   if(rb.status==='fulfilled'){
     S.bolo = rb.value; S.furgos = rb.value.furgonetas || [];
     const f = S.bolo.ficha||{};
@@ -268,7 +314,7 @@ function vistaDet(){
       <div class="chk">${i[k]?'✓':''}</div>
       <div class="qty">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">⚠︎</button>
     </div>`;
   let body;
@@ -341,7 +387,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">🚐</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">📲</span>Avisar al cliente de la llegada<span class="go">›</span></button>${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje →</button></div>`;
   return { body, foot };
 }
@@ -359,22 +405,23 @@ function furgoActual(){
 }
 function tarjetaFurg(){
   const l = S.furgos||[], f = furgoActual();
-  if(!l.length) return `<div class="furg"><div class="top"><b>Furgoneta</b><button class="edit" onclick="abrirFurgos()">Añadir</button></div><div class="meta">Pon la matrícula, marca y modelo para que salgan en el correo.</div></div>`;
+  if(!l.length) return `<div class="furg"><div class="top"><b>Furgoneta</b>${esAdmin()?'<button class="edit" onclick="abrirFurgos()">Añadir</button>':''}</div><div class="meta">Pon la matrícula, marca y modelo para que salgan en el correo.</div></div>`;
   const sel = l.length>1 ? `<select class="selfurgo" id="selfurgo" onchange="elegirFurgo(this.value)"><option value="">Elige furgoneta…</option>${l.map(x=>`<option value="${esc(x.id)}" ${f&&f.id===x.id?'selected':''}>${esc([x.matricula,x.marca,x.modelo].filter(Boolean).join(' · '))}</option>`).join('')}</select>` : '';
-  if(!f) return `<div class="furg"><div class="top"><b>Furgoneta</b><button class="edit" onclick="abrirFurgos()">Gestionar</button></div>${sel}</div>`;
+  if(!f) return `<div class="furg"><div class="top"><b>Furgoneta</b>${esAdmin()?'<button class="edit" onclick="abrirFurgos()">Gestionar</button>':''}</div>${sel}</div>`;
   const kv = [['Marca',f.marca],['Modelo',f.modelo],['Color',f.color],['Conductor',f.conductor],['Notas',f.notas]].filter(x=>x[1]).map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('');
-  return `<div class="furg"><div class="top">${f.matricula?`<span class="plate">${esc(f.matricula)}</span>`:'<b>Furgoneta</b>'}<button class="edit" onclick="abrirFurgos()">Gestionar</button></div>${sel}<dl class="kv" style="margin:${sel?'10px':'0'} 0 0">${kv}</dl></div>`;
+  return `<div class="furg"><div class="top">${f.matricula?`<span class="plate">${esc(f.matricula)}</span>`:'<b>Furgoneta</b>'}${esAdmin()?'<button class="edit" onclick="abrirFurgos()">Gestionar</button>':''}</div>${sel}<dl class="kv" style="margin:${sel?'10px':'0'} 0 0">${kv}</dl></div>`;
 }
 async function elegirFurgo(id){
   if(!S.bolo) return; S.bolo.ficha.furgo = id; render();
-  try{ await call('ckGuardarFicha', S.num, { furgo:id }); toast('Furgoneta asignada'); }catch(e){ toast('No se guardó: '+e.message); }
+  guardarBoloCache();
+  try{ const r = await enviar('ckGuardarFicha', S.num, { furgo:id }); if(r!==null) toast('Furgoneta asignada'); }catch(e){ toast('No se guardó: '+e.message); }
 }
 async function cargarFurgos(){ try{ S.furgos = await call('ckFurgonetas') || []; }catch(e){} }
 function abrirFurgos(){
   const l = S.furgos||[];
   abrirSheet(`<h3>🚐 Furgonetas</h3><div class="meta" style="margin-bottom:12px">Salen en la app y en el correo de salida.</div>
-    ${l.length? l.map((f,i)=>`<div class="frow"><div style="flex:1;min-width:0">${f.matricula?`<span class="plate sm">${esc(f.matricula)}</span>`:''}<div class="meta">${esc([f.marca,f.modelo,f.color].filter(Boolean).join(' · ')||'Sin datos')}</div></div><button class="edit" onclick="editarFurgo(${i})">Editar</button></div>`).join('') : '<div class="meta" style="margin-bottom:12px">Aún no hay ninguna furgoneta.</div>'}
-    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cerrar</button><button class="btn" onclick="editarFurgo(-1)">+ Añadir</button></div>`);
+    ${l.length? l.map((f,i)=>`<div class="frow"><div style="flex:1;min-width:0">${f.matricula?`<span class="plate sm">${esc(f.matricula)}</span>`:''}<div class="meta">${esc([f.marca,f.modelo,f.color].filter(Boolean).join(' · ')||'Sin datos')}</div></div>${esAdmin()?`<button class="edit" onclick="editarFurgo(${i})">Editar</button>`:''}</div>`).join('') : '<div class="meta" style="margin-bottom:12px">Aún no hay ninguna furgoneta.</div>'}
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cerrar</button>${esAdmin()?'<button class="btn" onclick="editarFurgo(-1)">+ Añadir</button>':''}</div>`);
 }
 function editarFurgo(i){
   const f = i>=0 ? S.furgos[i] : {};
@@ -435,7 +482,7 @@ async function salida(reenviar){
   if(reenviar && !confirm('¿Reenviar el correo de salida?')) return;
   if((S.furgos||[]).length>1 && !furgoActual()){ toast('Elige primero la furgoneta'); return; }
   const num = S.num; S.enviando = true; render();
-  try{ const h = await callPost('ckSalida', num, FOTOS[num]||''); guardarSalida(num, h); if(S.bolo) S.bolo.ficha.salida = h; vib(30); toast('Correo de salida enviado'); }
+  try{ const h = await enviar('ckSalida', num, FOTOS[num]||''); const hh = h || hora().slice(6); guardarSalida(num, hh); if(S.bolo){ S.bolo.ficha.salida = hh; guardarBoloCache(); } vib(30); if(h) toast('Correo de salida enviado'); }
   catch(e){ toast('No se envió el correo: '+e.message); }
   S.enviando = false; render();
 }
@@ -443,7 +490,8 @@ function salidaAuto(){
   if(SALIDAS[S.num] || ficha().salida || S.enviando) return;
   const num = S.num, now = new Date(), z=n=>String(n).padStart(2,'0');
   guardarSalida(num, z(now.getHours())+':'+z(now.getMinutes()));
-  try{ fetch(API, { method:'POST', body: JSON.stringify({k:KEY, a:'ckSalida', p:[num, '']}), credentials:'omit', keepalive:true }); }catch(e){}
+  if(COLA.length || S.offline){ COLA.push({ fn:'ckSalida', args:[num, FOTOS[num]||''], post:true }); guardarCola(); }
+  else try{ fetch(API, { method:'POST', body: JSON.stringify({k:KEY, a:'ckSalida', p:[num, '']}), credentials:'omit', keepalive:true }); }catch(e){}
   setTimeout(render, 300);
 }
 async function vuelta(){
@@ -451,7 +499,7 @@ async function vuelta(){
   const falt = S.items.filter(i=>!i.devuelto).length;
   if(!confirm(falt ? `Faltan ${falt} artículos por devolver. ¿Enviar el resumen igualmente?` : '¿Enviar el resumen de vuelta?')) return;
   S.enviando = true; render();
-  try{ const h = await call('ckVuelta', S.num); if(S.bolo) S.bolo.ficha.vuelta = h; vib(30); toast('Resumen de vuelta enviado'); }
+  try{ const h = await enviar('ckVuelta', S.num); if(S.bolo){ S.bolo.ficha.vuelta = h || hora().slice(6); guardarBoloCache(); } vib(30); if(h) toast('Resumen de vuelta enviado'); }
   catch(e){ toast('No se envió: '+e.message); }
   S.enviando = false; render();
 }
@@ -465,15 +513,17 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">✍ Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma()">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma()">✍ Firma del cliente y albarán</button>`;
-  const body = `${hito('llegada','He llegado','📍')}${hito('finMontaje','Montaje terminado','🎛')}${firma}${tarjetaFicha()}`;
+  const body = `${hito('llegada','He llegado','📍')}${tarjetaChecklist()}${hito('finMontaje','Montaje terminado','🎛')}${firma}${tarjetaGastos()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: vuelta al almacén →</button></div>`;
   return { body, foot };
 }
 async function hito(campo, borrar){
   if(!S.bolo) return;
+  if(campo==='finMontaje' && !borrar){ const l=((S.yo||{}).config||{}).checklist||[], ch=S.bolo.ficha.checks||{}, f=l.filter(x=>!ch[x]).length; if(f && !confirm(`Quedan ${f} pasos de la checklist sin marcar. ¿Terminar el montaje igualmente?`)) return; }
   if(borrar && !confirm('¿Borrar esta hora?')) return;
   const prev = S.bolo.ficha[campo]; S.bolo.ficha[campo] = borrar ? '' : hora(); vib(20); render();
-  try{ S.bolo.ficha[campo] = await call('ckHito', S.num, campo, !!borrar); render(); }
+  guardarBoloCache();
+  try{ const r = await enviar('ckHito', S.num, campo, !!borrar); if(r!=null){ S.bolo.ficha[campo] = r; guardarBoloCache(); } render(); }
   catch(e){ S.bolo.ficha[campo] = prev; render(); toast('No se guardó: '+e.message); }
 }
 let firmaTrazo = false;
@@ -505,7 +555,7 @@ async function enviarFirma(){
   const x = w.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w.width,w.height); x.drawImage(c,0,0);
   const png = w.toDataURL('image/png');
   const b = $('#btnFirmar'); b.disabled = true; b.textContent = 'Enviando…';
-  try{ const h = await callPost('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h; } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
+  try{ const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
   catch(e){ b.disabled = false; b.textContent = 'Firmar y enviar'; toast('No se envió: '+e.message); }
 }
 
@@ -526,17 +576,19 @@ async function guardarFichaUI(){
   const patch = {}; ['contacto','telefono','horario','acceso','notas'].forEach(c=> patch[c] = ($('#b_'+c).value||'').trim());
   patch.tecnicos = [...document.querySelectorAll('.chip.tec.on')].map(b=>b.dataset.n);
   const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render();
-  try{ await call('ckGuardarFicha', S.num, patch); toast('Ficha guardada'); }
+  guardarBoloCache();
+  try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(r!==null) toast('Ficha guardada'); }
   catch(e){ S.bolo.ficha = prev; render(); toast('No se guardó: '+e.message); }
 }
 
 /* ---------- ESCÁNER QR ---------- */
-let SCAN = null;
+let SCAN = null, SCANMODO = 'carga';
 function cargarScript(src){ return new Promise((ok,ko)=>{ if(document.querySelector(`script[src="${src}"]`)) return ok(); const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=()=>ko(new Error('No se pudo cargar '+src)); document.head.appendChild(s); }); }
-async function abrirScan(){
+async function abrirScan(modoScan){
+  SCANMODO = modoScan || S.modo;
   const ov = document.createElement('div'); ov.className='scanov'; ov.id='scanov';
   ov.innerHTML = `<video id="scanv" playsinline muted></video><div class="scanframe"></div>
-    <div class="scantop"><b>${S.modo==='carga'?'Cargar':'Devolver'} escaneando</b><button onclick="cerrarScan()">Cerrar</button></div>
+    <div class="scantop"><b>${SCANMODO==='consulta'?'Consultar equipo':SCANMODO==='carga'?'Cargar escaneando':'Devolver escaneando'}</b><button onclick="cerrarScan()">Cerrar</button></div>
     <div class="scanlast" id="scanlast">Apunta al código QR de la etiqueta</div>`;
   document.body.appendChild(ov);
   try{
@@ -558,9 +610,10 @@ async function abrirScan(){
     loop();
   }catch(e){ $('#scanlast').textContent = 'No se pudo abrir la cámara. Permite el acceso a la cámara en Safari.'; }
 }
-function cerrarScan(){ if(SCAN){ SCAN.on=false; try{ SCAN.st.getTracks().forEach(t=>t.stop()); }catch(e){} SCAN=null; } const o=$('#scanov'); if(o) o.remove(); render(); }
+function cerrarScan(){ if(SCAN){ SCAN.on=false; try{ SCAN.st.getTracks().forEach(t=>t.stop()); }catch(e){} SCAN=null; } const o=$('#scanov'); if(o) o.remove(); if(SCANMODO!=='consulta') render(); }
 function leido(txt){
   const p = String(txt).split('|'), cod = (p[0]==='DS' ? p[1] : '') || '', nom = (p[0]==='DS' ? p[2] : txt) || '';
+  if(SCANMODO==='consulta'){ cerrarScan(); verHistorial(nom, cod); return; }
   const U = s => String(s||'').trim().toUpperCase();
   const it = S.items.find(i => U(i.material)===U(nom) || (cod && (U(i.material).includes('('+U(cod)+')') || U(i.material)===U(cod))));
   const el = $('#scanlast') || {};
@@ -605,7 +658,8 @@ async function toggle(fila, soloMarcar){
   it[k] = !it[k]; it[hk] = it[k] ? hora() : '';
   vib(it[k] ? 15 : [8,40,8]);
   actualizarResumen(); if(!SCAN) render();
-  try{ it[hk] = await call('ckMarcar', fila, S.num, it.material, modo, it[k]); if(!SCAN) render(); }
+  guardarMatCache();
+  try{ const r = await enviar('ckMarcar', fila, S.num, it.material, modo, it[k]); if(r!=null){ it[hk] = r; guardarMatCache(); } if(!SCAN) render(); }
   catch(e){ it[k]=prev[0]; it[hk]=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 async function todo(valor){
@@ -614,7 +668,8 @@ async function todo(valor){
   const prev = S.items.map(i=>[i[k],i[hk]]);
   S.items.forEach(i=>{ i[k]=valor; i[hk]=valor?hora():''; }); vib(30);
   actualizarResumen(); render();
-  try{ await call('ckMarcarTodo', S.num, modo, valor); toast('Guardado en la hoja'); }
+  guardarMatCache();
+  try{ const r = await enviar('ckMarcarTodo', S.num, modo, valor); if(r!==null) toast('Guardado en la hoja'); }
   catch(e){ S.items.forEach((i,n)=>{ i[k]=prev[n][0]; i[hk]=prev[n][1]; }); actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 
@@ -626,8 +681,12 @@ function abrirInc(fila){
   $('#sheet').innerHTML = `<h3>${esc(it.material)}</h3><div class="meta">Cantidad: ${esc(it.cant)}</div>
     <div class="chips">${S.opciones.map(o=>`<button class="chip ${o===incSel?'on':''}" onclick="selInc(this,'${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}</div>
     <textarea id="nota" placeholder="Nota (qué ha pasado, cuántas unidades…)">${esc(it.nota)}</textarea>
-    <div class="row2"><button class="btn sec2" onclick="guardarInc(true)">Quitar</button><button class="btn" onclick="guardarInc(false)">Guardar</button></div>`;
+    <div id="incFotos"></div>
+    <label class="btn sec2 fotobtn" for="incFoto" style="margin:0 0 10px">📷 Añadir foto</label><input type="file" id="incFoto" accept="image/*" capture="environment" hidden onchange="fotoIncidencia(this)">
+    <div class="row2"><button class="btn sec2" onclick="guardarInc(true)">Quitar</button><button class="btn" onclick="guardarInc(false)">Guardar</button></div>
+    <button class="link" onclick="cerrarSheet();verHistorial('${esc(it.material).replace(/'/g,"\\'")}','${esc(it.codigo||'')}')">Ver historial de este equipo</button>`;
   $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open'));
+  cargarFotos().then(()=>pintarFotosInc(it.material));
 }
 function selInc(el,o){ incSel = incSel===o ? '' : o; document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c.textContent===incSel)); }
 function cerrarSheet(){ $('#sheet').classList.remove('open'); setTimeout(()=>$('#sbg').style.display='none',200); }
@@ -637,17 +696,356 @@ async function guardarInc(quitar){
   it.incidencia = quitar ? '' : incSel; it.nota = quitar ? '' : $('#nota').value.trim();
   if(!quitar && !it.incidencia && it.nota) it.incidencia = S.opciones.includes('Otro') ? 'Otro' : '';
   cerrarSheet(); actualizarResumen(); render();
-  try{ await call('ckIncidencia', it.fila, S.num, it.material, it.incidencia, it.nota); toast(quitar?'Incidencia quitada':'Incidencia guardada'); }
+  guardarMatCache();
+  try{ const r = await enviar('ckIncidencia', it.fila, S.num, it.material, it.incidencia, it.nota); if(r!==null) toast(quitar?'Incidencia quitada':'Incidencia guardada'); }
   catch(e){ it.incidencia=prev[0]; it.nota=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 
+/* =========================================================
+   SIN COBERTURA: caché de lecturas y cola de cambios
+   ========================================================= */
+const LECT = ['ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes'];
+function cacheGet(k){ try{ const v = localStorage.getItem('ck_c_'+k); return v ? JSON.parse(v) : undefined; }catch(e){ return undefined; } }
+function cacheSet(k, v){ try{ localStorage.setItem('ck_c_'+k, JSON.stringify(v)); }catch(e){ limpiarCache(); } }
+function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_c_ckMaterial')===0||k.indexOf('ck_c_ckBolo')===0).slice(0,-6).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
+let COLA = []; try{ COLA = JSON.parse(localStorage.getItem('ck_cola')||'[]'); }catch(e){}
+function guardarCola(){ try{ localStorage.setItem('ck_cola', JSON.stringify(COLA)); }catch(e){ toast('Memoria llena: no se pudo guardar el cambio sin conexión'); } pintarRed(); }
+async function enviar(fn, ...args){
+  const post = ['ckSalida','ckFirma','ckFoto','ckGasto'].includes(fn);
+  if(COLA.length){ COLA.push({fn, args, post}); guardarCola(); vaciarCola(); return null; }
+  try{ return post ? await callPost(fn, ...args) : await call(fn, ...args); }
+  catch(e){
+    if(!e.red) throw e;
+    COLA.push({fn, args, post}); guardarCola(); S.offline = true;
+    toast('Sin cobertura: se enviará solo al volver la conexión');
+    return null;
+  }
+}
+let vaciando = false;
+async function vaciarCola(){
+  if(vaciando || !COLA.length || !navigator.onLine && navigator.onLine !== undefined && false) return;
+  vaciando = true;
+  try{
+    while(COLA.length){
+      const t = COLA[0];
+      try{ t.post ? await callPost(t.fn, ...t.args) : await call(t.fn, ...t.args); }
+      catch(e){ if(e.red){ S.offline = true; break; } toast('Un cambio no se pudo guardar: '+e.message); }
+      COLA.shift(); guardarCola();
+    }
+    if(!COLA.length){ if(S.offline) toast('Conexión recuperada: todo guardado'); S.offline = false; }
+  } finally { vaciando = false; pintarRed(); }
+}
+function pintarRed(){
+  let b = $('#redbar');
+  const txt = COLA.length ? `Sin conexión · ${COLA.length} cambio${COLA.length>1?'s':''} pendiente${COLA.length>1?'s':''} de enviar` : (S.offline ? 'Sin conexión · mostrando los últimos datos guardados' : '');
+  if(!txt){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement('div'); b.id='redbar'; b.className='redbar'; b.onclick = vaciarCola; document.body.appendChild(b); }
+  b.textContent = txt;
+}
+window.addEventListener('online', ()=>{ S.offline=false; vaciarCola(); });
+setInterval(()=>{ if(COLA.length) vaciarCola(); }, 20000);
+function guardarMatCache(){ if(S.num) cacheSet('ckMaterial'+JSON.stringify([S.num]), { items:S.items, opciones:S.opciones }); }
+function guardarBoloCache(){ if(S.num && S.bolo) cacheSet('ckBolo'+JSON.stringify([S.num]), S.bolo); }
+
+/* =========================================================
+   ACCESO
+   ========================================================= */
+function esAdmin(){ return S.yo && S.yo.usuario && S.yo.usuario.rol === 'admin'; }
+function vistaLogin(){
+  return `<div class="login"><div class="brand big"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <h1>Carga de material</h1><p>Escribe tu código de acceso. Te lo da Andreu desde la app.</p>
+    <form onsubmit="event.preventDefault();entrar()"><input id="lgCod" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Código de acceso"><button class="btn" id="lgBtn">Entrar</button></form>
+    <div class="meta" id="lgErr"></div></div>`;
+}
+async function entrar(){
+  const c = ($('#lgCod').value||'').trim(); if(!c) return;
+  $('#lgBtn').disabled = true; $('#lgErr').textContent = '';
+  KEY = c;
+  try{ S.yo = await call('ckYo'); try{ localStorage.setItem('ck_key', c); }catch(e){} cacheSet('ckYo[]', S.yo); arrancar(); }
+  catch(e){ KEY=''; $('#lgBtn').disabled = false; $('#lgErr').textContent = e.red ? 'Sin conexión. Prueba otra vez con cobertura.' : 'Código no válido.'; }
+}
+function salirSesion(){
+  if(COLA.length && !confirm('Hay cambios sin enviar. Si sales se perderán. ¿Salir igualmente?')) return;
+  try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_')===0).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  location.reload();
+}
+async function arrancar(){
+  S.yo = S.yo || cacheGet('ckYo[]') || null;
+  cargarLista(); cargarFurgos(); vaciarCola();
+  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); }
+  catch(e){ if(!e.red && /código|acceso/i.test(e.message)){ salirSesion(); } }
+}
+
+/* =========================================================
+   MENÚ
+   ========================================================= */
+function abrirMenu(){
+  const u = (S.yo||{}).usuario || {};
+  const it = (ic, t, f, sub) => `<button class="mitem" onclick="cerrarSheet();${f}"><span class="ic">${ic}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
+  abrirSheet(`<h3>Menú</h3><div class="meta" style="margin-bottom:10px">${esc(u.nombre||'')}${u.rol==='admin'?' · Administrador':' · Técnico'}</div>
+    ${esAdmin()? it('📊','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias'):''}
+    ${it('🔎','Consultar un equipo','abrirScan(\'consulta\')','Escanea su QR y mira su historial')}
+    ${it('⌗','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
+    ${it('🚐','Furgonetas','cargarFurgos().then(abrirFurgos)')}
+    ${esAdmin()? it('👥','Accesos del equipo','verAccesos()','Códigos para Paula y el resto'):''}
+    ${esAdmin()? it('☑','Checklist de montaje','editarChecklist()','Pasos que se revisan en cada montaje'):''}
+    ${it('⬇','Instalar en el móvil','ayudaInstalar()')}
+    ${it('↩','Cerrar sesión','salirSesion()')}`);
+}
+function ayudaInstalar(){
+  abrirSheet(`<h3>Instalar la app</h3><ol class="pasos"><li>Abre esta página en <b>Safari</b>.</li><li>Pulsa el botón <b>Compartir</b> (el cuadrado con la flecha).</li><li>Elige <b>Añadir a pantalla de inicio</b>.</li><li>Abre la app desde el icono y escribe tu código de acceso.</li></ol>
+    <div class="meta">Tu código: <b class="sel">${esc(KEY)}</b></div><button class="btn sec2" style="margin-top:14px" onclick="cerrarSheet()">Entendido</button>`);
+}
+
+/* =========================================================
+   HOY
+   ========================================================= */
+function diaDe(ts){ const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+function tarjetasHoy(){
+  const hoy = diaDe(Date.now()), man = hoy + 864e5;
+  const l = (S.presus||[]).filter(p => p.ts && (diaDe(p.ts) === hoy || diaDe(p.ts) === man) && !p.cerrado);
+  if(!l.length) return '';
+  return l.map(p => {
+    const esHoy = diaDe(p.ts) === hoy;
+    const paso = p.cargados < p.total ? 'Empezar a cargar' : p.devueltos === 0 ? 'Ir al evento' : 'Terminar la vuelta';
+    return `<div class="hoy ${esHoy?'':'man'}"><div class="lbl">${esHoy?'HOY':'MAÑANA'} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
+      ${p.lugar?`<div class="hlug">📍 ${esc(p.lugar)}</div>`:''}
+      <div class="hst"><span>🚚 ${p.cargados}/${p.total}</span><span>🏠 ${p.devueltos}/${p.total}</span>${(p.tecnicos||[]).length?`<span>👤 ${esc(p.tecnicos.join(', '))}</span>`:''}</div>
+      <button class="btn" onclick="abrir('${esc(p.num)}')">${paso} →</button></div>`;
+  }).join('');
+}
+
+/* =========================================================
+   AVISAR AL CLIENTE
+   ========================================================= */
+function telIntl(t){ let d = String(t||'').replace(/[^\d+]/g,''); if(d.startsWith('+')) return d.slice(1); if(d.startsWith('00')) return d.slice(2); if(d.length===9) return '34'+d; return d; }
+function abrirAviso(){
+  const f = ficha(), p = S.presus.find(x=>x.num===S.num) || {};
+  if(!f.telefono){ toast('Pon el teléfono del contacto en la ficha'); abrirFicha(); return; }
+  const z = n => String(n).padStart(2,'0'), h = m => { const d = new Date(Date.now()+m*60000); return z(d.getHours())+':'+z(d.getMinutes()); };
+  abrirSheet(`<h3>📲 Avisar al cliente</h3><div class="meta">${esc(f.contacto||'Contacto')} · ${esc(f.telefono)}</div>
+    <div class="fld" style="margin-top:12px"><span>¿A qué hora llegáis?</span><div class="chips" style="margin:6px 0 0">${[15,30,45,60,90].map((m,i)=>`<button class="chip eta ${i===1?'on':''}" data-h="${h(m)}" onclick="document.querySelectorAll('.eta').forEach(b=>b.classList.remove('on'));this.classList.add('on');$('#avH').value=this.dataset.h;textoAviso()">${h(m)}</button>`).join('')}</div></div>
+    <label class="fld"><span>Hora</span><input id="avH" type="time" value="${h(30)}" oninput="textoAviso()"></label>
+    <label class="fld"><span>Mensaje</span><textarea id="avTxt" rows="4"></textarea></label>
+    <div class="row2"><a class="btn wa" id="avWa" target="_blank" rel="noopener">WhatsApp</a><a class="btn sec2" id="avSms">SMS</a></div>`);
+  textoAviso();
+}
+function textoAviso(){
+  const f = ficha(), p = S.presus.find(x=>x.num===S.num) || {};
+  const ta = $('#avTxt');
+  if(!ta.dataset.edit){ ta.value = `Hola${f.contacto?' '+f.contacto.split(' ')[0]:''}, somos Dreamscape Events. Salimos ya hacia ${destino(p.lugar)||'el evento'} y llegaremos sobre las ${$('#avH').value}. ¡Hasta ahora!`; ta.oninput = () => { ta.dataset.edit = 1; linksAviso(); }; }
+  linksAviso();
+}
+function linksAviso(){
+  const f = ficha(), t = encodeURIComponent($('#avTxt').value);
+  $('#avWa').href = `https://wa.me/${telIntl(f.telefono)}?text=${t}`;
+  $('#avSms').href = `sms:+${telIntl(f.telefono)}&body=${t}`;
+}
+
+/* =========================================================
+   CHECKLIST DE MONTAJE
+   ========================================================= */
+function tarjetaChecklist(){
+  const lista = ((S.yo||{}).config||{}).checklist || [], ch = ficha().checks || {};
+  if(!lista.length) return '';
+  const hechos = lista.filter(x=>ch[x]).length;
+  return `<div class="furg"><div class="top"><b>☑ Checklist de montaje</b><span class="meta">${hechos}/${lista.length}</span></div>
+    ${lista.map((x,i)=>`<button class="ck ${ch[x]?'on':''}" onclick="marcarCheck(${i})"><span class="cb">${ch[x]?'✓':''}</span><span><b>${esc(x)}</b>${ch[x]?`<small>${esc(ch[x])}</small>`:''}</span></button>`).join('')}</div>`;
+}
+async function marcarCheck(i){
+  const t = S.yo.config.checklist[i]; if(!S.bolo) return;
+  const ch = S.bolo.ficha.checks = S.bolo.ficha.checks || {};
+  const v = !ch[t]; if(v) ch[t] = hora() + ' · ' + ((S.yo.usuario||{}).nombre||''); else delete ch[t];
+  vib(15); guardarBoloCache(); render();
+  try{ const r = await enviar('ckCheck', S.num, t, v); if(r && v){ ch[t] = r; guardarBoloCache(); render(); } }
+  catch(e){ if(v) delete ch[t]; else ch[t] = '✓'; render(); toast('No se guardó: '+e.message); }
+}
+function editarChecklist(){
+  const l = ((S.yo||{}).config||{}).checklist || [];
+  abrirSheet(`<h3>☑ Checklist de montaje</h3><div class="meta" style="margin-bottom:10px">Un paso por línea. Sale en el paso Montaje de todos los bolos.</div>
+    <textarea id="ckTxt" rows="10">${esc(l.join('\n'))}</textarea>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarChecklist()">Guardar</button></div>`);
+}
+async function guardarChecklist(){
+  const l = $('#ckTxt').value.split('\n').map(x=>x.trim()).filter(Boolean);
+  try{ const c = await call('ckGuardarConfig', { checklist:l }); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Checklist guardada'); render(); }
+  catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* =========================================================
+   GASTOS Y HORAS
+   ========================================================= */
+function duracion(a, b){
+  const p = s => { const m = String(s||'').match(/(\d+)\/(\d+) (\d+):(\d+)/); return m ? new Date(new Date().getFullYear(), m[2]-1, m[1], m[3], m[4]).getTime() : null; };
+  const x = p(a), y = p(b); return x && y && y > x ? Math.round((y-x)/36e5*4)/4 : 0;
+}
+function tarjetaGastos(){
+  const g = S.gastos || [];
+  const fila = x => `<div class="grow"><div style="flex:1;min-width:0"><b>${esc(x.tipo)}${x.persona?' · '+esc(x.persona):''}</b><div class="meta">${esc(x.fecha)}${x.nota?' · '+esc(String(x.nota).replace(/ ?· ?App: .*/,'')):''}</div></div><div class="gimp">${/hora/i.test(x.tipo)?esc(x.cantidad)+' h':''}<b>${esc(x.importe||'')}${typeof x.importe==='number'?' €':''}</b></div></div>`;
+  return `<div class="furg"><div class="top"><b>💶 Gastos y horas</b><button class="edit" onclick="abrirGasto()">+ Añadir</button></div>
+    ${g.length ? g.map(fila).join('') : '<div class="meta">Gasoil, peajes, parking, dietas y horas del equipo. Con foto del ticket.</div>'}</div>`;
+}
+let GF = null;
+function abrirGasto(){
+  const tipos = (S.yo||{}).tiposGasto || ['Horas','Gasolina','Dietas','Parking / peajes','Material','Otro'];
+  const f = ficha(), tecs = (f.tecnicos&&f.tecnicos.length ? f.tecnicos : ((S.bolo||{}).equipo||[]).map(x=>x.nombre));
+  const hs = duracion(f.llegada, f.finMontaje);
+  GF = null;
+  abrirSheet(`<h3>💶 Nuevo gasto</h3>
+    <div class="fld"><span>Tipo</span><div class="chips" style="margin:6px 0 0">${tipos.map((t,i)=>`<button class="chip gt ${i===0?'on':''}" data-t="${esc(t)}" onclick="document.querySelectorAll('.gt').forEach(b=>b.classList.remove('on'));this.classList.add('on');tipoGasto()">${esc(t)}</button>`).join('')}</div></div>
+    <div id="gPer" class="fld"><span>Persona</span><div class="chips" style="margin:6px 0 0">${tecs.map((t,i)=>`<button class="chip gp ${i===0?'on':''}" data-n="${esc(t)}" onclick="document.querySelectorAll('.gp').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${esc(t)}</button>`).join('')}</div></div>
+    <label class="fld"><span id="gLbl">Horas</span><input id="gCant" inputmode="decimal" value="${hs||''}" placeholder="0"></label>
+    ${hs?`<div class="meta" id="gHint" style="margin:-4px 0 10px">De la llegada al fin de montaje: ${hs} h</div>`:''}
+    <label class="fld"><span>Nota</span><input id="gNota" autocomplete="off" placeholder="Opcional"></label>
+    <div id="gFotoBox"></div>
+    <label class="btn sec2 fotobtn" for="gFoto">📷 Foto del ticket</label><input type="file" id="gFoto" accept="image/*" capture="environment" hidden onchange="fotoTicket(this)">
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="gBtn" onclick="guardarGasto()">Guardar</button></div>`);
+  tipoGasto();
+}
+function tipoGasto(){
+  const t = (document.querySelector('.gt.on')||{}).dataset?.t || '', h = /hora/i.test(t);
+  $('#gPer').hidden = !h; $('#gLbl').textContent = h ? 'Horas' : 'Importe (€)';
+  const hint = $('#gHint'); if(hint) hint.hidden = !h;
+  if(!h && $('#gCant').value && hint) $('#gCant').value = '';
+}
+async function fotoTicket(inp){ const f = inp.files&&inp.files[0]; if(!f) return; try{ GF = await comprimir(f); $('#gFotoBox').innerHTML = `<img src="${GF}" class="prev" style="margin-bottom:8px">`; }catch(e){ toast(e.message); } }
+async function guardarGasto(){
+  const tipo = document.querySelector('.gt.on').dataset.t, h = /hora/i.test(tipo);
+  const g = { tipo, persona: h ? ((document.querySelector('.gp.on')||{}).dataset||{}).n || '' : '', cantidad: ($('#gCant').value||'').replace(',','.'), nota: ($('#gNota').value||'').trim(), foto: GF||'' };
+  if(!(parseFloat(g.cantidad)>0)){ toast(h?'Pon las horas':'Pon el importe'); return; }
+  $('#gBtn').disabled = true;
+  try{
+    const r = await enviar('ckGasto', S.num, g);
+    S.gastos = S.gastos || [];
+    S.gastos.push(r || { fecha: hora().slice(0,5), tipo, persona:g.persona, cantidad:g.cantidad, importe: h ? '' : parseFloat(g.cantidad), nota:g.nota });
+    cacheSet('ckGastos'+JSON.stringify([S.num]), S.gastos);
+    cerrarSheet(); toast('Gasto apuntado en la pestaña Gastos'); render();
+  }catch(e){ $('#gBtn').disabled = false; toast('No se guardó: '+e.message); }
+}
+
+/* =========================================================
+   FOTOS
+   ========================================================= */
+function comprimir(file, lado=720, max=45000){
+  return new Promise((ok, ko) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      let L = lado, q = .7, d = '';
+      for(let n=0; n<8; n++){
+        const r = Math.min(1, L/Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width*r); c.height = Math.round(img.height*r);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        d = c.toDataURL('image/jpeg', q);
+        if(d.length <= max) break;
+        q = Math.max(.4, q-.1); L = Math.round(L*.85);
+      }
+      URL.revokeObjectURL(url);
+      d.length <= max ? ok(d) : ko(new Error('La foto es demasiado grande'));
+    };
+    img.onerror = () => ko(new Error('No se pudo leer la foto'));
+    img.src = url;
+  });
+}
+async function cargarFotos(){ if(S.fotos) return S.fotos; try{ S.fotos = await call('ckFotos', S.num); }catch(e){ S.fotos = []; } return S.fotos; }
+async function fotoIncidencia(inp){
+  const it = S.items.find(i=>i.fila===incFila); const f = inp.files&&inp.files[0]; if(!it||!f) return;
+  try{
+    const d = await comprimir(f);
+    S.fotos = S.fotos || []; S.fotos.push({ fecha: hora(), material: it.material, tipo:'incidencia', img:d });
+    pintarFotosInc(it.material);
+    await enviar('ckFoto', S.num, it.material, 'incidencia', d); toast('Foto guardada');
+  }catch(e){ toast(e.message); }
+}
+function pintarFotosInc(material){
+  const box = $('#incFotos'); if(!box) return;
+  const l = (S.fotos||[]).filter(f=>f.material===material);
+  box.innerHTML = l.length ? `<div class="fgrid">${l.map(f=>`<img src="${f.img}" alt="Foto ${esc(f.fecha)}">`).join('')}</div>` : '';
+}
+
+/* =========================================================
+   HISTORIAL DE UN EQUIPO
+   ========================================================= */
+async function verHistorial(nombre, codigo){
+  S.vista = 'hist'; S.hist = { nombre, codigo, cargando:true }; render(); window.scrollTo(0,0);
+  try{ S.hist = await call('ckHistorial', nombre, codigo||''); }catch(e){ S.hist = { nombre, error:e.message }; }
+  if(S.vista==='hist') render();
+}
+function vistaHistorial(){
+  const h = S.hist || {};
+  const body = h.cargando ? `<div class="loading"><div class="spin"></div>Buscando…</div>` : h.error ? `<div class="empty">${esc(h.error)}</div>` : `
+    <div class="tiles">${h.stock?`<div class="tile"><b>${esc(h.stock.stock)}</b><span>en stock</span></div>`:''}<div class="tile"><b>${(h.usos||[]).length}</b><span>bolos</span></div><div class="tile ${h.incidencias?'warn':''}"><b>${h.incidencias||0}</b><span>incidencias</span></div></div>
+    ${(h.fotos||[]).length?`<div class="sec">Fotos</div><div class="fgrid">${h.fotos.map(f=>`<img src="${f.img}" alt="${esc(f.num)}">`).join('')}</div>`:''}
+    <div class="sec">Bolos</div>
+    ${(h.usos||[]).map(u=>`<div class="hrow2"><div style="flex:1;min-width:0"><b>${esc(u.num)} · ${esc(u.evento)}</b><div class="meta">${esc(u.montaje)} · ${esc(u.cant)} uds · ${u.devuelto?'Devuelto':u.cargado?'<span class="inc">Fuera del almacén</span>':'Sin cargar'}</div>${u.incidencia?`<div class="meta inc">⚠ ${esc(u.incidencia)}${u.nota?': '+esc(u.nota):''}</div>`:''}</div></div>`).join('') || '<div class="meta">Aún no ha salido en ningún bolo.</div>'}`;
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="volverDeHist()" aria-label="Volver">‹</button><div style="flex:1;min-width:0"><h1>${esc(h.nombre||'')}</h1><div class="sub">${esc(h.codigo||'Historial del equipo')}</div></div></div></header><main>${body}</main>`;
+}
+function volverDeHist(){ S.vista = S.num ? 'det' : 'lista'; render(); }
+
+/* =========================================================
+   ACCESOS DEL EQUIPO (administrador)
+   ========================================================= */
+async function verAccesos(){
+  S.vista='accesos'; S.acc=null; render();
+  try{ S.acc = await call('ckUsuarios'); }catch(e){ toast('Error: '+e.message); S.acc = { usuarios:[], equipo:[] }; }
+  if(S.vista==='accesos') render();
+}
+function vistaAccesos(){
+  const a = S.acc;
+  const url = location.origin + location.pathname;
+  const body = !a ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : (() => {
+    const nombres = [...new Set([...(a.equipo||[]).map(x=>x.nombre), ...(a.usuarios||[]).map(x=>x.nombre)])].filter(n=>n!=='Andreu' || (a.usuarios||[]).some(u=>u.nombre==='Andreu'));
+    return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código y solo ve los bolos donde está como técnico (o los que no tienen a nadie asignado). Las personas salen de la pestaña Equipo.</div>` +
+      nombres.map(n => { const u = (a.usuarios||[]).find(x=>x.nombre===n); const on = u && u.activo !== false;
+        return `<div class="furg"><div class="top"><b>${esc(n)}</b><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
+          ${on?`<div class="codigo"><span class="sel">${esc(u.codigo)}</span><select onchange="accRol('${esc(n).replace(/'/g,"\\'")}',this.value)"><option value="tecnico" ${u.rol!=='admin'?'selected':''}>Técnico</option><option value="admin" ${u.rol==='admin'?'selected':''}>Administrador</option></select></div>
+          <div class="row2" style="margin-top:10px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Hola '+n.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')')}">Enviar por WhatsApp</a><button class="btn sec2" onclick="accNuevo('${esc(n).replace(/'/g,"\\'")}')">Nuevo código</button></div>`:''}</div>`; }).join('') +
+      `<div class="meta" style="margin:8px 4px">Tu código de administrador es el de tu enlace. Si alguien pierde el móvil, pulsa «Nuevo código» y el anterior deja de funcionar.</div>`;
+  })();
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>Accesos del equipo</h1></div></header><main>${body}</main>`;
+}
+async function accGuardar(l, msg){ try{ S.acc.usuarios = await call('ckGuardarUsuarios', l); toast(msg); render(); }catch(e){ toast('No se guardó: '+e.message); } }
+function accToggle(n){ const l = (S.acc.usuarios||[]).slice(); const u = l.find(x=>x.nombre===n); if(u) u.activo = u.activo === false; else l.push({ nombre:n, rol:'tecnico', activo:true }); accGuardar(l, 'Acceso actualizado'); }
+function accRol(n, r){ const l = S.acc.usuarios.slice(); const u = l.find(x=>x.nombre===n); if(u){ u.rol = r; accGuardar(l, 'Permiso actualizado'); } }
+function accNuevo(n){ if(!confirm('El código anterior dejará de funcionar. ¿Crear uno nuevo?')) return; const l = S.acc.usuarios.map(x=>x.nombre===n ? Object.assign({}, x, { nuevo:true }) : x); accGuardar(l, 'Código nuevo creado'); }
+
+/* =========================================================
+   RESUMEN DEL MES (administrador)
+   ========================================================= */
+async function verResumen(mes){
+  S.vista='resumen'; S.res = { mes: mes || (S.res&&S.res.mes) || new Date().toISOString().slice(0,7), cargando:true }; render(); window.scrollTo(0,0);
+  try{ S.res = await call('ckResumen', S.res.mes); }catch(e){ S.res = { mes:S.res.mes, error:e.message }; }
+  if(S.vista==='resumen') render();
+}
+function moverMes(d){ const [y,m] = S.res.mes.split('-').map(Number); const x = new Date(y, m-1+d, 1); verResumen(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')); }
+const eur = n => (Number(n)||0).toLocaleString('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
+function vistaResumen(){
+  const r = S.res || {};
+  const [y,m] = (r.mes||'').split('-').map(Number);
+  let nombreMes = y ? new Date(y, m-1, 1).toLocaleDateString('es-ES', { month:'long', year:'numeric' }) : ''; nombreMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+  const barras = (obj, fmt) => { const ks = Object.keys(obj||{}); const mx = Math.max(1, ...ks.map(k=>obj[k])); return ks.length ? ks.sort((a,b)=>obj[b]-obj[a]).map(k=>`<div class="bar2"><span>${esc(k)}</span><div class="bt"><div style="width:${obj[k]/mx*100}%"></div></div><b>${fmt(obj[k])}</b></div>`).join('') : '<div class="meta">Sin datos este mes.</div>'; };
+  const body = r.cargando ? `<div class="loading"><div class="spin"></div>Calculando…</div>` : r.error ? `<div class="empty">${esc(r.error)}</div>` : `
+    <div class="tiles"><div class="tile"><b>${(r.bolos||[]).length}</b><span>bolos</span></div><div class="tile"><b>${eur(r.facturado)}</b><span>presupuestado</span></div><div class="tile"><b>${eur(r.totalGastos)}</b><span>gastos</span></div><div class="tile ${(r.incidencias||[]).length?'warn':''}"><b>${(r.incidencias||[]).length}</b><span>incidencias</span></div></div>
+    <div class="furg"><b>Horas por persona</b><div style="margin-top:10px">${barras(r.horas, v=>v+' h')}</div></div>
+    <div class="furg"><b>Gastos por tipo</b><div style="margin-top:10px">${barras(r.gastos, eur)}</div></div>
+    <div class="furg"><b>Material más usado</b><div style="margin-top:10px">${barras(Object.fromEntries((r.top||[]).map(x=>[x.material,x.cant])), v=>v+' uds')}</div></div>
+    ${(r.incidencias||[]).length?`<div class="furg"><b>Incidencias</b>${r.incidencias.map(i=>`<div class="hrow2"><div><b>${esc(i.material)}</b><div class="meta inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''} · ${esc(i.num)}</div></div></div>`).join('')}</div>`:''}
+    <div class="sec">Bolos del mes</div>
+    ${(r.bolos||[]).map(b=>`<button class="card" onclick="abrir('${esc(b.num)}')"><div class="top"><span class="num">${esc(b.num)}</span><span class="date">${esc(b.montaje)}</span></div><div class="ev">${esc(b.evento)}</div><div class="meta">${b.importe?eur(b.importe)+' · ':''}${esc(b.cerrado?'Listo para facturar':(b.estado||''))}${b.firma?' · ✍ firmado':''}</div></button>`).join('') || '<div class="meta">No hay bolos este mes.</div>'}`;
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>Resumen</h1></div>
+    <div class="mesnav"><button onclick="moverMes(-1)" aria-label="Mes anterior">‹</button><b>${esc(nombreMes)}</b><button onclick="moverMes(1)" aria-label="Mes siguiente">›</button></div></header><main>${body}</main>`;
+}
+
 /* ---------- RENDER ---------- */
-function render(){ $('#app').innerHTML = S.vista==='lista' ? vistaLista() : S.vista==='etiq' ? vistaEtiquetas() : vistaDet(); dot(); }
+function render(){ const V = { lista:vistaLista, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin }; $('#app').innerHTML = (V[S.vista] || vistaDet)(); dot(); pintarRed(); }
 function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
-window.addEventListener('popstate', ()=>{ if(S.vista==='det'){ S.vista='lista'; render(); } });
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(S.pend || !KEY || SCAN || S.vista==='etiq' || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
-if(!KEY){ document.getElementById('app').innerHTML = '<div class="empty" style="padding-top:30vh">Abre la app con el enlace que lleva la clave.</div>'; }
-else { cargarLista(); cargarFurgos(); }
+window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if(!KEY){ S.vista='login'; render(); setTimeout(()=>{ const i=$('#lgCod'); if(i) i.focus(); }, 300); }
+else arrancar();
 </script>
 </body>
 </html>
