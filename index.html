@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16243a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carga">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>Carga · Dreamscape</title>
+<style>
+:root{--navy:#16243a;--navy2:#22344f;--bg:#f2f4f7;--card:#fff;--txt:#14202e;--mut:#6b7686;--line:#e3e7ec;--ok:#1f9d55;--okbg:#e5f6ec;--dev:#2b6cb0;--devbg:#e6f0fa;--warn:#d97706;--warnbg:#fff4e0;--r:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px}
+.hrow{display:flex;align-items:center;gap:10px}
+.hrow h1{font-size:20px;margin:0;font-weight:700;flex:1;min-width:0}
+.sub{font-size:13px;opacity:.75;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{width:40px;height:40px;border-radius:12px;background:var(--navy2);display:grid;place-items:center;font-size:22px;flex:none}
+.ref{width:40px;height:40px;border-radius:12px;background:var(--navy2);display:grid;place-items:center;font-size:18px;flex:none}
+.search{margin-top:12px;width:100%;padding:12px 14px;border-radius:12px;border:0;font:inherit;font-size:16px;background:#fff}
+.seg{display:flex;background:var(--navy2);border-radius:12px;padding:4px;margin-top:12px}
+.seg button{flex:1;padding:10px 6px;border-radius:9px;color:#c9d3e0;font-weight:600;font-size:15px}
+.seg button.on{background:#fff;color:var(--navy)}
+main{padding:14px 14px calc(env(safe-area-inset-bottom) + 96px)}
+.card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:block;width:100%;text-align:left}
+.card .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.num{font-weight:700;font-size:15px;color:var(--navy)}
+.date{font-size:13px;color:var(--mut);white-space:nowrap}
+.ev{margin:4px 0 10px;font-size:15px}
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bar small{font-size:12px;color:var(--mut);display:flex;justify-content:space-between}
+.track{height:7px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:4px}
+.fill{height:100%;border-radius:9px;background:var(--ok);transition:width .3s}
+.fill.dev{background:var(--dev)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--warnbg);color:var(--warn);margin-left:6px}
+.prog{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.prog .big{font-size:28px;font-weight:800}
+.prog .big span{font-size:16px;color:var(--mut);font-weight:600}
+.prog .track{height:10px}
+.done-banner{background:var(--okbg);color:var(--ok);font-weight:700;text-align:center;padding:14px;border-radius:var(--r);margin-bottom:12px}
+.done-banner.dev{background:var(--devbg);color:var(--dev)}
+.sec{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:16px 4px 8px}
+.item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px;margin-bottom:8px;min-height:68px;user-select:none;transition:background .15s,transform .1s}
+.item:active{transform:scale(.985)}
+.chk{width:34px;height:34px;border-radius:10px;border:2.5px solid #c3cad4;flex:none;display:grid;place-items:center;font-size:20px;color:#fff;font-weight:900}
+.item.on .chk{background:var(--ok);border-color:var(--ok)}
+.mode-dev .item.on .chk{background:var(--dev);border-color:var(--dev)}
+.item.on{background:#fafbfc}
+.item.on .mat{color:var(--mut);text-decoration:line-through}
+.qty{flex:none;min-width:48px;height:40px;padding:0 8px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-weight:800;font-size:18px}
+.info{flex:1;min-width:0}
+.mat{font-weight:600;font-size:16px;word-break:break-word}
+.meta{font-size:12.5px;color:var(--mut);margin-top:2px}
+.meta .inc{color:var(--warn);font-weight:600}
+.more{flex:none;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;color:var(--mut)}
+.item.has-inc .more{color:var(--warn);background:var(--warnbg)}
+.foot{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(transparent,var(--bg) 30%);z-index:4}
+.btn{width:100%;padding:16px;border-radius:14px;background:var(--navy);color:#fff;font-weight:700;font-size:16px}
+.btn.sec2{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.sheet-bg{position:fixed;inset:0;background:rgba(10,20,35,.45);z-index:20;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 16px);z-index:21;transform:translateY(105%);transition:transform .25s}
+.sheet.open{transform:none}
+.sheet h3{margin:0 0 4px;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{padding:10px 14px;border-radius:24px;background:var(--bg);font-weight:600;font-size:15px}
+.chip.on{background:var(--warn);color:#fff}
+textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;margin-bottom:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:#1b2633;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.empty,.loading{text-align:center;color:var(--mut);padding:40px 10px}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:s .8s linear infinite;margin:0 auto 10px}
+@keyframes s{to{transform:rotate(360deg)}}
+.sync{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-left:6px;vertical-align:middle}
+.sync.busy{background:#fbbf24}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="sheet-bg" id="sbg" onclick="cerrarSheet()"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// La clave llega en el enlace (#k=...) y se guarda en este móvil
+let KEY = '';
+try{ const m = location.hash.match(/k=([\w-]+)/); if(m){ localStorage.setItem('ck_key', m[1]); history.replaceState(null,'',location.pathname); } KEY = localStorage.getItem('ck_key') || ''; }catch(e){ const m = location.hash.match(/k=([\w-]+)/); KEY = m ? m[1] : ''; }
+const S = { vista:'lista', filtro:'prox', q:'', presus:[], num:null, items:[], opciones:[], modo:'carga', pend:0 };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const vib = n => { try{ navigator.vibrate && navigator.vibrate(n) }catch(e){} };
+
+const API = 'https://script.google.com/macros/s/AKfycbwEQlNLMpsPbUDbgc3p12dKbyeVm17cIY_-XH3YmIzadhPqSUu12ZoHwxZ4xAfff45-/exec';
+async function call(fn, ...args){
+  S.pend++; dot();
+  try{
+    const u = API + '?k=' + encodeURIComponent(KEY) + '&a=' + fn + '&p=' + encodeURIComponent(JSON.stringify(args)) + '&t=' + Date.now();
+    const r = await fetch(u, { credentials: 'omit', cache: 'no-store' });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.e || 'Error');
+    return j.r;
+  }catch(e){
+    throw new Error(e.message === 'Failed to fetch' || e.name === 'TypeError' ? 'Sin conexión' : e.message);
+  }finally{ S.pend--; dot(); }
+}
+function dot(){ const d = $('#dot'); if(d) d.className = 'sync' + (S.pend ? ' busy' : ''); }
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('show'),2200); }
+
+/* ---------- LISTA ---------- */
+async function cargarLista(){
+  S.vista='lista'; S.num=null; render();
+  try{ S.presus = await call('ckPresupuestos'); }catch(e){ toast('Error: '+e.message); }
+  if(S.vista==='lista') render();
+}
+function filtrados(){
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const lim = hoy.getTime() - 3*864e5;
+  let l = S.presus.slice();
+  if(S.filtro==='prox') l = l.filter(p => !p.ts || p.ts >= lim || p.cargados > p.devueltos);
+  if(S.q){ const q=S.q.toLowerCase(); l = l.filter(p => (p.num+' '+p.evento).toLowerCase().includes(q)); }
+  l.sort((a,b)=> S.filtro==='prox' ? (a.ts||9e15)-(b.ts||9e15) : (b.ts||0)-(a.ts||0));
+  return l;
+}
+function vistaLista(){
+  const l = filtrados();
+  const body = !S.presus.length ? `<div class="loading"><div class="spin"></div>Cargando presupuestos…</div>`
+    : !l.length ? `<div class="empty">No hay presupuestos ${S.filtro==='prox'?'próximos':''}</div>`
+    : l.map(p => {
+      const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
+      return `<button class="card" onclick="abrir('${esc(p.num)}')">
+        <div class="top"><span class="num">${esc(p.num)}${p.incidencias?`<span class="tag">⚠ ${p.incidencias}</span>`:''}</span><span class="date">${esc(p.montaje)}</span></div>
+        <div class="ev">${esc(p.evento)}</div>
+        <div class="bars">
+          <div class="bar"><small><span>🚚 Carga</span><b>${p.cargados}/${p.total}</b></small><div class="track"><div class="fill" style="width:${pc}%"></div></div></div>
+          <div class="bar"><small><span>🏠 Vuelta</span><b>${p.devueltos}/${p.total}</b></small><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div>
+        </div></button>`;
+    }).join('');
+  return `<header>
+    <div class="hrow"><h1>Carga de material<span class="sync" id="dot"></span></h1><button class="ref" onclick="cargarLista()" aria-label="Actualizar">↻</button></div>
+    <input class="search" placeholder="Buscar nº o cliente…" value="${esc(S.q)}" oninput="S.q=this.value;redibujarLista()">
+    <div class="seg"><button class="${S.filtro==='prox'?'on':''}" onclick="S.filtro='prox';render()">Próximos</button><button class="${S.filtro==='todos'?'on':''}" onclick="S.filtro='todos';render()">Todos</button></div>
+  </header><main id="lista">${body}</main>`;
+}
+function redibujarLista(){ const m=document.createElement('div'); m.innerHTML=vistaLista(); $('#lista').innerHTML=m.querySelector('#lista').innerHTML; }
+
+/* ---------- DETALLE ---------- */
+async function abrir(num, refresco){
+  const nuevo = !refresco; S.vista='det'; S.num=num; if(nuevo) S.items=[];
+  const p = S.presus.find(x=>x.num===num);
+  // Si ya está cargado todo y no devuelto, abre en modo descarga
+  if(nuevo) S.modo = p && p.total && p.cargados===p.total && p.devueltos<p.total ? 'dev' : 'carga';
+  if(nuevo){ try{history.pushState({v:'det'},'')}catch(e){} render(); window.scrollTo(0,0); }
+  try{ const r = await call('ckMaterial', num); S.items=r.items; S.opciones=r.opciones; actualizarResumen(); }catch(e){ toast('Error: '+e.message); }
+  if(S.vista==='det' && S.num===num) render();
+}
+function vistaDet(){
+  const p = S.presus.find(x=>x.num===S.num) || {num:S.num, evento:''};
+  const k = S.modo==='carga' ? 'cargado' : 'devuelto';
+  const hk = S.modo==='carga' ? 'hCarga' : 'hDev';
+  const tot = S.items.length, hechos = S.items.filter(i=>i[k]).length;
+  const pend = S.items.filter(i=>!i[k]), ok = S.items.filter(i=>i[k]);
+  const fila = i => `<div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''}" onclick="toggle(${i.fila})">
+      <div class="chk">${i[k]?'✓':''}</div>
+      <div class="qty">${esc(i.cant)}</div>
+      <div class="info"><div class="mat">${esc(i.material)}</div>
+        <div class="meta">${[i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+      <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">⚠︎</button>
+    </div>`;
+  let body;
+  if(!tot) body = `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
+  else body = `
+    <div class="prog"><div class="big">${hechos}<span> / ${tot} ${S.modo==='carga'?'cargados':'devueltos'}</span></div>
+      <div class="track"><div class="fill ${S.modo==='dev'?'dev':''}" style="width:${hechos/tot*100}%"></div></div></div>
+    ${hechos===tot?`<div class="done-banner ${S.modo==='dev'?'dev':''}">${S.modo==='carga'?'✓ Todo cargado en la furgoneta':'✓ Todo devuelto al almacén'}</div>`:''}
+    ${pend.length?`<div class="sec">Pendiente (${pend.length})</div>${pend.map(fila).join('')}`:''}
+    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} (${ok.length})</div>${ok.map(fila).join('')}`:''}`;
+  const foot = tot ? `<div class="foot"><button class="btn ${hechos===tot?'sec2':''}" onclick="todo(${hechos!==tot})">${hechos===tot?'Desmarcar todo':(S.modo==='carga'?'Marcar todo como cargado':'Marcar todo como devuelto')}</button></div>` : '';
+  return `<header>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button>
+      <div style="flex:1;min-width:0"><h1>${esc(p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.evento)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
+      <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">↻</button></div>
+    <div class="seg"><button class="${S.modo==='carga'?'on':''}" onclick="S.modo='carga';render()">🚚 Cargar</button><button class="${S.modo==='dev'?'on':''}" onclick="S.modo='dev';render()">🏠 Descargar</button></div>
+  </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
+}
+function actualizarResumen(){
+  const p = S.presus.find(x=>x.num===S.num); if(!p) return;
+  p.cargados = S.items.filter(i=>i.cargado).length;
+  p.devueltos = S.items.filter(i=>i.devuelto).length;
+  p.incidencias = S.items.filter(i=>i.incidencia).length;
+}
+function hora(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${z(d.getDate())}/${z(d.getMonth()+1)} ${z(d.getHours())}:${z(d.getMinutes())}`; }
+
+async function toggle(fila){
+  const it = S.items.find(i=>i.fila===fila); if(!it) return;
+  const modo = S.modo, k = modo==='carga'?'cargado':'devuelto', hk = modo==='carga'?'hCarga':'hDev';
+  const prev = [it[k], it[hk]];
+  it[k] = !it[k]; it[hk] = it[k] ? hora() : '';
+  vib(it[k] ? 15 : [8,40,8]);
+  actualizarResumen(); render();
+  try{ it[hk] = await call('ckMarcar', fila, S.num, it.material, modo, it[k]); render(); }
+  catch(e){ it[k]=prev[0]; it[hk]=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+}
+async function todo(valor){
+  const modo=S.modo, k = modo==='carga'?'cargado':'devuelto', hk = modo==='carga'?'hCarga':'hDev';
+  if(!confirm(valor ? `¿Marcar los ${S.items.length} artículos como ${modo==='carga'?'cargados':'devueltos'}?` : '¿Desmarcar todos?')) return;
+  const prev = S.items.map(i=>[i[k],i[hk]]);
+  S.items.forEach(i=>{ i[k]=valor; i[hk]=valor?hora():''; }); vib(30);
+  actualizarResumen(); render();
+  try{ await call('ckMarcarTodo', S.num, modo, valor); toast('Guardado en la hoja'); }
+  catch(e){ S.items.forEach((i,n)=>{ i[k]=prev[n][0]; i[hk]=prev[n][1]; }); actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+}
+
+/* ---------- INCIDENCIAS ---------- */
+let incFila=null, incSel='';
+function abrirInc(fila){
+  const it = S.items.find(i=>i.fila===fila); if(!it) return;
+  incFila=fila; incSel=it.incidencia||'';
+  $('#sheet').innerHTML = `<h3>${esc(it.material)}</h3><div class="meta">Cantidad: ${esc(it.cant)}</div>
+    <div class="chips">${S.opciones.map(o=>`<button class="chip ${o===incSel?'on':''}" onclick="selInc(this,'${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}</div>
+    <textarea id="nota" placeholder="Nota (qué ha pasado, cuántas unidades…)">${esc(it.nota)}</textarea>
+    <div class="row2"><button class="btn sec2" onclick="guardarInc(true)">Quitar</button><button class="btn" onclick="guardarInc(false)">Guardar</button></div>`;
+  $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open'));
+}
+function selInc(el,o){ incSel = incSel===o ? '' : o; document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c.textContent===incSel)); }
+function cerrarSheet(){ $('#sheet').classList.remove('open'); setTimeout(()=>$('#sbg').style.display='none',200); }
+async function guardarInc(quitar){
+  const it = S.items.find(i=>i.fila===incFila); if(!it) return;
+  const prev=[it.incidencia,it.nota];
+  it.incidencia = quitar ? '' : incSel; it.nota = quitar ? '' : $('#nota').value.trim();
+  if(!quitar && !it.incidencia && it.nota) it.incidencia = S.opciones.includes('Otro') ? 'Otro' : '';
+  cerrarSheet(); actualizarResumen(); render();
+  try{ await call('ckIncidencia', it.fila, S.num, it.material, it.incidencia, it.nota); toast(quitar?'Incidencia quitada':'Incidencia guardada'); }
+  catch(e){ it.incidencia=prev[0]; it.nota=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+}
+
+/* ---------- RENDER ---------- */
+function render(){ $('#app').innerHTML = S.vista==='lista' ? vistaLista() : vistaDet(); dot(); }
+window.addEventListener('popstate', ()=>{ if(S.vista==='det'){ S.vista='lista'; render(); } });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(S.pend || !KEY) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
+if(!KEY){ document.getElementById('app').innerHTML = '<div class="empty" style="padding-top:30vh">Abre la app con el enlace que lleva la clave.</div>'; }
+else cargarLista();
+</script>
+</body>
+</html>
