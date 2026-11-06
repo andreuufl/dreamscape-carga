@@ -76,7 +76,9 @@ function pinta(){
         <textarea id="com" placeholder="Cuéntanos algo (opcional)"></textarea><button class="btn" id="valBtn" onclick="valorar()" disabled>Enviar valoración</button></div>` : '');
   $('#app').innerHTML = `
     <div class="card"><div class="lbl">Estado</div><ul class="tl">${PASOS.map((p,n)=>`<li class="${n<i||(n===i&&n===PASOS.length-1)?'ok':n===i?'now':''}"><span class="dot">${n<i||(n===i&&n===PASOS.length-1)?'✓':''}</span><span><b>${p[1]}</b><small>${n<=i && hora[p[0]] ? p[2] + ' · ' + esc(hora[p[0]]) : n===i ? p[2] : ''}</small></span></li>`).join('')}</ul></div>
-    ${D.firma ? `<div class="card"><div class="lbl">Albarán de entrega</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.firma)}</b>${D.firmaHora?' · '+esc(D.firmaHora):''}.</p><button class="btn gold" id="albBtn" onclick="albaran()">Descargar albarán (PDF)</button></div>` : ''}
+    ${D.firma ? `<div class="card"><div class="lbl">Albarán de entrega</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.firma)}</b>${D.firmaHora?' · '+esc(D.firmaHora):''}.</p><button class="btn gold" id="albBtn" onclick="albaran('entrega',this)">Descargar albarán (PDF)</button></div>` : ''}
+    ${D.recogida ? `<div class="card"><div class="lbl">Albarán de recogida</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.recogida)}</b>${D.recogidaHora?' · '+esc(D.recogidaHora):''}.</p><button class="btn gold" onclick="albaran('recogida',this)">Descargar recogida (PDF)</button></div>` : ''}
+    ${D.dossier ? `<div class="card"><div class="lbl">Dossier de tu evento</div><p style="margin:0 0 12px">Fotos del montaje, el día y el material, en un PDF para guardar.</p><button class="btn" onclick="dossier(this)">Descargar dossier (PDF)</button></div>` : ''}
     ${val}
     <div class="card"><div class="lbl">Material confirmado (${D.material.length})</div>${D.material.map(m=>`<div class="mat"><span class="q">${esc(m.cant)}</span><span>${esc(m.material)}</span></div>`).join('')}</div>
     <footer>Dreamscape Events &amp; Productions · <a href="https://eventsandproductionsap.com" target="_blank" rel="noopener">eventsandproductionsap.com</a></footer>`;
@@ -91,15 +93,26 @@ async function valorar(){
   try{ D.valoracion = await api('ckValorar', [T, nota, $('#com').value.trim()], true); pinta(); }
   catch(e){ b.disabled = false; b.textContent = 'Enviar valoración'; alert('No se pudo enviar: ' + e.message); }
 }
-async function albaran(){
-  const b = $('#albBtn'); b.disabled = true; b.textContent = 'Preparando el PDF…';
+function bajar(r){
+  const bin = atob(r.b64), arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([arr], { type:'application/pdf' }));
+  const a = document.createElement('a'); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+async function dossier(b){
+  const t0 = b.textContent; b.disabled = true; b.textContent = 'Preparando el PDF…';
+  try{ bajar(await api('ckDossierCliente', [T])); b.textContent = t0; }catch(e){ b.textContent = 'No se pudo descargar. Inténtalo de nuevo.'; }
+  b.disabled = false;
+}
+async function albaran(tipo, b){
+  const t0 = b.textContent; b.disabled = true; b.textContent = 'Preparando el PDF…';
   try{
-    const r = await api('ckAlbaranCliente', [T]);
+    const r = await api('ckAlbaranCliente', [T, tipo]);
     const bin = atob(r.b64), arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
     const url = URL.createObjectURL(new Blob([arr], { type:'application/pdf' }));
     const a = document.createElement('a'); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 60000);
-    b.textContent = 'Descargar albarán (PDF)';
+    b.textContent = t0;
   }catch(e){ b.textContent = 'No se pudo descargar. Inténtalo de nuevo.'; }
   b.disabled = false;
 }

@@ -203,6 +203,12 @@ main > .hrow2{background:var(--card);padding:12px 14px;border-radius:12px;margin
 .rent{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .pct{font-size:20px;font-weight:800;color:var(--ok);text-align:right;flex:none}.pct small{display:block;font-size:12px;color:var(--mut);font-weight:600}
 .pct.medio{color:var(--warn)}.pct.bajo{color:#c0392b}
+.item.extra{min-height:56px;background:#fbfaf7}.item.extra.on{background:#f6f7f8}
+.qty.sm{font-size:13px;min-width:44px;height:34px;font-weight:700}
+.scan.addx{border-style:solid;border-color:var(--line);color:var(--mut);font-weight:600;margin-top:4px}
+.sec.sl{display:flex;justify-content:space-between;align-items:center}.sec.sl button{font-size:12px;font-weight:700;color:var(--dev);text-transform:none;letter-spacing:0}
+.inp{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--line);font:inherit;font-size:16px;background:#fff;color:var(--txt)}
+a.copia{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--txt)}a.copia span{color:var(--dev);font-weight:700}
 .link{display:block;width:100%;text-align:center;padding:12px;color:var(--mut);font-weight:600;font-size:14px}
 </style>
 </head>
@@ -339,8 +345,10 @@ function vistaDet(){
     ${hechos===tot?`<div class="done-banner ${S.modo==='dev'?'dev':''}">${S.modo==='carga'?'✓ Todo cargado en la furgoneta':'✓ Todo devuelto al almacén'}</div>`:''}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?'<button class="btn" onclick="verFactura()">🧾 Datos factura</button>':''}<button class="btn sec2" onclick="pedirValoracion()">⭐ Pedir valoración</button></div></div>`:''}
+    ${S.modo==='dev' ? (f.recogida ? `<div class="done-banner">✍ Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">✍ Firma de recogida del cliente</button>`) : ''}
     ${pend.length?`<div class="sec">Pendiente (${pend.length})</div>${pend.map(fila).join('')}`:''}
-    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} (${ok.length})</div>${ok.map(fila).join('')}`:''}`;
+    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} (${ok.length})</div>${ok.map(fila).join('')}`:''}
+    ${bloqueExtras()}`;
   }
   const faltan = tot - hechos;
   const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo==='carga'
@@ -521,9 +529,9 @@ function vistaMontaje(p, tot){
     ? `<button class="hito ok" onclick="hito('${campo}', true)"><span class="ic">✓</span><span><b>${txt}</b><small>${esc(f[campo])} · tocar para deshacer</small></span></button>`
     : `<button class="hito" onclick="hito('${campo}')"><span class="ic">${ic}</span><span><b>${txt}</b><small>Apunta la hora ahora</small></span></button>`;
   const firma = f.firma
-    ? `<div class="done-banner">✍ Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma()">Firmar otra vez</button>`
-    : `<button class="salida firma" onclick="abrirFirma()">✍ Firma del cliente y albarán</button>`;
-  const body = `${hito('llegada','He llegado','📍')}${tarjetaChecklist()}${hito('finMontaje','Montaje terminado','🎛')}${firma}${tarjetaGastos()}${tarjetaFicha()}`;
+    ? `<div class="done-banner">✍ Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
+    : `<button class="salida firma" onclick="abrirFirma('entrega')">✍ Firma del cliente y albarán</button>`;
+  const body = `${hito('llegada','He llegado','📍')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado','🎛')}${firma}${tarjetaGastos()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: vuelta al almacén →</button></div>`;
   return { body, foot };
 }
@@ -537,9 +545,13 @@ async function hito(campo, borrar){
   catch(e){ S.bolo.ficha[campo] = prev; render(); toast('No se guardó: '+e.message); }
 }
 let firmaTrazo = false;
-function abrirFirma(){
-  abrirSheet(`<h3>✍ Firma del cliente</h3><div class="meta" style="margin-bottom:10px">Se genera un albarán en PDF con el material montado y te llega por correo.</div>
+let FIRMA_TIPO = 'entrega';
+function abrirFirma(tipo){
+  FIRMA_TIPO = tipo === 'recogida' ? 'recogida' : 'entrega';
+  const rec = FIRMA_TIPO === 'recogida';
+  abrirSheet(`<h3>✍ ${rec?'Firma de recogida':'Firma del cliente'}</h3><div class="meta" style="margin-bottom:10px">${rec?'El cliente confirma que se recoge el material y en qué estado (las incidencias salen en el albarán). Te llega en PDF por correo.':'Se genera un albarán en PDF con el material montado y te llega por correo.'}</div>
     <div class="row2"><label class="fld"><span>Nombre</span><input id="fNom" autocomplete="off" value="${esc(ficha().contacto||'')}"></label><label class="fld"><span>DNI (opcional)</span><input id="fDni" autocomplete="off"></label></div>
+    ${rec?'<label class="fld"><span>Observaciones (opcional)</span><input id="fObs" autocomplete="off" placeholder="Ej. Falta recoger una tarima, se pasa el lunes"></label>':''}
     <div class="pad"><canvas id="pad"></canvas><span class="padhint">Firma aquí con el dedo</span></div>
     <button class="link" onclick="limpiarFirma()" style="padding:8px">Borrar firma</button>
     <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="btnFirmar" onclick="enviarFirma()">Firmar y enviar</button></div>`);
@@ -565,7 +577,9 @@ async function enviarFirma(){
   const x = w.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w.width,w.height); x.drawImage(c,0,0);
   let png = ''; for(const q of [.6,.45,.3]){ const s2 = document.createElement('canvas'); const r2 = Math.min(1, 700/w.width); s2.width = Math.round(w.width*r2); s2.height = Math.round(w.height*r2); s2.getContext('2d').drawImage(w,0,0,s2.width,s2.height); png = s2.toDataURL('image/jpeg', q); if(png.length < 45000) break; }
   const b = $('#btnFirmar'); b.disabled = true; b.textContent = 'Enviando…';
-  try{ const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
+  try{
+    if(FIRMA_TIPO === 'recogida'){ const obs = (($('#fObs')||{}).value||'').trim(); const h = await enviar('ckFirmaRecogida', S.num, nom, dni, obs, png); if(S.bolo){ S.bolo.ficha.recogida = { nombre:nom, hora: h || hora() }; guardarBoloCache(); } cerrarSheet(); vib(30); toast('Recogida firmada y enviada'); render(); return; }
+    const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
   catch(e){ b.disabled = false; b.textContent = 'Firmar y enviar'; toast('No se envió: '+e.message); }
 }
 
@@ -721,7 +735,7 @@ function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_
 let COLA = []; try{ COLA = JSON.parse(localStorage.getItem('ck_cola')||'[]'); }catch(e){}
 function guardarCola(){ try{ localStorage.setItem('ck_cola', JSON.stringify(COLA)); }catch(e){ toast('Memoria llena: no se pudo guardar el cambio sin conexión'); } pintarRed(); }
 async function enviar(fn, ...args){
-  const post = ['ckSalida','ckFirma','ckFoto','ckGasto'].includes(fn);
+  const post = ['ckSalida','ckFirma','ckFoto','ckGasto','ckFirmaRecogida','ckExtra'].includes(fn);
   if(COLA.length){ COLA.push({fn, args, post}); guardarCola(); vaciarCola(); return null; }
   try{ return post ? await callPost(fn, ...args) : await call(fn, ...args); }
   catch(e){
@@ -800,7 +814,10 @@ function abrirMenu(){
     ${it('⌗','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     ${it('🚐','Furgonetas','cargarFurgos().then(abrirFurgos)')}
     ${esAdmin()? it('👥','Accesos del equipo','verAccesos()','Códigos para Paula y el resto'):''}
+    ${esAdmin()? it('📋','Plantillas de material','verPlantillas()','Creadas con tus bolos; se aplican en un toque'):''}
+    ${esAdmin()? it('🧰','Siempre llevar','editarSiempre()','Lo que va en todos los bolos'):''}
     ${esAdmin()? it('☑','Checklist de montaje','editarChecklist()','Pasos que se revisan en cada montaje'):''}
+    ${esAdmin()? it('💾','Copias de seguridad','verCopias()','Una por semana, en tu Drive'):''}
     ${esAdmin()? it('⚙','Ajustes','abrirAjustes()','Enlace de reseñas de Google'):''}
     ${it('⬇','Instalar en el móvil','ayudaInstalar()')}
     ${it('↩','Cerrar sesión','salirSesion()')}`);
@@ -1070,6 +1087,7 @@ async function cargarAvisos(){
     const a = await call('ckAvisos'); S.avisos = a; S.pendientes = a.pendientes || [];
     if((a.nuevos||[]).length) toast('Bolo nuevo: te he enviado el material a preparar');
     else if((a.recordados||[]).length) toast('Recordatorio de mañana enviado al equipo');
+    else if(a.backup) toast('Copia de seguridad semanal hecha');
     if(S.vista==='lista') render();
   }catch(e){}
 }
@@ -1086,6 +1104,9 @@ function abrirMas(){
     ${it('⭐','Pedir valoración','pedirValoracion()','Puntuación y reseña en Google')}
     ${it('📣','Enviar recordatorio al equipo','recordatorio()','Correo con hora, lugar, material y furgoneta')}
     ${it('📅','Añadir a mi calendario','calendario()','Crea el evento en el calendario del móvil')}
+    ${it('📘','Dossier del bolo (PDF)','dossier(false)','Fotos del montaje, el día, material y valoración')}
+    ${esAdmin()? it('✉','Enviarme el dossier por correo','dossier(true)','Para reenviarlo al cliente'):''}
+    ${esAdmin()? it('📋','Guardar como plantilla','plantillaDeBolo()','Para reutilizar este material en otros bolos'):''}
     ${esAdmin()? it('🧾','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}`);
 }
 async function tokenCliente(){
@@ -1248,8 +1269,170 @@ function bloqueRentabilidad(r){
     ${sinPrecio?`<div class="aviso" style="margin:10px 0 0">Hay horas sin valorar: pon el €/hora de cada persona en la pestaña Equipo.</div>`:''}</div>`;
 }
 
+/* =========================================================
+   SIEMPRE LLEVAR + MATERIAL EXTRA
+   ========================================================= */
+function listaExtra(){
+  const f = ficha(), sl = ((S.yo||{}).config||{}).siempre || [], sm = f.siempre || {};
+  const c = S.modo==='dev' ? 'd' : 'c';
+  const extra = (f.extra||[]).map(e => ({ tipo:'extra', nombre:e.nombre, cant:e.cant, origen:e.origen, hecho:e[c] }));
+  const siempre = sl.map(s => ({ tipo:'siempre', nombre:s.nombre, cant:s.cant, hecho:(sm[s.nombre]||{})[c] }));
+  return { extra, siempre };
+}
+function filaExtra(x){
+  const id = 'x' + encodeURIComponent(x.tipo+'|'+x.nombre).replace(/[^\w]/g,'');
+  return `<div class="item extra ${x.hecho?'on':''}" id="${id}" onclick='marcarExtra(${JSON.stringify(x.tipo)},${JSON.stringify(x.nombre).replace(/'/g,"&#39;")})'>
+    <div class="chk">${x.hecho?'✓':''}</div><div class="qty sm">${esc(x.cant||'')}</div>
+    <div class="info"><div class="mat">${esc(x.nombre)}</div><div class="meta">${x.hecho?esc(x.hecho):''}${x.tipo==='extra'&&x.origen?(x.hecho?' · ':'')+esc(x.origen):''}</div></div>
+    ${x.tipo==='extra'?`<button class="more" onclick='event.stopPropagation();quitarExtra(${JSON.stringify(x.nombre).replace(/'/g,"&#39;")})' aria-label="Quitar">✕</button>`:''}</div>`;
+}
+function bloqueExtras(){
+  if(!S.bolo) return '';
+  const { extra, siempre } = listaExtra();
+  const hs = siempre.filter(x=>x.hecho).length;
+  return `${extra.length?`<div class="sec">Material extra (${extra.filter(x=>x.hecho).length}/${extra.length})</div>${extra.map(filaExtra).join('')}`:''}
+    <button class="scan addx" onclick="abrirExtra()">＋ Añadir material extra o una plantilla</button>
+    ${siempre.length?`<div class="sec sl"><span>Siempre llevar (${hs}/${siempre.length})</span>${hs<siempre.length?`<button onclick="todoExtra('siempre',true)">Marcar todo</button>`:''}</div>${siempre.map(filaExtra).join('')}`:''}`;
+}
+async function marcarExtra(tipo, nombre){
+  const f = S.bolo.ficha, c = S.modo==='dev' ? 'd' : 'c', v = (()=>{ if(tipo==='siempre'){ f.siempre = f.siempre||{}; const o = f.siempre[nombre] = f.siempre[nombre]||{}; if(o[c]){ delete o[c]; return false; } o[c] = hora(); return true; } const o = (f.extra||[]).find(e=>e.nombre===nombre); if(!o) return false; if(o[c]){ delete o[c]; return false; } o[c] = hora(); return true; })();
+  vib(v?15:[8,40,8]); guardarBoloCache(); render();
+  try{ const r = await enviar('ckExtra', S.num, 'marcar', { tipo, nombre, modo:S.modo, valor:v }); if(r){ f.siempre = r.siempre; f.extra = r.extra; guardarBoloCache(); render(); } }
+  catch(e){ toast('No se guardó: '+e.message); abrir(S.num, true); }
+}
+async function todoExtra(tipo, valor){
+  const f = S.bolo.ficha, c = S.modo==='dev' ? 'd' : 'c', h = hora();
+  if(tipo==='siempre'){ f.siempre = f.siempre||{}; ((S.yo.config||{}).siempre||[]).forEach(s=>{ const o = f.siempre[s.nombre] = f.siempre[s.nombre]||{}; if(valor) o[c] = o[c]||h; else delete o[c]; }); }
+  guardarBoloCache(); render();
+  try{ const r = await enviar('ckExtra', S.num, 'todo', { tipo, modo:S.modo, valor }); if(r){ f.siempre = r.siempre; f.extra = r.extra; guardarBoloCache(); render(); } }catch(e){ toast('No se guardó: '+e.message); }
+}
+async function quitarExtra(nombre){
+  if(!confirm('¿Quitar "'+nombre+'" de este bolo?')) return;
+  const f = S.bolo.ficha; f.extra = (f.extra||[]).filter(e=>e.nombre!==nombre); guardarBoloCache(); render();
+  try{ await enviar('ckExtra', S.num, 'quitar', { nombre }); }catch(e){ toast('No se guardó: '+e.message); }
+}
+async function abrirExtra(){
+  if(!S.plantillas){ try{ S.plantillas = await call('ckPlantillas'); }catch(e){ S.plantillas = []; } }
+  if(!S.catalogo){ try{ S.catalogo = await call('ckCatalogo'); }catch(e){} }
+  abrirSheet(`<h3>＋ Material extra</h3><div class="meta" style="margin-bottom:12px">Lo que no está en el presupuesto pero hay que llevar. No cambia el presupuesto ni la factura.</div>
+    ${(S.plantillas||[]).length?`<div class="fld"><span>Aplicar una plantilla</span></div>${S.plantillas.map(p=>`<button class="mitem" onclick="aplicarPlantilla('${esc(p.id)}')"><span class="ic">📋</span><span><b>${esc(p.nombre)}</b><small>${p.items.length} ${p.items.length===1?'cosa':'cosas'} · ${esc(p.origen||'')}</small></span></button>`).join('')}`:''}
+    <div class="fld" style="margin-top:14px"><span>O añade una cosa</span></div>
+    <div class="row2"><input id="exN" list="exL" placeholder="Material" autocomplete="off" class="inp"><input id="exC" inputmode="numeric" placeholder="Cantidad" class="inp"></div>
+    <datalist id="exL">${(S.catalogo||[]).map(x=>`<option value="${esc(x.nombre)}">`).join('')}</datalist>
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cerrar</button><button class="btn" onclick="anadirExtra()">Añadir</button></div>`);
+}
+async function aplicarPlantilla(id){
+  cerrarSheet();
+  try{ const r = await enviar('ckExtra', S.num, 'aplicar', { id }); if(r){ S.bolo.ficha.extra = r.extra; S.bolo.ficha.siempre = r.siempre; guardarBoloCache(); toast('Plantilla aplicada: se añade lo que no está en el presupuesto'); render(); } }
+  catch(e){ toast('Error: '+e.message); }
+}
+async function anadirExtra(){
+  const n = ($('#exN').value||'').trim(), c = ($('#exC').value||'1').trim(); if(!n){ toast('Escribe el material'); return; }
+  const f = S.bolo.ficha; f.extra = f.extra||[]; if(!f.extra.some(e=>e.nombre.toUpperCase()===n.toUpperCase())) f.extra.push({ nombre:n, cant:c, origen:'a mano' });
+  cerrarSheet(); guardarBoloCache(); render();
+  try{ const r = await enviar('ckExtra', S.num, 'añadir', { nombre:n, cant:c }); if(r){ f.extra = r.extra; guardarBoloCache(); } }catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* =========================================================
+   PLANTILLAS (administrador) y SIEMPRE LLEVAR (editar)
+   ========================================================= */
+async function verPlantillas(){
+  S.vista='plant'; render(); window.scrollTo(0,0);
+  try{ S.plantillas = await call('ckPlantillas'); }catch(e){ toast('Error: '+e.message); }
+  if(S.vista==='plant') render();
+}
+function vistaPlantillas(){
+  const l = S.plantillas;
+  const body = !l ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `<div class="meta" style="margin:0 4px 12px">Las primeras las he creado con el material de tus bolos. En cada bolo, «＋ Añadir material extra» te deja aplicarlas: solo añade lo que no esté ya en el presupuesto.</div>` +
+    (l.length ? l.map((p,i)=>`<div class="furg"><div class="top"><div style="min-width:0"><b>${esc(p.nombre)}</b><div class="meta">${p.items.length} ${p.items.length===1?'cosa':'cosas'} · ${esc(p.origen||'')}</div></div><button class="edit" onclick="editarPlantilla(${i})">Editar</button></div><div class="meta">${esc(p.items.slice(0,6).map(x=>x.cant+' × '+x.nombre).join(' · '))}${p.items.length>6?' …':''}</div></div>`).join('') : '<div class="empty" style="padding:20px">No hay plantillas.</div>');
+  const foot = l ? `<div class="foot"><button class="btn" onclick="editarPlantilla(-1)">+ Nueva plantilla</button></div>` : '';
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div><div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>Plantillas</h1></div></header><main>${body}</main>${foot}`;
+}
+const aTexto = items => items.map(x=>`${x.cant} x ${x.nombre}`).join('\n');
+const deTexto = t => t.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const m = l.match(/^(\d+[\w ]*?)\s*[x×]\s+(.+)$/i); return m ? { cant:m[1].trim(), nombre:m[2].trim() } : { cant:'1', nombre:l }; });
+function editarPlantilla(i){
+  const p = i>=0 ? S.plantillas[i] : { nombre:'', items:[] };
+  abrirSheet(`<h3>${i>=0?'Editar plantilla':'Nueva plantilla'}</h3><label class="fld"><span>Nombre</span><input id="plN" value="${esc(p.nombre)}" placeholder="Ej. Boda en finca"></label>
+    <label class="fld"><span>Material (una línea por cosa: «4 x ALTAVOZ 1100W»)</span><textarea id="plT" rows="10">${esc(aTexto(p.items))}</textarea></label>
+    <div class="row2">${i>=0?`<button class="btn sec2 danger" onclick="borrarPlantilla(${i})">Eliminar</button>`:`<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>`}<button class="btn" onclick="guardarPlantilla(${i})">Guardar</button></div>`);
+}
+async function guardarPlantillas(l, msg){ try{ S.plantillas = await call('ckGuardarPlantillas', l); cerrarSheet(); toast(msg); render(); }catch(e){ toast('No se guardó: '+e.message); } }
+function guardarPlantilla(i){ const l = S.plantillas.slice(), p = { id: i>=0 ? l[i].id : '', nombre: $('#plN').value.trim()||'Plantilla', origen: i>=0 ? l[i].origen : 'creada a mano', items: deTexto($('#plT').value) }; if(i>=0) l[i] = p; else l.push(p); guardarPlantillas(l, 'Plantilla guardada'); }
+function borrarPlantilla(i){ if(!confirm('¿Eliminar esta plantilla?')) return; const l = S.plantillas.slice(); l.splice(i,1); guardarPlantillas(l, 'Plantilla eliminada'); }
+async function plantillaDeBolo(){
+  const p = S.presus.find(x=>x.num===S.num)||{}; const n = prompt('Nombre de la plantilla', (p.evento||'').split('·')[0].trim());
+  if(!n) return; cerrarSheet();
+  try{ S.plantillas = await call('ckPlantillaDeBolo', S.num, n); toast('Plantilla «'+n+'» creada con este bolo'); }catch(e){ toast('Error: '+e.message); }
+}
+function editarSiempre(){
+  const l = ((S.yo||{}).config||{}).siempre || [];
+  abrirSheet(`<h3>🧰 Siempre llevar</h3><div class="meta" style="margin-bottom:10px">Sale en todos los bolos, en Cargar y en Vuelta. Una línea por cosa: «2 x Cinta americana».</div>
+    <textarea id="slT" rows="12">${esc(aTexto(l))}</textarea>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarSiempre()">Guardar</button></div>`);
+}
+async function guardarSiempre(){
+  try{ const c = await call('ckGuardarConfig', { siempre: deTexto($('#slT').value) }); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Lista guardada'); render(); }
+  catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* =========================================================
+   FOTOS DEL MONTAJE
+   ========================================================= */
+function tarjetaFotosMontaje(){
+  const l = (S.fotos||[]).filter(f=>f.tipo==='montaje');
+  if(S.fotos === null){ cargarFotos().then(()=>{ if(S.modo==='montaje') render(); }); }
+  return `<div class="furg"><div class="top"><b>📸 Fotos del montaje</b><span class="meta">${l.length}</span></div>
+    ${l.length?`<div class="fgrid">${l.map(f=>`<img src="${f.img}" alt="Foto del montaje">`).join('')}</div>`:'<div class="meta" style="margin-bottom:10px">Para el dossier del cliente, tu web y redes.</div>'}
+    <label class="btn sec2 fotobtn" for="fmIn">＋ Añadir fotos</label><input type="file" id="fmIn" accept="image/*" multiple hidden onchange="fotosMontaje(this)"></div>`;
+}
+async function fotosMontaje(inp){
+  const fs = [...(inp.files||[])].slice(0,9); if(!fs.length) return;
+  S.fotos = S.fotos || [];
+  for(const f of fs){
+    try{ const d = await comprimir(f, 900, 45000); S.fotos.push({ fecha: hora(), material:'Montaje', tipo:'montaje', img:d }); render(); await enviar('ckFoto', S.num, 'Montaje', 'montaje', d); }
+    catch(e){ toast(e.message); }
+  }
+  toast(fs.length>1 ? fs.length+' fotos guardadas' : 'Foto guardada');
+}
+
+/* =========================================================
+   DOSSIER Y PDF
+   ========================================================= */
+function descargarPdf(r){
+  const bin = atob(r.b64), arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([arr], { type:'application/pdf' }));
+  const a = document.createElement('a'); a.href = url; a.download = r.nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+async function dossier(enviarCorreo){
+  cerrarSheet(); toast('Preparando el dossier…');
+  try{ const r = await call('ckDossier', S.num, !!enviarCorreo); descargarPdf(r); toast(enviarCorreo ? 'Dossier descargado y enviado a tu correo' : 'Dossier descargado'); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+
+/* =========================================================
+   COPIAS DE SEGURIDAD
+   ========================================================= */
+async function verCopias(){
+  S.vista='copias'; S.copias=null; render();
+  try{ S.copias = await call('ckBackups'); }catch(e){ S.copias = { error: e.red?'Necesitas conexión':e.message }; }
+  if(S.vista==='copias') render();
+}
+function vistaCopias(){
+  const l = S.copias;
+  const body = !l ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : l.error ? `<div class="empty">${esc(l.error)}</div>` :
+    `<div class="meta" style="margin:0 4px 12px">Cada semana, al abrir la app, se copia el Sheet de presupuestos entero (también las pestañas ocultas de la app) a un archivo nuevo en tu Drive y te llega el enlace por correo.</div>` +
+    (l.length ? l.map(b=>`<a class="furg copia" href="${esc(b.url)}" target="_blank" rel="noopener"><div><b>💾 ${esc(b.fecha)}</b><div class="meta">${b.hojas} pestañas</div></div><span>Abrir ›</span></a>`).join('') : '<div class="empty" style="padding:20px">Aún no hay copias.</div>');
+  const foot = l && !l.error ? `<div class="foot"><button class="btn" id="bkBtn" onclick="copiaAhora()">Hacer una copia ahora</button></div>` : '';
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div><div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">‹</button><h1>Copias de seguridad</h1></div></header><main>${body}</main>${foot}`;
+}
+async function copiaAhora(){
+  const b = $('#bkBtn'); b.disabled = true; b.textContent = 'Copiando… (puede tardar un minuto)';
+  try{ await call('ckBackup'); toast('Copia hecha'); verCopias(); }catch(e){ b.disabled = false; b.textContent = 'Hacer una copia ahora'; toast('Error: '+e.message); }
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant }; $('#app').innerHTML = (V[S.vista] || vistaDet)(); dot(); pintarRed(); }
+function render(){ const V = { lista:vistaLista, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias }; $('#app').innerHTML = (V[S.vista] || vistaDet)(); dot(); pintarRed(); }
 function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
