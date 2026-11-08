@@ -525,6 +525,7 @@ function vistaDet(){
     ${hechos===tot && S.modo==='carga' ? (esAdmin() ? `<button class="next" onclick="irA('ruta')">${ic('check')}<span>Todo cargado<small>Siguiente paso: la ruta al lugar</small></span>${ic('chev')}</button>` : `<button class="next" onclick="irA('dev')">${ic('check')}<span>Todo cargado en la furgoneta<small>Al volver, marca aquí la descarga en el almacén</small></span>${ic('chev')}</button>`) : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
+    ${tarjetaQuien()}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn" onclick="verFactura()">${ic('receipt','s')} Factura</button>`:''}<button class="btn sec2" onclick="pedirValoracion()">${ic('star','s')} Valoración</button></div></div>`:''}
     ${S.modo==='dev' && esAdmin() ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
@@ -590,7 +591,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaQuien()}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -599,6 +600,29 @@ function btnSalida(p){
   if(S.enviando) return `<button class="salida" disabled>Enviando correo…</button>`;
   if(h) return `<button class="salida sent" onclick="salida(true)">${ic('check','s')} Salida avisada ${esc(h)} · Reenviar</button>`;
   return `<button class="salida" onclick="salida()">${ic('send')} Me dirijo al lugar</button>`;
+}
+
+/* ---------- ¿QUIÉN VA? (administrador) ---------- */
+function tarjetaQuien(){
+  if(!esAdmin() || !S.bolo) return '';
+  const t = ficha().tecnicos || [];
+  return `<div class="furg"><div class="top"><b>${ic('users','s')} ¿Quién va?</b><button class="edit" onclick="abrirQuien()">${t.length?'Cambiar':'Elegir'}</button></div>
+    ${t.length ? `<div class="chips" style="margin:4px 0 0">${t.map(n=>`<span class="chip tec on">${esc(n)}</span>`).join('')}</div>` : '<div class="meta">Nadie asignado todavía: los técnicos no ven este bolo.</div>'}</div>`;
+}
+function abrirQuien(){
+  if(!S.bolo){ toast('Cargando…'); return; }
+  const eq = S.bolo.equipo || [], sel = new Set(ficha().tecnicos || []);
+  abrirSheet(`<h3>${ic('users')} ¿Quién va a este bolo?</h3><div class="meta" style="margin-bottom:4px">Toca para añadir o quitar. Solo las personas marcadas verán este bolo en su app.</div>
+    <div class="chips">${eq.length ? eq.map(t=>`<button class="chip tec qv ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}</button>`).join('') : '<span class="meta">Aún no hay nadie en el equipo.</span>'}</div>
+    <button class="link" onclick="cerrarSheet();verAccesos().then(nuevaPersona)">${ic('plus','s')} Crear una persona nueva</button>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarQuien()">Guardar</button></div>`);
+}
+async function guardarQuien(){
+  const t = [...document.querySelectorAll('.chip.qv.on')].map(b=>b.dataset.n);
+  const prev = (ficha().tecnicos || []).slice();
+  S.bolo.ficha.tecnicos = t; cerrarSheet(); render(); guardarBoloCache(); vib(20);
+  try{ const r = await enviar('ckGuardarFicha', S.num, { tecnicos:t }); if(r!==null) toast(t.length ? 'Van: '+t.join(', ') : 'Nadie asignado'); }
+  catch(e){ S.bolo.ficha.tecnicos = prev; render(); toast('No se guardó: '+e.message); }
 }
 
 /* ---------- FURGONETAS ---------- */
