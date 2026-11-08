@@ -467,7 +467,8 @@ function vistaFurgos(){
 
 /* ---------- DETALLE ---------- */
 async function abrir(num, refresco){
-  const nuevo = !refresco; S.vista='det'; S.num=num; if(nuevo){ const cm = cacheGet('ckMaterial'+JSON.stringify([num])), p0 = S.presus.find(x=>x.num===num); const fresco = !!cm && (!p0 || !p0.total || (cm.items.length===p0.total && cm.items.filter(i=>i.cargado).length===p0.cargados && cm.items.filter(i=>i.devuelto).length===p0.devueltos)); S.items = fresco ? cm.items : []; S.opciones = cm ? cm.opciones : []; S.bolo = cacheGet('ckBolo'+JSON.stringify([num])) || null; S.gastos = cacheGet('ckGastos'+JSON.stringify([num])) || []; S.fotos = null; }
+  const nuevo = !refresco, auto = refresco==='auto';
+  const antes = auto ? JSON.stringify([S.items, S.bolo]) : ''; S.vista='det'; S.num=num; if(nuevo){ const cm = cacheGet('ckMaterial'+JSON.stringify([num])), p0 = S.presus.find(x=>x.num===num); const fresco = !!cm && (!p0 || !p0.total || (cm.items.length===p0.total && cm.items.filter(i=>i.cargado).length===p0.cargados && cm.items.filter(i=>i.devuelto).length===p0.devueltos)); S.items = fresco ? cm.items : []; S.opciones = cm ? cm.opciones : []; S.bolo = cacheGet('ckBolo'+JSON.stringify([num])) || null; S.gastos = cacheGet('ckGastos'+JSON.stringify([num])) || []; S.fotos = null; }
   const p = S.presus.find(x=>x.num===num);
   if(nuevo){
     const f = (S.bolo||{}).ficha || {};
@@ -476,7 +477,7 @@ async function abrir(num, refresco){
   if(nuevo){ try{history.pushState({v:'det'},'')}catch(e){} render(); window.scrollTo(0,0); }
   if(COLA.length){ await vaciarCola(); }
   cargarCatalogo();
-  S.actualizando = true; if(S.items.length) render();
+  if(!auto){ S.actualizando = true; if(S.items.length) render(); }
   const [rm, rb, rg] = await Promise.allSettled([call('ckMaterial', num), call('ckBolo', num), call('ckGastos', num)]);
   S.actualizando = false;
   if(rg.status==='fulfilled') S.gastos = rg.value || [];
@@ -486,7 +487,8 @@ async function abrir(num, refresco){
     const f = S.bolo.ficha||{};
     if(nuevo && S.modo==='ruta' && (f.llegada || SALIDAS[num])) S.modo='montaje';
   }
-  if(S.vista==='det' && S.num===num) render();
+  if(auto && JSON.stringify([S.items, S.bolo]) === antes) return;
+  if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render();
 }
 function ficha(){ return (S.bolo && S.bolo.ficha) || {}; }
 function vistaDet(){
@@ -823,7 +825,7 @@ async function abrirScan(modoScan){
   SCANMODO = modoScan || S.modo;
   const ov = document.createElement('div'); ov.className='scanov'; ov.id='scanov';
   ov.innerHTML = `<video id="scanv" playsinline muted></video><div class="scanframe"></div>
-    <div class="scantop"><b>${SCANMODO==='consulta'?'Consultar equipo':SCANMODO==='carga'?'Cargar escaneando':'Devolver escaneando'}</b><button onclick="cerrarScan()">Cerrar</button></div>
+    <div class="scantop"><b>${SCANMODO==='consulta'?'Consultar equipo':SCANMODO==='añadir'?'Añadir material':SCANMODO==='carga'?'Cargar escaneando':'Devolver escaneando'}</b><button onclick="cerrarScan()">Cerrar</button></div>
     <div class="scanlast" id="scanlast">Apunta al código QR de la etiqueta</div>`;
   document.body.appendChild(ov);
   try{
@@ -838,7 +840,7 @@ async function abrirScan(modoScan){
         const w = 480, h = Math.round(v.videoHeight * w / v.videoWidth); c.width = w; c.height = h;
         x.drawImage(v, 0, 0, w, h);
         const r = jsQR(x.getImageData(0,0,w,h).data, w, h, { inversionAttempts:'dontInvert' });
-        if(r && r.data && (r.data !== SCAN.ultimo || Date.now()-SCAN.t > 2500)){ SCAN.ultimo = r.data; SCAN.t = Date.now(); leido(r.data); }
+        if(r && r.data && !SCAN.pausa && (r.data !== SCAN.ultimo || Date.now()-SCAN.t > 2500)){ SCAN.ultimo = r.data; SCAN.t = Date.now(); leido(r.data); }
       }
       requestAnimationFrame(loop);
     };
@@ -852,8 +854,17 @@ function leido(txt){
   const U = s => String(s||'').trim().toUpperCase();
   const it = S.items.find(i => U(i.material)===U(nom) || (cod && (U(i.material).includes('('+U(cod)+')') || U(i.material)===U(cod))));
   const el = $('#scanlast') || {};
-  if(!it){ el.className='scanlast bad'; el.textContent = '✕ ' + (nom||txt) + ' no está en este presupuesto'; vib([60,60,60]); return; }
+  if(!it){
+    const ex = enExtras(nom), c = S.modo==='dev' ? 'd' : 'c';
+    if(ex){ if(ex[c]){ el.className='scanlast'; el.textContent = '✓ ' + ex.nombre + ' ya estaba marcado'; } else { el.className='scanlast good'; el.textContent = '✓ ' + ex.cant + ' × ' + ex.nombre + ' (extra)'; vib(40); marcarExtra('extra', ex.nombre); } return; }
+    vib([60,60,60]);
+    if(!esAdmin()){ el.className='scanlast bad'; el.textContent = '✕ ' + (nom||txt) + ' no está en este bolo. Avisa a Dreamscape.'; return; }
+    SCAN.pausa = true; S.pendFuera = { nombre: nom||txt, marcar: true };
+    el.className='scanlast bad'; el.innerHTML = `⚠ ${esc(nom||txt)}<br><span style="font-weight:600;font-size:14px;opacity:.9">No está en el albarán</span><div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="SCAN.pausa=false;S.pendFuera=null;$('#scanlast').className='scanlast';$('#scanlast').textContent='Apunta al código QR de la etiqueta'">Ignorar</button><button class="btn gold" onclick="anadirFuera('1');SCAN.pausa=false;$('#scanlast').className='scanlast good';$('#scanlast').textContent='✓ Añadido fuera de albarán'">Añadir igualmente</button></div>`;
+    return;
+  }
   const k = S.modo==='carga' ? 'cargado' : 'devuelto';
+  if(SCANMODO==='añadir'){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya está en el albarán'; return; }
   if(it[k]){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya estaba marcado'; return; }
   el.className='scanlast good'; el.textContent = '✓ ' + it.cant + ' × ' + it.material; vib(40);
   toggle(it.fila, true);
@@ -1367,7 +1378,8 @@ function abrirMas(){
   const k = S.modo==='carga' ? 'cargado' : 'devuelto', todoHecho = lista && S.items.every(i=>i[k]);
   abrirSheet(`<h3>${esc(p.evento||'')}</h3><div class="meta" style="margin-bottom:6px">${esc(p.num||'')}${p.montaje?' · '+esc(p.montaje):''}</div>
     ${lista ? it('checkall', todoHecho ? 'Desmarcar todo' : 'Marcar todo como '+(S.modo==='carga'?'cargado':'devuelto'), `cerrarSheet();todo(${!todoHecho})`, 'Pide confirmación antes de guardar') : ''}
-    ${!esAdmin() ? '' : `${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
+    ${!esAdmin() ? '' : `${it('plus','Añadir material','abrirExtra()','Escaneando el QR o desde el inventario')}
+    ${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
     ${it('link','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
     ${it('star','Pedir valoración','pedirValoracion()','Puntuación y reseña en Google')}
     ${it('bell','Enviar recordatorio al equipo','recordatorio()','Correo con hora, lugar, material y furgoneta')}
@@ -1543,7 +1555,7 @@ function bloqueRentabilidad(r){
 function listaExtra(){
   const f = ficha(), sl = ((S.yo||{}).config||{}).siempre || [], sm = f.siempre || {};
   const c = S.modo==='dev' ? 'd' : 'c';
-  const extra = (f.extra||[]).map(e => ({ tipo:'extra', nombre:e.nombre, cant:e.cant, origen:e.origen, hecho:e[c] }));
+  const extra = (f.extra||[]).map(e => ({ tipo:'extra', nombre:e.nombre, cant:e.cant, origen:e.origen, fuera: !!e.fuera || /fuera/i.test(e.origen||''), hecho:e[c] }));
   const siempre = sl.map(s => ({ tipo:'siempre', nombre:s.nombre, cant:s.cant, hecho:(sm[s.nombre]||{})[c] }));
   return { extra, siempre };
 }
@@ -1551,15 +1563,15 @@ function filaExtra(x){
   const id = 'x' + encodeURIComponent(x.tipo+'|'+x.nombre).replace(/[^\w]/g,'');
   return `<div class="item extra ${x.hecho?'on':''}" id="${id}" onclick='marcarExtra(${JSON.stringify(x.tipo)},${JSON.stringify(x.nombre).replace(/'/g,"&#39;")})'>
     <div class="chk">${x.hecho?ic('check'):''}</div><div class="qty sm">${esc(x.cant||'')}</div>
-    <div class="info"><div class="mat">${esc(x.nombre)}</div><div class="meta">${x.hecho?esc(x.hecho):''}${x.tipo==='extra'&&x.origen?(x.hecho?' · ':'')+esc(x.origen):''}</div></div>
-    ${x.tipo==='extra'?`<button class="more" onclick='event.stopPropagation();quitarExtra(${JSON.stringify(x.nombre).replace(/'/g,"&#39;")})' aria-label="Quitar">${ic('x','s')}</button>`:''}</div>`;
+    <div class="info"><div class="mat">${esc(x.nombre)}</div><div class="meta">${[x.fuera?`<span class="inc">${ic('alert','xs')} Fuera de albarán</span>`:'', x.hecho?esc(x.hecho):'', x.tipo==='extra'&&x.origen&&!x.fuera?esc(x.origen):''].filter(Boolean).join(' · ')}</div></div>
+    ${x.tipo==='extra'&&esAdmin()?`<button class="more" onclick='event.stopPropagation();quitarExtra(${JSON.stringify(x.nombre).replace(/'/g,"&#39;")})' aria-label="Quitar">${ic('x','s')}</button>`:''}</div>`;
 }
 function bloqueExtras(){
   if(!S.bolo) return '';
   const { extra, siempre } = listaExtra();
   const hs = siempre.filter(x=>x.hecho).length;
   return `${extra.length?`<div class="sec">Material extra <span class="cnt">${extra.filter(x=>x.hecho).length}/${extra.length}</span></div>${extra.map(filaExtra).join('')}`:''}
-    ${esAdmin()?`<button class="scan addx" onclick="abrirExtra()">${ic('plus','s')} Añadir material extra o una plantilla</button>`:''}
+    ${esAdmin()?`<button class="scan addx" onclick="abrirExtra()">${ic('plus','s')} Añadir material</button>`:''}
     ${siempre.length?`<div class="sec sl"><span>Siempre llevar <span class="cnt">${hs}/${siempre.length}</span></span>${hs<siempre.length?`<button onclick="todoExtra('siempre',true)">Marcar todo</button>`:''}</div>${siempre.map(filaExtra).join('')}`:''}`;
 }
 async function marcarExtra(tipo, nombre){
@@ -1579,26 +1591,65 @@ async function quitarExtra(nombre){
   const f = S.bolo.ficha; f.extra = (f.extra||[]).filter(e=>e.nombre!==nombre); guardarBoloCache(); render();
   try{ await enviar('ckExtra', S.num, 'quitar', { nombre }); }catch(e){ toast('No se guardó: '+e.message); }
 }
+const UP = t => String(t||'').trim().toUpperCase();
+function enAlbaran(nombre, cod){
+  const N = UP(nombre), C2 = UP(cod);
+  return S.items.find(i => { const M = UP(i.material); return M===N || M.replace(/\s*\([^)]*\)\s*$/,'')===N || (C2 && (M.includes('('+C2+')') || M===C2)); });
+}
+function enExtras(nombre){ return ((ficha().extra)||[]).find(e => UP(e.nombre)===UP(nombre)); }
 async function abrirExtra(){
-  if(!S.plantillas){ try{ S.plantillas = await call('ckPlantillas'); }catch(e){ S.plantillas = []; } }
-  if(!S.catalogo){ try{ S.catalogo = await call('ckCatalogo'); }catch(e){} }
-  abrirSheet(`<h3>＋ Material extra</h3><div class="meta" style="margin-bottom:12px">Lo que no está en el presupuesto pero hay que llevar. No cambia el presupuesto ni la factura.</div>
-    ${(S.plantillas||[]).length?`<div class="fld"><span>Aplicar una plantilla</span></div>${S.plantillas.map(p=>`<button class="mitem" onclick="aplicarPlantilla('${esc(p.id)}')"><span class="ic">📋</span><span><b>${esc(p.nombre)}</b><small>${p.items.length} ${p.items.length===1?'cosa':'cosas'} · ${esc(p.origen||'')}</small></span></button>`).join('')}`:''}
-    <div class="fld" style="margin-top:14px"><span>O añade una cosa</span></div>
-    <div class="row2"><input id="exN" list="exL" placeholder="Material" autocomplete="off" class="inp"><input id="exC" inputmode="numeric" placeholder="Cantidad" class="inp"></div>
-    <datalist id="exL">${(S.catalogo||[]).map(x=>`<option value="${esc(x.nombre)}">`).join('')}</datalist>
+  cargarCatalogo();
+  if(!S.plantillas){ call('ckPlantillas').then(p=>{ S.plantillas = p; }).catch(()=>{ S.plantillas = []; }); }
+  abrirSheet(`<h3>${ic('plus')} Añadir material</h3><div class="meta" style="margin-bottom:12px">Escanea su QR o búscalo en el inventario. Si no está en el albarán, te aviso antes de añadirlo. Lo verá todo el equipo en el móvil y el ordenador.</div>
+    <button class="scan" onclick="cerrarSheet();abrirScan('añadir')">${ic('qr')}Escanear QR</button>
+    <input id="exQ" class="inp" type="search" placeholder="Buscar en el inventario…" autocomplete="off" oninput="buscarInv(this.value)">
+    <div id="exRes" style="margin-top:6px"></div>
+    ${(S.plantillas||[]).length?`<div class="mgrp">O aplica una plantilla</div>${S.plantillas.map(p=>`<button class="mitem" onclick="aplicarPlantilla('${esc(p.id)}')"><span class="ic">${ic('clip')}</span><span><b>${esc(p.nombre)}</b><small>${p.items.length} ${p.items.length===1?'cosa':'cosas'} · solo añade lo que no esté ya</small></span></button>`).join('')}`:''}
+    <div class="mgrp">¿No está en el inventario?</div>
+    <div class="row2" style="margin-top:6px"><input id="exN" placeholder="Material" autocomplete="off" class="inp"><input id="exC" inputmode="numeric" placeholder="Cantidad" class="inp"></div>
     <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cerrar</button><button class="btn" onclick="anadirExtra()">Añadir</button></div>`);
+  buscarInv('');
+  if(!S.catalogo) setTimeout(()=>{ if($('#exRes')) buscarInv(($('#exQ')||{}).value||''); }, 1500);
+}
+function buscarInv(q){
+  const box = $('#exRes'); if(!box) return;
+  if(!S.catalogo){ box.innerHTML = `<div class="upd"><div class="spin"></div>Cargando inventario…</div>`; return; }
+  const U = UP(q);
+  S.invRes = S.catalogo.filter(x => !U || UP(x.nombre+' '+x.codigo+' '+(x.cat||'')).includes(U)).slice(0, 25);
+  box.innerHTML = S.invRes.length ? S.invRes.map((x,i) => { const a = enAlbaran(x.nombre, x.codigo), e = enExtras(x.nombre);
+    return `<button class="mitem" onclick="elegirMaterial(${i})"><span class="ic">${a||e?ic('check'):ic('box')}</span><span style="flex:1;min-width:0"><b>${esc(x.nombre)}</b><small>${esc([x.codigo, x.cat].filter(Boolean).join(' · '))}${a?' · en el albarán':e?' · ya añadido':''}</small></span></button>`; }).join('')
+    : `<div class="meta" style="padding:10px 2px">No hay nada con «${esc(q)}» en el inventario.</div>`;
+}
+function elegirMaterial(i){ const x = (S.invRes||[])[i]; if(x) proponerMaterial(x.nombre, x.codigo, '1', false); }
+function proponerMaterial(nombre, cod, cant, marcar){
+  const a = enAlbaran(nombre, cod);
+  if(a){ toast(`Ya está en el albarán: ${a.cant} × ${a.material}`); return; }
+  if(enExtras(nombre)){ toast('Ya está añadido en este bolo'); return; }
+  S.pendFuera = { nombre, marcar };
+  abrirSheet(`<div class="aviso" style="font-size:16px">${ic('alert')} Este material no está en el albarán</div>
+    <h3>${esc(nombre)}</h3><div class="meta" style="margin-bottom:12px">Se añade a la carga de este bolo como material extra, marcado «Fuera de albarán». No cambia el presupuesto ni la factura.</div>
+    <label class="fld"><span>Cantidad</span><input id="fqC" inputmode="numeric" value="${esc(cant||'1')}"></label>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">No añadir</button><button class="btn gold" onclick="anadirFuera()">Añadir igualmente</button></div>`);
+}
+async function anadirFuera(cantFija){
+  const pf = S.pendFuera; if(!pf || !S.bolo) return;
+  const cant = String(cantFija || (($('#fqC')||{}).value||'1')).trim() || '1';
+  const f = S.bolo.ficha, c = S.modo==='dev' ? 'd' : 'c'; f.extra = f.extra || [];
+  const nu = { nombre: pf.nombre, cant, origen: 'fuera de albarán', fuera: true }; if(pf.marcar) nu[c] = hora();
+  f.extra.push(nu); S.pendFuera = null;
+  if(!SCAN){ cerrarSheet(); render(); }
+  guardarBoloCache(); vib(30); toast(`Añadido fuera de albarán: ${cant} × ${pf.nombre}`);
+  try{ const r = await enviar('ckExtra', S.num, 'añadir', { nombre: pf.nombre, cant, origen: 'fuera de albarán', fuera: true, marcar: !!pf.marcar, modo: S.modo }); if(r){ f.extra = r.extra; f.siempre = r.siempre; guardarBoloCache(); if(!SCAN) render(); } }
+  catch(e){ toast('No se guardó: '+e.message); abrir(S.num, true); }
 }
 async function aplicarPlantilla(id){
   cerrarSheet();
   try{ const r = await enviar('ckExtra', S.num, 'aplicar', { id }); if(r){ S.bolo.ficha.extra = r.extra; S.bolo.ficha.siempre = r.siempre; guardarBoloCache(); toast('Plantilla aplicada: se añade lo que no está en el presupuesto'); render(); } }
   catch(e){ toast('Error: '+e.message); }
 }
-async function anadirExtra(){
+function anadirExtra(){
   const n = ($('#exN').value||'').trim(), c = ($('#exC').value||'1').trim(); if(!n){ toast('Escribe el material'); return; }
-  const f = S.bolo.ficha; f.extra = f.extra||[]; if(!f.extra.some(e=>e.nombre.toUpperCase()===n.toUpperCase())) f.extra.push({ nombre:n, cant:c, origen:'a mano' });
-  cerrarSheet(); guardarBoloCache(); render();
-  try{ const r = await enviar('ckExtra', S.num, 'añadir', { nombre:n, cant:c }); if(r){ f.extra = r.extra; guardarBoloCache(); } }catch(e){ toast('No se guardó: '+e.message); }
+  proponerMaterial(n, '', c, false);
 }
 
 /* =========================================================
@@ -1704,6 +1755,11 @@ function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaE
 function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
+setInterval(() => {
+  if(document.hidden || !KEY || S.pend || SCAN || S.enviando || COLA.length || $('#sheet').classList.contains('open')) return;
+  if(S.vista==='lista'){ call('ckPresupuestos').then(l => { if(JSON.stringify(l) !== JSON.stringify(S.presus)){ S.presus = l; if(S.vista==='lista') render(); } }).catch(()=>{}); }
+  else if(S.vista==='det' && S.num){ const p0 = S.num; call('ckPresupuestos').then(l => { S.presus = l; }).catch(()=>{}); abrir(p0, 'auto'); }
+}, 30000);
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg => { reg.update().catch(()=>{}); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{});
   let recargado = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(recargado || COLA.length) return; recargado = true; location.reload(); });
