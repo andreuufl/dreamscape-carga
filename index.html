@@ -296,6 +296,8 @@ a.copia{display:flex;justify-content:space-between;align-items:center;text-decor
 .tabbar button.on{color:var(--txt)}
 .tabbar button.on svg{stroke:var(--gold);stroke-width:2.3}
 .tabbar .bdg{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.cfrow{display:flex;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.cfrow b{flex:1;min-width:0;font-weight:650}
+.cfst{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--okbg);color:var(--ok);font-weight:700;margin-top:8px}.cfst.no{background:var(--badbg);color:var(--bad)}.cfst span{flex:1}.cfst small{display:block;font-weight:600;opacity:.8}.cfst button{font-size:13px;font-weight:700;text-decoration:underline;color:inherit}
 .upd{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--mut);margin:-4px 0 10px;font-weight:600}
 .upd .spin{width:14px;height:14px;border-width:2px;margin:0}
 @media (min-width:700px){ .bars{gap:18px} }
@@ -524,6 +526,7 @@ function vistaDet(){
       <div><div class="big">${hechos}<span> / ${tot}</span></div><div class="pm">${S.modo==='carga'?'cargados en la furgoneta':'devueltos al almacén'}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
     ${hechos===tot && S.modo==='carga' ? (esAdmin() ? `<button class="next" onclick="irA('ruta')">${ic('check')}<span>Todo cargado<small>Siguiente paso: la ruta al lugar</small></span>${ic('chev')}</button>` : `<button class="next" onclick="irA('dev')">${ic('check')}<span>Todo cargado en la furgoneta<small>Al volver, marca aquí la descarga en el almacén</small></span>${ic('chev')}</button>`) : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
+    ${tarjetaConfirmar()}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
     ${tarjetaQuien()}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
@@ -607,7 +610,34 @@ function tarjetaQuien(){
   if(!esAdmin() || !S.bolo) return '';
   const t = ficha().tecnicos || [];
   return `<div class="furg"><div class="top"><b>${ic('users','s')} ¿Quién va?</b><button class="edit" onclick="abrirQuien()">${t.length?'Cambiar':'Elegir'}</button></div>
-    ${t.length ? `<div class="chips" style="margin:4px 0 0">${t.map(n=>`<span class="chip tec on">${esc(n)}</span>`).join('')}</div>` : '<div class="meta">Nadie asignado todavía: los técnicos no ven este bolo.</div>'}</div>`;
+    ${t.length ? t.map(n => { const c = (ficha().conf||{})[n] || {}, v = c.voy;
+        return `<div class="cfrow"><b>${esc(n)}</b><span class="pill ${v ? (v.si?'ok':'warn') : ''}" title="${esc(v&&v.nota||'')}">${v ? (v.si?'✓ Va':'✕ No va') : 'Sin confirmar'}</span><span class="pill ${c.leido?'ok':''}">${c.leido?'✓ Leído':'Sin leer'}</span></div>${v&&!v.si&&v.nota?`<div class="meta" style="margin:-4px 0 6px">«${esc(v.nota)}»</div>`:''}`; }).join('') : '<div class="meta">Nadie asignado todavía: los técnicos no ven este bolo.</div>'}</div>`;
+}
+function miConf(){ const u = ((S.yo||{}).usuario||{}).nombre || ''; return ((ficha().conf)||{})[u] || {}; }
+function tarjetaConfirmar(){
+  if(esAdmin() || !S.bolo) return '';
+  const c = miConf(), v = c.voy, pend = !v || !c.leido;
+  const voy = !v
+    ? `<div class="meta" style="margin-top:2px">¿Vas a este bolo?</div><div class="row2" style="margin-top:8px"><button class="btn okb" onclick="confirmar('voy',true)">${ic('check','s')} Sí, voy</button><button class="btn sec2" onclick="noPuedo()">No puedo ir</button></div>`
+    : `<div class="cfst ${v.si?'':'no'}">${ic(v.si?'check':'x','s')}<span>${v.si?'Confirmado: vas a este bolo':'Has avisado de que no puedes ir'}<small>${esc(v.h)}${v.nota?' · '+esc(v.nota):''}</small></span><button onclick="confirmar('voy',null)">Cambiar</button></div>`;
+  const leido = `<button class="ck ${c.leido?'on':''}" style="margin-top:10px" onclick="confirmar('leido',${!c.leido})"><span class="cb">${c.leido?'✓':''}</span><span><b>He revisado todo el material y lo tengo claro</b>${c.leido?`<small>${esc(c.leido)}</small>`:'<small>Márcalo cuando hayas leído la lista</small>'}</span></button>`;
+  return `<div class="furg" style="${pend?'border:1.5px solid var(--gold)':''}"><div class="top"><b>${ic('user','s')} Tu confirmación</b><span class="pill ${pend?'warn':'ok'}">${pend?'Pendiente':'Hecho'}</span></div>${voy}${leido}</div>`;
+}
+function noPuedo(){
+  abrirSheet(`<h3>No puedo ir</h3><div class="meta" style="margin-bottom:12px">Se avisa a Dreamscape al momento para buscar a otra persona.</div>
+    <label class="fld"><span>Motivo (opcional)</span><textarea id="npMot" rows="3" placeholder="Ej. Estoy en otro bolo ese día"></textarea></label>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="confirmar('voy',false,($('#npMot').value||'').trim())">Avisar</button></div>`);
+}
+async function confirmar(tipo, valor, nota){
+  if(!S.bolo) return;
+  const u = ((S.yo||{}).usuario||{}).nombre || '', f = S.bolo.ficha; f.conf = f.conf || {};
+  const prev = JSON.stringify(f.conf); const yo = f.conf[u] = f.conf[u] || {};
+  if(tipo==='voy'){ if(valor===null) delete yo.voy; else yo.voy = { si: !!valor, h: hora(), nota: nota||'' }; }
+  else { if(valor) yo.leido = hora(); else delete yo.leido; }
+  cerrarSheet(); vib(25); guardarBoloCache(); render();
+  try{ const r = await enviar('ckConfirmar', S.num, tipo, valor, nota||''); if(r){ f.conf = r; guardarBoloCache(); render(); }
+    if(r!==null && valor!==null) toast(tipo==='leido' ? (valor?'Marcado como leído':'Desmarcado') : (valor?'¡Confirmado! Dreamscape ya lo sabe':'Aviso enviado a Dreamscape')); }
+  catch(e){ f.conf = JSON.parse(prev); render(); toast('No se guardó: '+e.message); }
 }
 function abrirQuien(){
   if(!S.bolo){ toast('Cargando…'); return; }
