@@ -1247,9 +1247,10 @@ function vistaAccesos(){
     const nombres = [...new Set([...(a.equipo||[]).map(x=>x.nombre), ...(a.usuarios||[]).map(x=>x.nombre)])].filter(n=>n!=='Andreu' || (a.usuarios||[]).some(u=>u.nombre==='Andreu'));
     return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código. Un <b>técnico</b> solo ve el material que hay que cargar en la furgoneta y descargar en el almacén de los bolos en los que está asignado (en la ficha del bolo → Técnicos que van), sin precios, clientes ni facturas.</div>` +
       nombres.map(n => { const u = (a.usuarios||[]).find(x=>x.nombre===n); const on = u && u.activo !== false;
-        return `<div class="furg"><div class="top"><b>${esc(n)}</b><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
+        const dq = (a.equipo||[]).find(x=>x.nombre===n) || {};
+        return `<div class="furg"><div class="top"><div style="min-width:0"><b>${esc(n)}</b><div class="meta">${[dq.telefono, dq.email].filter(Boolean).map(esc).join(' · ') || 'Sin teléfono ni correo'}</div></div><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
           ${on?`<div class="codigo"><span class="sel">${esc(u.codigo)}</span><select onchange="accRol('${esc(n).replace(/'/g,"\\'")}',this.value)"><option value="tecnico" ${u.rol!=='admin'?'selected':''}>Técnico</option><option value="admin" ${u.rol==='admin'?'selected':''}>Administrador</option></select></div>
-          <div class="row2" style="margin-top:10px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Hola '+n.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')')}">Enviar por WhatsApp</a><button class="btn sec2" onclick="accNuevo('${esc(n).replace(/'/g,"\\'")}')">Nuevo código</button></div>`:''}<button class="link danger" style="padding:10px 0 0" onclick="borrarPersona('${esc(n).replace(/'/g,"\\'")}')">Eliminar persona</button></div>`; }).join('') +
+          <div class="row2" style="margin-top:10px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Hola '+n.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')')}">Enviar por WhatsApp</a><button class="btn sec2" onclick="accNuevo('${esc(n).replace(/'/g,"\\'")}')">Nuevo código</button></div>`:''}<div class="row2" style="margin-top:4px"><button class="link" style="padding:10px 0 0" onclick="editarPersona('${esc(n).replace(/'/g,"\\'")}')">Modificar datos</button><button class="link danger" style="padding:10px 0 0" onclick="borrarPersona('${esc(n).replace(/'/g,"\\'")}')">Eliminar persona</button></div></div>`; }).join('') +
       `<div class="meta" style="margin:8px 4px">Tu código de administrador es el de tu enlace. Si alguien pierde el móvil, pulsa «Nuevo código» y el anterior deja de funcionar.</div>`;
   })();
   return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
@@ -1278,6 +1279,21 @@ async function guardarPersona(){
       <div class="row2" style="margin-top:12px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${tel?telIntl(tel):''}?text=${encodeURIComponent(msg)}">Enviar por WhatsApp</a><button class="btn sec2" onclick="copiar(${JSON.stringify(msg).replace(/"/g,'&quot;')})">Copiar enlace</button></div>
       <button class="link" onclick="cerrarSheet()">Hecho</button>`);
   }catch(e){ b.disabled = false; b.textContent = 'Crear'; toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+function editarPersona(n){
+  const d = ((S.acc||{}).equipo||[]).find(x=>x.nombre===n) || {};
+  abrirSheet(`<h3>${esc(n)}</h3><div class="meta" style="margin-bottom:12px">Se guarda en la pestaña Equipo del Drive.</div>
+    <label class="fld"><span>Teléfono</span><input id="epTel" type="tel" autocomplete="off" value="${esc(d.telefono||'')}" placeholder="600 000 000"></label>
+    <label class="fld"><span>Email</span><input id="epMail" type="email" autocomplete="off" autocapitalize="off" value="${esc(d.email||'')}" placeholder="nombre@correo.com"></label>
+    <div class="meta" style="margin:-4px 0 12px">Con el correo le llegan los recordatorios de sus bolos.</div>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="epBtn" onclick="guardarDatosPersona('${esc(n).replace(/'/g,"\\'")}')">Guardar</button></div>`);
+}
+async function guardarDatosPersona(n){
+  const tel = ($('#epTel').value||'').trim(), mail = ($('#epMail').value||'').trim();
+  if(mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){ toast('El correo no parece correcto'); return; }
+  const b = $('#epBtn'); b.disabled = true; b.textContent = 'Guardando…';
+  try{ S.acc = await call('ckEditarPersona', n, tel, mail); cerrarSheet(); vib(20); toast('Datos guardados'); render(); }
+  catch(e){ b.disabled = false; b.textContent = 'Guardar'; toast(e.red?'Necesitas conexión':'Error: '+e.message); }
 }
 async function borrarPersona(n){
   if(!confirm('¿Eliminar a '+n+'? Perderá el acceso a la app y se borrará de la pestaña Equipo.')) return;
