@@ -402,7 +402,7 @@ function tarjetaBolo(p){
       <div class="bar"><small><span>${ic('home','xs')} Vuelta</span><b>${p.devueltos}/${p.total}</b></small><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div>
     </div></button>`;
 }
-function tarjetasPendientes(){ return (S.pendientes||[]).map(x=>`<button class="card alerta" onclick="abrir('${esc(x.num)}')"><b>${ic('alert','s')} Material sin devolver</b><div class="meta">${esc(x.num)} · ${esc(x.evento)} · ${x.n} artículos</div></button>`).join(''); }
+function tarjetasPendientes(){ return (S.pendientes||[]).filter(x => esAdmin() || S.presus.some(p=>p.num===x.num)).map(x=>`<button class="card alerta" onclick="abrir('${esc(x.num)}')"><b>${ic('alert','s')} Material sin devolver</b><div class="meta">${esc(x.num)} · ${esc(x.evento)} · ${x.n} artículos</div></button>`).join(''); }
 function vistaLista(){
   if((S.tab||'hoy')==='hoy') return vistaHoy();
   const l = filtrados();
@@ -429,7 +429,7 @@ function vistaHoy(){
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
     ${tarjetasPendientes()}${hero}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
-    ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.</div></div>` : ''}`;
+    ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
     <div class="hrow"><div style="flex:1;min-width:0"><h1>${esc(saludo)}${nombre?', '+esc(nombre):''}<span class="sync" id="dot"></span></h1><div class="sub">${esc(fecha)}</div></div>
     <button class="ref" onclick="cargarLista()" aria-label="Actualizar">${ic('refresh')}</button></div>
@@ -437,7 +437,7 @@ function vistaHoy(){
 }
 function tabbar(){
   const t = S.vista==='furgos' ? 'furgos' : (S.tab||'hoy');
-  const n = (S.pendientes||[]).length + (esAdmin() ? ((S.avisos||{}).mantenimiento||[]).filter(m=>m.dias<0).length : 0);
+  const n = (S.pendientes||[]).filter(x => esAdmin() || S.presus.some(p=>p.num===x.num)).length + (esAdmin() ? ((S.avisos||{}).mantenimiento||[]).filter(m=>m.dias<0).length : 0);
   const b = (id, ico, txt, f) => `<button class="${t===id?'on':''}" onclick="${f}">${ic(ico)}<span>${txt}</span>${id==='hoy'&&n?`<span class="bdg">${n}</span>`:''}</button>`;
   if(!esAdmin()) return `<nav class="tabbar" style="grid-template-columns:repeat(3,1fr)">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
   return `<nav class="tabbar">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('furgos','truck','Furgos',"irTab('furgos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
@@ -1233,7 +1233,7 @@ function vistaAccesos(){
   const url = location.origin + location.pathname;
   const body = !a ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : (() => {
     const nombres = [...new Set([...(a.equipo||[]).map(x=>x.nombre), ...(a.usuarios||[]).map(x=>x.nombre)])].filter(n=>n!=='Andreu' || (a.usuarios||[]).some(u=>u.nombre==='Andreu'));
-    return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código. Un <b>técnico</b> solo ve el material que hay que cargar en la furgoneta y descargar en el almacén de los bolos donde está asignado (o que no tienen a nadie), sin precios, clientes ni facturas.</div>` +
+    return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código. Un <b>técnico</b> solo ve el material que hay que cargar en la furgoneta y descargar en el almacén de los bolos en los que está asignado (en la ficha del bolo → Técnicos que van), sin precios, clientes ni facturas.</div>` +
       nombres.map(n => { const u = (a.usuarios||[]).find(x=>x.nombre===n); const on = u && u.activo !== false;
         return `<div class="furg"><div class="top"><b>${esc(n)}</b><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
           ${on?`<div class="codigo"><span class="sel">${esc(u.codigo)}</span><select onchange="accRol('${esc(n).replace(/'/g,"\\'")}',this.value)"><option value="tecnico" ${u.rol!=='admin'?'selected':''}>Técnico</option><option value="admin" ${u.rol==='admin'?'selected':''}>Administrador</option></select></div>
