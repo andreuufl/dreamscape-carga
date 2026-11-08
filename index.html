@@ -427,7 +427,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${tarjetasPendientes()}${hero}${tarjetasAvisos()}
+    ${tarjetasPendientes()}${hero}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -437,8 +437,9 @@ function vistaHoy(){
 }
 function tabbar(){
   const t = S.vista==='furgos' ? 'furgos' : (S.tab||'hoy');
-  const n = (S.pendientes||[]).length + ((S.avisos||{}).mantenimiento||[]).filter(m=>m.dias<0).length;
+  const n = (S.pendientes||[]).length + (esAdmin() ? ((S.avisos||{}).mantenimiento||[]).filter(m=>m.dias<0).length : 0);
   const b = (id, ico, txt, f) => `<button class="${t===id?'on':''}" onclick="${f}">${ic(ico)}<span>${txt}</span>${id==='hoy'&&n?`<span class="bdg">${n}</span>`:''}</button>`;
+  if(!esAdmin()) return `<nav class="tabbar" style="grid-template-columns:repeat(3,1fr)">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
   return `<nav class="tabbar">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('furgos','truck','Furgos',"irTab('furgos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
 }
 function irTab(t){
@@ -481,6 +482,7 @@ async function abrir(num, refresco){
 function ficha(){ return (S.bolo && S.bolo.ficha) || {}; }
 function vistaDet(){
   const p = S.presus.find(x=>x.num===S.num) || {num:S.num, evento:''};
+  if(!esAdmin() && S.modo!=='carga' && S.modo!=='dev') S.modo = S.items.length && S.items.every(i=>i.cargado) ? 'dev' : 'carga';
   const lista = S.modo==='carga' || S.modo==='dev';
   const k = S.modo==='carga' ? 'cargado' : 'devuelto';
   const hk = S.modo==='carga' ? 'hCarga' : 'hDev';
@@ -509,12 +511,12 @@ function vistaDet(){
     ${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
       <div><div class="big">${hechos}<span> / ${tot}</span></div><div class="pm">${S.modo==='carga'?'cargados en la furgoneta':'devueltos al almacén'}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
-    ${hechos===tot && S.modo==='carga' ? `<button class="next" onclick="irA('ruta')">${ic('check')}<span>Todo cargado<small>Siguiente paso: la ruta al lugar</small></span>${ic('chev')}</button>` : ''}
+    ${hechos===tot && S.modo==='carga' ? (esAdmin() ? `<button class="next" onclick="irA('ruta')">${ic('check')}<span>Todo cargado<small>Siguiente paso: la ruta al lugar</small></span>${ic('chev')}</button>` : `<button class="next" onclick="irA('dev')">${ic('check')}<span>Todo cargado en la furgoneta<small>Al volver, marca aquí la descarga en el almacén</small></span>${ic('chev')}</button>`) : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn" onclick="verFactura()">${ic('receipt','s')} Factura</button>`:''}<button class="btn sec2" onclick="pedirValoracion()">${ic('star','s')} Valoración</button></div></div>`:''}
-    ${S.modo==='dev' ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
+    ${S.modo==='dev' && esAdmin() ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
     ${listaPend}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${ok.map(fila).join('')}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${S.modo==='carga'?'cargado':'devuelto'}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
@@ -523,7 +525,7 @@ function vistaDet(){
   const faltan = tot - hechos;
   const sinInc = pend.filter(i=>!i.incidencia).length;
   const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo==='carga'
-    ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('ruta', ${faltan})">${hechos===tot?'Siguiente: la ruta':'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
+    ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${esAdmin()?'ruta':'dev'}', ${faltan})">${hechos===tot?(esAdmin()?'Siguiente: la ruta':'Siguiente: descarga'):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
     : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('send','s')+' Terminar y enviar'))}</button></div>`;
   return `<header>
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
@@ -537,11 +539,11 @@ function vistaDet(){
 function stepper(tot){
   const c = S.items.filter(i=>i.cargado).length, d = S.items.filter(i=>i.devuelto).length, f = ficha();
   const ok = { carga: c===tot, ruta: !!(SALIDAS[S.num] || f.salida), montaje: !!(f.finMontaje || f.firma), dev: d===tot };
-  const pasos = [['carga','1','Cargar'],['ruta','2','Ruta'],['montaje','3','Montaje'],['dev','4','Vuelta']];
-  return `<div class="steps">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span><span class="t">${t}</span></button>`).join('<span class="ln"></span>')}</div>`;
+  const pasos = esAdmin() ? [['carga','1','Cargar'],['ruta','2','Ruta'],['montaje','3','Montaje'],['dev','4','Vuelta']] : [['carga','1','Cargar'],['dev','2','Descargar']];
+  return `<div class="steps" style="grid-template-columns:repeat(${pasos.length},1fr)">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span><span class="t">${t}</span></button>`).join('<span class="ln"></span>')}</div>`;
 }
 function irA(m, faltan){
-  if(faltan && !confirm(`Faltan ${faltan} artículos por cargar. ¿Pasar a la ruta igualmente?`)) return;
+  if(faltan && !confirm(`Faltan ${faltan} artículos por cargar. ¿Seguir igualmente?`)) return;
   S.modo = m; render(); window.scrollTo(0,0);
 }
 function destino(l){ return String(l||'').replace(/["“”«»]/g,'').replace(/\s*\|\s*/g,', ').trim(); }
@@ -864,7 +866,7 @@ function vistaEtiquetas(){
     <div class="sub" style="margin-top:8px;white-space:normal">Imprime en papel adhesivo y pega cada etiqueta en su equipo. Al escanearla, la app marca ese material.</div>
   </header><main class="etiq">${body}</main>`;
 }
-function copiar(t){ try{ navigator.clipboard.writeText(t).then(()=>toast('Dirección copiada'),()=>toast(t)); }catch(e){ toast(t); } }
+function copiar(t){ try{ navigator.clipboard.writeText(t).then(()=>toast('Copiado'),()=>toast(t)); }catch(e){ toast(t); } }
 function actualizarResumen(){
   const p = S.presus.find(x=>x.num===S.num); if(!p) return;
   p.cargados = S.items.filter(i=>i.cargado).length;
@@ -1008,12 +1010,12 @@ function abrirMenu(){
   const it = (ico, t, f, sub) => `<button class="mitem" onclick="cerrarSheet();${f}"><span class="ic">${ic(ico)}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
   const tema = TEMA==='dark' ? 'Oscuro' : TEMA==='light' ? 'Claro' : 'Automático';
   abrirSheet(`<h3>${esc(u.nombre||'Menú')}</h3><div class="meta">${u.rol==='admin'?'Administrador':'Técnico'}</div>
-    <div class="mgrp">Material</div>
+    ${esAdmin() ? `<div class="mgrp">Material</div>
     ${it('search','Consultar un equipo','abrirScan(\'consulta\')','Escanea su QR y mira su historial')}
     ${it('wrench','En reparación','verRep()','Equipos rotos o dañados')}
     ${it('clock','Mantenimiento','verMant()','ITV, revisiones, pilas, lámparas…')}
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
-    ${esAdmin()? `<div class="mgrp">Gestión</div>
+    <div class="mgrp">Gestión</div>
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
     ${it('users','Accesos del equipo','verAccesos()','Códigos para el equipo')}
     ${it('clip','Plantillas de material','verPlantillas()','Se aplican a un bolo en un toque')}
@@ -1037,7 +1039,7 @@ function ayudaInstalar(){
 function diaDe(ts){ const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
 function heroBolo(p, lbl, cls){
   const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
-  const paso = !p.total ? 'Ver el bolo' : p.cargados < p.total ? (p.cargados ? 'Seguir cargando' : 'Empezar a cargar') : p.devueltos === 0 ? 'Ir al evento' : p.devueltos < p.total ? 'Terminar la vuelta' : 'Ver el bolo';
+  const paso = !p.total ? 'Ver el bolo' : p.cargados < p.total ? (p.cargados ? 'Seguir cargando' : 'Empezar a cargar') : p.devueltos === 0 ? (esAdmin() ? 'Ir al evento' : 'Marcar la descarga') : p.devueltos < p.total ? 'Terminar la vuelta' : 'Ver el bolo';
   return `<div class="hoy ${cls||''}"><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
     ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
     <div class="hst"><div><span>Carga</span><b>${p.cargados}/${p.total}</b><div class="track"><div class="fill" style="width:${pc}%"></div></div></div><div><span>Vuelta</span><b>${p.devueltos}/${p.total}</b><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div></div>
@@ -1230,7 +1232,7 @@ function vistaAccesos(){
   const url = location.origin + location.pathname;
   const body = !a ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : (() => {
     const nombres = [...new Set([...(a.equipo||[]).map(x=>x.nombre), ...(a.usuarios||[]).map(x=>x.nombre)])].filter(n=>n!=='Andreu' || (a.usuarios||[]).some(u=>u.nombre==='Andreu'));
-    return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código y solo ve los bolos donde está como técnico (o los que no tienen a nadie asignado). Las personas salen de la pestaña Equipo.</div>` +
+    return `<div class="meta" style="margin:0 4px 12px">Cada persona entra con su código. Un <b>técnico</b> solo ve el material que hay que cargar en la furgoneta y descargar en el almacén de los bolos donde está asignado (o que no tienen a nadie), sin precios, clientes ni facturas.</div>` +
       nombres.map(n => { const u = (a.usuarios||[]).find(x=>x.nombre===n); const on = u && u.activo !== false;
         return `<div class="furg"><div class="top"><b>${esc(n)}</b><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
           ${on?`<div class="codigo"><span class="sel">${esc(u.codigo)}</span><select onchange="accRol('${esc(n).replace(/'/g,"\\'")}',this.value)"><option value="tecnico" ${u.rol!=='admin'?'selected':''}>Técnico</option><option value="admin" ${u.rol==='admin'?'selected':''}>Administrador</option></select></div>
@@ -1238,7 +1240,31 @@ function vistaAccesos(){
       `<div class="meta" style="margin:8px 4px">Tu código de administrador es el de tu enlace. Si alguien pierde el móvil, pulsa «Nuevo código» y el anterior deja de funcionar.</div>`;
   })();
   return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
-    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Accesos del equipo</h1></div></header><main>${body}</main>`;
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Accesos del equipo</h1></div></header><main>${body}</main>${a?`<div class="foot"><button class="btn" onclick="nuevaPersona()">${ic('plus','s')} Nueva persona</button></div>`:''}`;
+}
+let NP_ROL = 'tecnico';
+function nuevaPersona(){
+  NP_ROL = 'tecnico';
+  abrirSheet(`<h3>Nueva persona</h3><div class="meta" style="margin-bottom:12px">Se añade a la pestaña Equipo y le creo su código de acceso.</div>
+    <label class="fld"><span>Nombre</span><input id="npNom" autocomplete="off" placeholder="Ej. Marc López"></label>
+    <div class="row2"><label class="fld"><span>Teléfono (opcional)</span><input id="npTel" type="tel" autocomplete="off" placeholder="600 000 000"></label><label class="fld"><span>Email (opcional)</span><input id="npMail" type="email" autocomplete="off" autocapitalize="off"></label></div>
+    <div class="fld"><span>Permiso</span><div class="chips" style="margin:6px 0 0"><button class="chip tec np on" data-r="tecnico" onclick="document.querySelectorAll('.np').forEach(b=>b.classList.remove('on'));this.classList.add('on');NP_ROL='tecnico'">Técnico · solo carga y descarga</button><button class="chip tec np" data-r="admin" onclick="document.querySelectorAll('.np').forEach(b=>b.classList.remove('on'));this.classList.add('on');NP_ROL='admin'">Administrador · todo</button></div></div>
+    <div class="row2" style="margin-top:6px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="npBtn" onclick="guardarPersona()">Crear</button></div>`);
+  setTimeout(()=>{ const i=$('#npNom'); if(i) i.focus(); }, 320);
+}
+async function guardarPersona(){
+  const nom = ($('#npNom').value||'').trim(); if(!nom){ toast('Escribe el nombre'); return; }
+  const tel = ($('#npTel').value||'').trim(), mail = ($('#npMail').value||'').trim();
+  const b = $('#npBtn'); b.disabled = true; b.textContent = 'Creando…';
+  try{
+    S.acc = await call('ckNuevaPersona', nom, tel, mail, NP_ROL); render(); vib(30);
+    const u = (S.acc.usuarios||[]).find(x=>String(x.nombre).toLowerCase()===nom.toLowerCase()) || {};
+    const url = location.origin + location.pathname, msg = 'Hola '+nom.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')';
+    abrirSheet(`<h3>${ic('check')} ${esc(nom)} ya tiene acceso</h3><div class="meta" style="margin-bottom:12px">${u.rol==='admin'?'Administrador':'Técnico: solo verá el material para cargar y descargar.'}</div>
+      <div class="codigo"><span class="sel">${esc(u.codigo||'')}</span><span class="meta" style="margin:0">su código</span></div>
+      <div class="row2" style="margin-top:12px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${tel?telIntl(tel):''}?text=${encodeURIComponent(msg)}">Enviar por WhatsApp</a><button class="btn sec2" onclick="copiar(${JSON.stringify(msg).replace(/"/g,'&quot;')})">Copiar enlace</button></div>
+      <button class="link" onclick="cerrarSheet()">Hecho</button>`);
+  }catch(e){ b.disabled = false; b.textContent = 'Crear'; toast(e.red?'Necesitas conexión':'Error: '+e.message); }
 }
 async function accGuardar(l, msg){ try{ S.acc.usuarios = await call('ckGuardarUsuarios', l); toast(msg); render(); }catch(e){ toast('No se guardó: '+e.message); } }
 function accToggle(n){ const l = (S.acc.usuarios||[]).slice(); const u = l.find(x=>x.nombre===n); if(u) u.activo = u.activo === false; else l.push({ nombre:n, rol:'tecnico', activo:true }); accGuardar(l, 'Acceso actualizado'); }
@@ -1307,7 +1333,7 @@ function abrirMas(){
   const k = S.modo==='carga' ? 'cargado' : 'devuelto', todoHecho = lista && S.items.every(i=>i[k]);
   abrirSheet(`<h3>${esc(p.evento||'')}</h3><div class="meta" style="margin-bottom:6px">${esc(p.num||'')}${p.montaje?' · '+esc(p.montaje):''}</div>
     ${lista ? it('checkall', todoHecho ? 'Desmarcar todo' : 'Marcar todo como '+(S.modo==='carga'?'cargado':'devuelto'), `cerrarSheet();todo(${!todoHecho})`, 'Pide confirmación antes de guardar') : ''}
-    ${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
+    ${!esAdmin() ? '' : `${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
     ${it('link','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
     ${it('star','Pedir valoración','pedirValoracion()','Puntuación y reseña en Google')}
     ${it('bell','Enviar recordatorio al equipo','recordatorio()','Correo con hora, lugar, material y furgoneta')}
@@ -1315,7 +1341,7 @@ function abrirMas(){
     ${it('book','Dossier del bolo (PDF)','dossier(false)','Fotos del montaje, el día, material y valoración')}
     ${esAdmin()? it('mail','Enviarme el dossier por correo','dossier(true)','Para reenviarlo al cliente'):''}
     ${esAdmin()? it('clip','Guardar como plantilla','plantillaDeBolo()','Para reutilizar este material en otros bolos'):''}
-    ${esAdmin()? it('receipt','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}`);
+    ${esAdmin()? it('receipt','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}`}`);
 }
 async function tokenCliente(){
   const f = ficha();
@@ -1499,7 +1525,7 @@ function bloqueExtras(){
   const { extra, siempre } = listaExtra();
   const hs = siempre.filter(x=>x.hecho).length;
   return `${extra.length?`<div class="sec">Material extra <span class="cnt">${extra.filter(x=>x.hecho).length}/${extra.length}</span></div>${extra.map(filaExtra).join('')}`:''}
-    <button class="scan addx" onclick="abrirExtra()">${ic('plus','s')} Añadir material extra o una plantilla</button>
+    ${esAdmin()?`<button class="scan addx" onclick="abrirExtra()">${ic('plus','s')} Añadir material extra o una plantilla</button>`:''}
     ${siempre.length?`<div class="sec sl"><span>Siempre llevar <span class="cnt">${hs}/${siempre.length}</span></span>${hs<siempre.length?`<button onclick="todoExtra('siempre',true)">Marcar todo</button>`:''}</div>${siempre.map(filaExtra).join('')}`:''}`;
 }
 async function marcarExtra(tipo, nombre){
