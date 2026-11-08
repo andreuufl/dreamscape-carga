@@ -227,6 +227,10 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 .login .btn{background:var(--gold)!important;color:#16243a!important}.login .meta{color:#fca5a5;margin-top:10px}
 .mitem{width:100%;display:flex;align-items:center;gap:14px;padding:11px 2px;border-bottom:1px solid var(--line);text-align:left}
 .mitem:last-child{border-bottom:0}
+a.mitem{text-decoration:none;color:inherit}
+.empresa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
+.empresa a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:14px;background:var(--card2);border:1.5px solid var(--line);color:var(--txt);text-decoration:none;font-weight:650;font-size:13.5px}
+.empresa a .i{color:var(--gold)}
 .mitem .ic{width:42px;height:42px;border-radius:13px;background:var(--card2);display:grid;place-items:center;flex:none;color:var(--txt);font-size:19px}
 .mitem b{display:block;font-size:16px;font-weight:650}.mitem small{color:var(--mut);font-size:13px}
 .mgrp{font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:16px 2px 2px}
@@ -347,6 +351,8 @@ const ic = (n, c) => `<svg class="i ${c||''}" viewBox="0 0 24 24" aria-hidden="t
 let TEMA = 'auto'; try{ TEMA = localStorage.getItem('ck_tema') || 'auto'; }catch(e){}
 function aplicarTema(){ const r = document.documentElement; if(TEMA==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', TEMA); }
 function cambiarTema(){ TEMA = TEMA==='auto' ? 'dark' : TEMA==='dark' ? 'light' : 'auto'; try{ localStorage.setItem('ck_tema', TEMA); }catch(e){} aplicarTema(); abrirMenu(); }
+const EMPRESA = { tel:'+34613089894', telTxt:'613 08 98 94', mail:'info@dreamscapeevents.es' };
+function contactoEmpresa(){ return `<div class="empresa"><a href="tel:${EMPRESA.tel}">${ic('phone')}Llamar</a><a href="https://wa.me/${EMPRESA.tel.replace('+','')}" target="_blank" rel="noopener">${ic('msg')}WhatsApp</a><a href="mailto:${EMPRESA.mail}">${ic('mail')}Correo</a></div><div class="meta" style="text-align:center">${EMPRESA.telTxt} · ${EMPRESA.mail}</div>`; }
 const BRAND = `<div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>`;
 
 
@@ -523,7 +529,8 @@ function vistaDet(){
     ${listaPend}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${ok.map(fila).join('')}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${S.modo==='carga'?'cargado':'devuelto'}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
-    ${bloqueExtras()}`;
+    ${bloqueExtras()}
+    ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
   }
   const faltan = tot - hechos;
   const sinInc = pend.filter(i=>!i.incidencia).length;
@@ -984,7 +991,8 @@ function vistaLogin(){
   return `<div class="login"><div class="brand big"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <h1>Carga de material</h1><p>Escribe tu código de acceso. Te lo da Andreu desde la app.</p>
     <form onsubmit="event.preventDefault();entrar()"><input id="lgCod" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Código de acceso"><button class="btn" id="lgBtn">Entrar</button></form>
-    <div class="meta" id="lgErr"></div></div>`;
+    <div class="meta" id="lgErr"></div>
+    <a href="tel:${EMPRESA.tel}" style="color:#a9b6ca;margin-top:28px;font-size:14px;text-decoration:none">¿No tienes código? Llama al ${EMPRESA.telTxt}</a></div>`;
 }
 async function entrar(){
   const c = ($('#lgCod').value||'').trim(); if(!c) return;
@@ -1013,6 +1021,7 @@ function abrirMenu(){
   const it = (ico, t, f, sub) => `<button class="mitem" onclick="cerrarSheet();${f}"><span class="ic">${ic(ico)}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
   const tema = TEMA==='dark' ? 'Oscuro' : TEMA==='light' ? 'Claro' : 'Automático';
   abrirSheet(`<h3>${esc(u.nombre||'Menú')}</h3><div class="meta">${u.rol==='admin'?'Administrador':'Técnico'}</div>
+    <div class="mgrp">Contacto de Dreamscape Events</div>${contactoEmpresa()}
     ${esAdmin() ? `<div class="mgrp">Material</div>
     ${it('search','Consultar un equipo','abrirScan(\'consulta\')','Escanea su QR y mira su historial')}
     ${it('wrench','En reparación','verRep()','Equipos rotos o dañados')}
@@ -1240,7 +1249,7 @@ function vistaAccesos(){
       nombres.map(n => { const u = (a.usuarios||[]).find(x=>x.nombre===n); const on = u && u.activo !== false;
         return `<div class="furg"><div class="top"><b>${esc(n)}</b><button class="sw ${on?'on':''}" onclick="accToggle('${esc(n).replace(/'/g,"\\'")}')">${on?'Con acceso':'Sin acceso'}</button></div>
           ${on?`<div class="codigo"><span class="sel">${esc(u.codigo)}</span><select onchange="accRol('${esc(n).replace(/'/g,"\\'")}',this.value)"><option value="tecnico" ${u.rol!=='admin'?'selected':''}>Técnico</option><option value="admin" ${u.rol==='admin'?'selected':''}>Administrador</option></select></div>
-          <div class="row2" style="margin-top:10px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Hola '+n.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')')}">Enviar por WhatsApp</a><button class="btn sec2" onclick="accNuevo('${esc(n).replace(/'/g,"\\'")}')">Nuevo código</button></div>`:''}</div>`; }).join('') +
+          <div class="row2" style="margin-top:10px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Hola '+n.split(' ')[0]+', esta es la app de carga de Dreamscape: '+url+'#k='+u.codigo+'  (tu código: '+u.codigo+')')}">Enviar por WhatsApp</a><button class="btn sec2" onclick="accNuevo('${esc(n).replace(/'/g,"\\'")}')">Nuevo código</button></div>`:''}<button class="link danger" style="padding:10px 0 0" onclick="borrarPersona('${esc(n).replace(/'/g,"\\'")}')">Eliminar persona</button></div>`; }).join('') +
       `<div class="meta" style="margin:8px 4px">Tu código de administrador es el de tu enlace. Si alguien pierde el móvil, pulsa «Nuevo código» y el anterior deja de funcionar.</div>`;
   })();
   return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
@@ -1269,6 +1278,11 @@ async function guardarPersona(){
       <div class="row2" style="margin-top:12px"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${tel?telIntl(tel):''}?text=${encodeURIComponent(msg)}">Enviar por WhatsApp</a><button class="btn sec2" onclick="copiar(${JSON.stringify(msg).replace(/"/g,'&quot;')})">Copiar enlace</button></div>
       <button class="link" onclick="cerrarSheet()">Hecho</button>`);
   }catch(e){ b.disabled = false; b.textContent = 'Crear'; toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+async function borrarPersona(n){
+  if(!confirm('¿Eliminar a '+n+'? Perderá el acceso a la app y se borrará de la pestaña Equipo.')) return;
+  try{ S.acc = await call('ckBorrarPersona', n); vib(20); toast(n+' eliminado'); render(); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
 }
 async function accGuardar(l, msg){ try{ S.acc.usuarios = await call('ckGuardarUsuarios', l); toast(msg); render(); }catch(e){ toast('No se guardó: '+e.message); } }
 function accToggle(n){ const l = (S.acc.usuarios||[]).slice(); const u = l.find(x=>x.nombre===n); if(u) u.activo = u.activo === false; else l.push({ nombre:n, rol:'tecnico', activo:true }); accGuardar(l, 'Acceso actualizado'); }
