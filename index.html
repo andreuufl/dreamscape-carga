@@ -1017,7 +1017,8 @@ function abrirMenu(){
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     <div class="mgrp">Gestión</div>
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
-    ${it('users','Accesos del equipo','verAccesos()','Códigos para el equipo')}
+    ${it('users','Accesos del equipo','verAccesos()','Códigos y permisos del equipo')}
+    ${it('plus','Nueva persona','verAccesos().then(nuevaPersona)','Dar acceso a alguien a la app')}
     ${it('clip','Plantillas de material','verPlantillas()','Se aplican a un bolo en un toque')}
     ${it('box','Siempre llevar','editarSiempre()','Lo que va en todos los bolos')}
     ${it('checksq','Checklist de montaje','editarChecklist()','Pasos que se revisan en cada montaje')}
@@ -1670,7 +1671,10 @@ function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaE
 function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg => { reg.update().catch(()=>{}); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{});
+  let recargado = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(recargado || COLA.length) return; recargado = true; location.reload(); });
+}
 if(!KEY){ S.vista='login'; render(); setTimeout(()=>{ const i=$('#lgCod'); if(i) i.focus(); }, 300); }
 else arrancar();
 </script>
