@@ -408,10 +408,10 @@ function tarjetaBolo(p){
   return `<button class="card" onclick="abrir('${esc(p.num)}')">
     <div class="top"><span class="num">${esc(p.num)}${p.incidencias?`<span class="tag">${ic('alert','xs')} ${p.incidencias}</span>`:''}</span><span class="date">${esc(p.montaje)}</span></div>
     <div class="ev">${esc(p.evento)}</div>
-    <div class="bars">
+    ${p.archivado ? `<span class="pill">${esc(p.estado||'Terminado')}</span>` : `<div class="bars">
       <div class="bar"><small><span>${ic('truck','xs')} Carga</span><b>${p.cargados}/${p.total}</b></small><div class="track"><div class="fill" style="width:${pc}%"></div></div></div>
       <div class="bar"><small><span>${ic('home','xs')} Vuelta</span><b>${p.devueltos}/${p.total}</b></small><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div>
-    </div></button>`;
+    </div>`}</button>`;
 }
 function tarjetasPendientes(){ return (S.pendientes||[]).filter(x => esAdmin() || S.presus.some(p=>p.num===x.num)).map(x=>`<button class="card alerta" onclick="abrir('${esc(x.num)}')"><b>${ic('alert','s')} Material sin devolver</b><div class="meta">${esc(x.num)} · ${esc(x.evento)} · ${x.n} artículos</div></button>`).join(''); }
 function vistaLista(){
@@ -510,7 +510,7 @@ function vistaDet(){
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
-  if(!tot) body = `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
+  if(!tot) body = (p.archivado || (!S.actualizando && S.bolo)) ? `<div class="empty">${ic('box')}<div>${p.archivado ? 'Bolo terminado: su material ya no está en la pestaña Carga.' : 'Este bolo no tiene material en la pestaña Carga.'}</div></div>${tarjetaQuien()}` : `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
   else if(S.modo==='ruta'){ const r = vistaRuta(p, tot); body = r.body; foot0 = r.foot; }
   else if(S.modo==='montaje'){ const r = vistaMontaje(p, tot); body = r.body; foot0 = r.foot; }
   else {
@@ -617,6 +617,10 @@ function miConf(){ const u = ((S.yo||{}).usuario||{}).nombre || ''; return ((fic
 function tarjetaConfirmar(){
   if(esAdmin() || !S.bolo) return '';
   const c = miConf(), v = c.voy, pend = !v || !c.leido;
+  if(v && v.si){
+    if(c.leido) return `<div class="cfst" style="margin:0 0 12px">${ic('check','s')}<span>Confirmado que vas · material revisado<small>${esc(v.h)}</small></span><button onclick="confirmar('voy',null)">Cambiar</button></div>`;
+    return `<button class="ck" style="border:0;background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--sh)" onclick="confirmar('leido',true)"><span class="cb"></span><span><b>He revisado todo el material y lo tengo claro</b><small>Ya has confirmado que vas · ${esc(v.h)}</small></span></button>`;
+  }
   const voy = !v
     ? `<div class="meta" style="margin-top:2px">¿Vas a este bolo?</div><div class="row2" style="margin-top:8px"><button class="btn okb" onclick="confirmar('voy',true)">${ic('check','s')} Sí, voy</button><button class="btn sec2" onclick="noPuedo()">No puedo ir</button></div>`
     : `<div class="cfst ${v.si?'':'no'}">${ic(v.si?'check':'x','s')}<span>${v.si?'Confirmado: vas a este bolo':'Has avisado de que no puedes ir'}<small>${esc(v.h)}${v.nota?' · '+esc(v.nota):''}</small></span><button onclick="confirmar('voy',null)">Cambiar</button></div>`;
@@ -1441,7 +1445,15 @@ function abrirMas(){
     ${it('book','Dossier del bolo (PDF)','dossier(false)','Fotos del montaje, el día, material y valoración')}
     ${esAdmin()? it('mail','Enviarme el dossier por correo','dossier(true)','Para reenviarlo al cliente'):''}
     ${esAdmin()? it('clip','Guardar como plantilla','plantillaDeBolo()','Para reutilizar este material en otros bolos'):''}
-    ${esAdmin()? it('receipt','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}`}`);
+    ${esAdmin()? it('receipt','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}
+    ${esAdmin()? `<button class="mitem" onclick="cancelarBolo()"><span class="ic" style="color:var(--bad)">${ic('x')}</span><span><b class="danger">Cancelar bolo</b><small>Se borra de la app, Carga, EVENTOS, calendario, reservas y Bolos</small></span></button>`:''}`}`);
+}
+async function cancelarBolo(){
+  const num = S.num, p = S.presus.find(x=>x.num===num) || {};
+  if(!confirm(`¿Cancelar el bolo ${num} · ${p.evento||''}?\n\nSe borrará de la app, de la pestaña Carga, de EVENTOS, del calendario, de las reservas y de Bolos. No se puede deshacer.`)) return;
+  cerrarSheet();
+  try{ await call('ckCancelarBolo', num); S.presus = S.presus.filter(x=>x.num!==num); vib(30); S.vista='lista'; render(); toast('Bolo cancelado. EVENTOS y calendario se limpian en unos minutos'); }
+  catch(e){ toast(e.red?'Necesitas conexión para cancelar':'Error: '+e.message); }
 }
 async function tokenCliente(){
   const f = ficha();
