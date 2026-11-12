@@ -1,5 +1,5 @@
 // Dreamscape · Carga — funciona sin cobertura
-const V = 'carga-v22';
+const V = 'carga-v23';
 const BASE = ['./', 'index.html', 'jsqr.js', 'qrcode.js', 'manifest.json', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(BASE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
@@ -15,7 +15,25 @@ self.addEventListener('fetch', e => {
     e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(n => { const c = n.clone(); caches.open(V).then(x => x.put(e.request, c)); return n; })));
   }
 });
+// Avisos push: el servidor solo «despierta» al móvil; aquí se piden los avisos pendientes y se muestran
+self.addEventListener('push', e => {
+  e.waitUntil((async () => {
+    let l = [];
+    try {
+      const c = await caches.open('ck-cfg'), r = await c.match('cfg'), cfg = await r.json();
+      const u = cfg.api + '?k=' + encodeURIComponent(cfg.k) + '&a=ckMisAvisos&p=%5B%5D&t=' + Date.now();
+      const j = await (await fetch(u, { credentials:'omit', cache:'no-store' })).json();
+      if (j.ok) l = j.r || [];
+    } catch (err) {}
+    if (!l.length) l = [{ titulo:'Dreamscape · Carga', cuerpo:'Tienes un aviso nuevo en la app' }];
+    for (const m of l.slice(-3)) await self.registration.showNotification(m.titulo, { body: m.cuerpo || '', icon:'icon-192.png', badge:'icon-192.png', tag: m.id || undefined, data: { num: m.num || '' } });
+  })());
+});
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(self.clients.matchAll({ type:'window', includeUncontrolled:true }).then(l => { for (const c of l) { if ('focus' in c) return c.focus(); } return self.clients.openWindow('./'); }));
+  const num = (e.notification.data || {}).num, url = './' + (num ? '?bolo=' + encodeURIComponent(num) : '');
+  e.waitUntil(self.clients.matchAll({ type:'window', includeUncontrolled:true }).then(l => {
+    for (const c of l) { if ('focus' in c) { if (num && 'navigate' in c) return c.navigate(url).then(w => (w||c).focus()).catch(() => c.focus()); return c.focus(); } }
+    return self.clients.openWindow(url);
+  }));
 });

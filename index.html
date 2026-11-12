@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.png">
 <title>Carga · Dreamscape</title>
-<script>try{var t=localStorage.getItem("ck_tema");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);if(localStorage.getItem("ck_big")==="1")document.documentElement.classList.add("big")}catch(e){}</script>
+<script>window.T0=Date.now();try{var t=localStorage.getItem("ck_tema");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);if(localStorage.getItem("ck_big")==="1")document.documentElement.classList.add("big")}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,460&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -269,6 +269,57 @@ button.furg.notas{display:block;width:100%;text-align:left}
 html.big body{zoom:1.15}
 html.big .item{min-height:84px}html.big .chk{transform:scale(1.15)}
 html.big .btn{padding:19px}
+
+/* ===== Mejoras 2 ===== */
+.card{position:relative;overflow:hidden}
+.card[class*="est-"]{border-left:5px solid var(--line)}
+.card.est-pend{border-left-color:#9aa3b2}.card.est-prep{border-left-color:var(--gold)}.card.est-curso{border-left-color:var(--dev)}.card.est-vuelta{border-left-color:var(--warn)}.card.est-listo{border-left-color:var(--ok)}.card.est-fin{border-left-color:var(--line)}
+.est{display:inline-block;margin-left:8px;font-size:11px;font-weight:750;letter-spacing:.02em;padding:2px 8px;border-radius:8px;vertical-align:2px;background:var(--card2);color:var(--mut)}
+.est.est-prep{background:rgba(201,166,107,.18);color:#9a7a3f}.est.est-curso{background:var(--devbg);color:var(--dev)}.est.est-vuelta{background:var(--warnbg);color:var(--warn)}.est.est-listo{background:var(--okbg);color:var(--ok)}
+:root[data-theme="dark"] .est.est-prep{color:var(--gold2)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .est.est-prep{color:var(--gold2)}}
+.card .cover{height:92px;margin:-15px -16px 12px;background:center/cover no-repeat}
+.hoy.conpt{background:linear-gradient(160deg,rgba(15,26,43,.55),rgba(15,26,43,.94) 70%),var(--pt) center/cover}
+header.conpt{background:linear-gradient(rgba(15,26,43,.72),rgba(15,26,43,.96)),var(--pt) center/cover}
+.micon{width:40px;height:40px;border-radius:11px;background:var(--card2);display:grid;place-items:center;flex:none;color:var(--mut)}
+.ztag{display:inline-flex;align-items:center;gap:2px;font-weight:650}
+.mtools{display:flex;gap:8px;align-items:center;margin:4px 0 6px}
+.msearch{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;font:inherit;font-size:16px;background:var(--card);color:var(--txt);-webkit-appearance:none}
+.seg.mini{margin:0;flex:none;background:var(--card);border:1.5px solid var(--line)}.seg.mini button{white-space:nowrap;padding:8px 10px;font-size:13px;color:var(--mut)}.seg.mini button.on{background:var(--navy);color:#fff}
+.undo{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 88px);z-index:30;background:#16243a;color:#fff;border-radius:16px;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:10px;font-size:14.5px;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateY(160%);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none}
+.undo.show{transform:none;opacity:1;pointer-events:auto}
+.undo span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo button{background:var(--gold);color:#16243a;font-weight:800;padding:9px 14px;border-radius:11px;flex:none}
+.micwrap{position:relative;display:flex;gap:8px;align-items:flex-start}.micwrap textarea,.micwrap input{flex:1;min-width:0}
+.mic{width:46px;height:46px;flex:none;border-radius:13px;background:var(--card2);border:1.5px solid var(--line);display:grid;place-items:center;color:var(--txt)}
+.mic.on{background:var(--bad);color:#fff;border-color:var(--bad);animation:blink 1s infinite}
+.chatin .mic{height:50px}
+.zbox{display:flex;gap:8px;align-items:flex-end;margin:4px 0 6px}.zbox .btn{width:auto;padding:13px 16px}
+.guia{text-align:center;padding:6px 4px 0}.guia .gico{font-size:54px;margin:8px 0 6px;animation:pop .5s cubic-bezier(.2,.8,.2,1.4)}
+.guia h3{font-size:22px}.guia p{color:var(--mut);font-size:16px;line-height:1.45;margin:8px 6px 18px;min-height:70px}
+.gdots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}.gdots i{width:7px;height:7px;border-radius:4px;background:var(--line);transition:all .25s}.gdots i.on{width:22px;background:var(--gold)}
+.splash{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 70% 20%,#22385c 0%,#0f1a2b 55%,#0a111c 100%);display:grid;place-items:center;transition:opacity .45s ease,visibility .45s}
+.splash.fuera{opacity:0;visibility:hidden}
+.sp-in{text-align:center;animation:spin .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes spin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.sp-logo{font-family:Fraunces,"Iowan Old Style",Georgia,serif;color:#ece7de;font-size:26px;letter-spacing:.32em;margin-left:.32em}
+.sp-sub{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--gold);font-size:10px;letter-spacing:.3em;text-transform:uppercase;margin-top:10px}
+.sp-line{width:120px;height:2px;background:rgba(255,255,255,.1);margin:26px auto 0;border-radius:2px;overflow:hidden}.sp-line i{display:block;height:100%;width:40%;background:var(--gold);animation:spl 1.1s ease-in-out infinite}
+@keyframes spl{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+main.anim{animation:paso .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes paso{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.item.on.pop .chk svg{animation:tick .4s ease}
+@keyframes tick{0%{stroke-dasharray:0 30}100%{stroke-dasharray:30 30}}
+.confeti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.confeti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:cae linear forwards}
+@keyframes cae{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
+.panelbtn{display:flex!important;align-items:center;gap:12px;text-align:left}.panelbtn span{flex:1}.panelbtn small{display:block;color:var(--mut);font-size:13px}
+button.pcard{display:block;width:100%;text-align:left}.pcard.tarde{box-shadow:0 0 0 2px var(--bad)}
+.pline{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:12px 0 10px;position:relative}
+.ps{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;text-align:center}
+.ps i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);background:var(--card)}.ps.ok i{background:var(--ok);border-color:var(--ok)}
+.ps b{font-weight:700;color:var(--mut)}.ps.ok b{color:var(--txt)}.ps small{color:var(--mut);font-variant-numeric:tabular-nums}
+.pbar{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12.5px;color:var(--mut)}
+.ptecs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 @media print{ .noprint,.toast,.foot,.tabbar{display:none!important} body{background:#fff} main.etiq{padding:0} .labels{grid-template-columns:repeat(3,1fr)} .sec{margin-top:8px} }
 .redbar{position:fixed;left:0;right:0;top:0;z-index:40;background:#b45309;color:#fff;text-align:center;font-size:13px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px}
 .login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px max(28px,env(safe-area-inset-left));background:radial-gradient(120% 80% at 50% 0%,#1d2f4d 0%,var(--navy) 60%);color:#fff;max-width:none}
@@ -358,6 +409,7 @@ a.copia{display:flex;justify-content:space-between;align-items:center;text-decor
 </head>
 <body>
 <div id="app"></div>
+<div id="splash" class="splash"><div class="sp-in"><div class="sp-logo">DREAMSCAPE</div><div class="sp-sub">Events &amp; Productions</div><div class="sp-line"><i></i></div></div></div>
 <div class="sheet-bg" id="sbg" onclick="cerrarSheet()"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
@@ -400,7 +452,14 @@ const ICO = {
   star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>', bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
   book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>', mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
   receipt:'<path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h5"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/>'
+  euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/>',
+  bulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/>',
+  spk:'<rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="6.5" r="1.2"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/>',
+  plug:'<path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0zM12 17v5"/>',
+  truss:'<path d="M3 4h18M3 20h18M3 4l6 16M9 4l6 16M15 4l6 16M9 20l6-16M3 20l6-16M15 20l6-16"/>',
+  screen:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  cloud:'<path d="M17.5 19H8a6 6 0 1 1 5.7-7.9A4.5 4.5 0 1 1 17.5 19z"/>'
 };
 const ic = (n, c) => `<svg class="i ${c||''}" viewBox="0 0 24 24" aria-hidden="true">${ICO[n]||''}</svg>`;
 let TEMA = 'auto'; try{ TEMA = localStorage.getItem('ck_tema') || 'auto'; }catch(e){}
@@ -445,8 +504,10 @@ async function cargarLista(){
   try{ S.presus = await call('ckPresupuestos'); }catch(e){ toast('Error: '+e.message); }
   S.listo = true;
   if(S.vista==='lista') render();
+  ocultarSplash();
   cargarAvisos();
   avisarRecordatorios();
+  cargarPortadas(); revisarPush();
 }
 function filtrados(){
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -459,8 +520,9 @@ function filtrados(){
 }
 function tarjetaBolo(p){
   const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
-  return `<button class="card" onclick="abrir('${esc(p.num)}')">
-    <div class="top"><span class="num">${esc(p.num)}${p.incidencias?`<span class="tag">${ic('alert','xs')} ${p.incidencias}</span>`:''}</span><span class="date">${esc(p.montaje)}</span></div>
+  const [ec, et] = estadoBolo(p), pt = portada(p.num);
+  return `<button class="card est-${ec}" onclick="abrir('${esc(p.num)}')">${pt?`<div class="cover" style="background-image:url(${pt})"></div>`:''}
+    <div class="top"><span class="num">${esc(p.num)}<span class="est est-${ec}">${et}</span>${p.incidencias?`<span class="tag">${ic('alert','xs')} ${p.incidencias}</span>`:''}</span><span class="date">${esc(p.montaje)}</span></div>
     <div class="ev">${esc(p.evento)}</div>
     ${p.archivado ? `<span class="pill">${esc(p.estado||'Terminado')}</span>` : `<div class="bars">
       <div class="bar"><small><span>${ic('truck','xs')} Carga</span><b>${p.cargados}/${p.total}</b></small><div class="track"><div class="fill" style="width:${pc}%"></div></div></div>
@@ -492,7 +554,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${hero}${esAdmin()?tarjetasAvisos():''}
+    ${semana()}${tarjetasPendientes()}${hero}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -524,7 +586,7 @@ function vistaFurgos(){
 /* ---------- DETALLE ---------- */
 async function abrir(num, refresco){
   const nuevo = !refresco, auto = refresco==='auto';
-  const antes = auto ? JSON.stringify([S.items, S.bolo]) : ''; S.vista='det'; S.num=num; if(nuevo){ const cm = cacheGet('ckMaterial'+JSON.stringify([num])), p0 = S.presus.find(x=>x.num===num); const fresco = !!cm && (!p0 || !p0.total || (cm.items.length===p0.total && cm.items.filter(i=>i.cargado).length===p0.cargados && cm.items.filter(i=>i.devuelto).length===p0.devueltos)); S.items = fresco ? cm.items : []; S.opciones = cm ? cm.opciones : []; S.bolo = cacheGet('ckBolo'+JSON.stringify([num])) || null; S.gastos = cacheGet('ckGastos'+JSON.stringify([num])) || []; S.fotos = null; }
+  const antes = auto ? JSON.stringify([S.items, S.bolo]) : ''; S.vista='det'; S.num=num; if(nuevo){ const cm = cacheGet('ckMaterial'+JSON.stringify([num])), p0 = S.presus.find(x=>x.num===num); const fresco = !!cm && (!p0 || !p0.total || (cm.items.length===p0.total && cm.items.filter(i=>i.cargado).length===p0.cargados && cm.items.filter(i=>i.devuelto).length===p0.devueltos)); S.items = fresco ? cm.items : []; S.opciones = cm ? cm.opciones : []; S.bolo = cacheGet('ckBolo'+JSON.stringify([num])) || null; S.gastos = cacheGet('ckGastos'+JSON.stringify([num])) || []; S.fotos = null; S.qm = ''; }
   const p = S.presus.find(x=>x.num===num);
   if(nuevo){
     const f = (S.bolo||{}).ficha || {};
@@ -553,16 +615,16 @@ function vistaDet(){
   const lista = S.modo==='carga' || S.modo==='dev';
   const k = S.modo==='carga' ? 'cargado' : 'devuelto';
   const hk = S.modo==='carga' ? 'hCarga' : 'hDev';
-  const IV = lista ? itemsVista() : S.items;
+  const IV0 = lista ? itemsVista() : S.items, IV = IV0.filter(coincide);
   const tot = S.items.length, hechos = S.items.filter(i=>i[k]).length;
   const pend = IV.filter(i=>!i[k]), ok = IV.filter(i=>i[k]);
-  const vt = IV.length, vh = ok.length;
+  const vt = IV0.length, vh = IV0.filter(i=>i[k]).length;
   let foot0 = null;
   const fila = i => `<div class="swipe"><div class="under l">${ic('check','s')} ${i[k]?'Desmarcar':(S.modo==='carga'?'Cargado':'Devuelto')}</div><div class="under">${ic('alert','s')} Incidencia</div><div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" id="it${i.fila}" data-f="${i.fila}" onclick="if(!SW.moved)toggle(${i.fila})">
       <div class="chk">${i[k]?ic('check'):''}</div>
-      ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:''}<div class="qty">${esc(i.cant)}</div>
+      ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
@@ -572,7 +634,8 @@ function vistaDet(){
   else {
     const f = ficha();
     const pct = vt ? vh/vt : 0, CIR = 2*Math.PI*27, nInc = S.items.filter(i=>i.incidencia).length;
-    const grupos = agrupar(pend);
+    const grupos = agrupacion()==='zona' && hayZonas() ? agruparZona(pend) : agrupar(pend);
+    const herr = S.items.length > 6 || hayZonas() ? `<div class="mtools"><input id="bsq" class="msearch" type="search" placeholder="Buscar en el material" value="${esc(S.qm||'')}" oninput="filtrarMat(this.value)" autocomplete="off">${hayZonas()?`<div class="seg mini"><button class="${agrupacion()==='zona'?'on':''}" onclick="ponerAgr('zona')">Por zona</button><button class="${agrupacion()!=='zona'?'on':''}" onclick="ponerAgr('cat')">Por tipo</button></div>`:''}</div>${S.qm && !IV.length ? `<div class="meta" style="margin:4px 4px 14px">Nada coincide con «${esc(S.qm)}».</div>` : ''}` : '';
     const listaPend = !pend.length ? '' : grupos.length>1
       ? grupos.map(([c,l])=>`<div class="sec">${esc(c)} <span class="cnt">${l.length}</span></div>${l.map(fila).join('')}`).join('')
       : `<div class="sec">Pendiente <span class="cnt">${pend.length}</span></div>${pend.map(fila).join('')}`;
@@ -590,6 +653,7 @@ function vistaDet(){
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn" onclick="verFactura()">${ic('receipt','s')} Factura</button>`:''}<button class="btn sec2" onclick="pedirValoracion()">${ic('star','s')} Valoración</button></div></div>`:''}
     ${S.modo==='dev' && esAdmin() ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
     ${tarjetaNotas()}
+    ${herr}
     ${listaPend}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${ok.map(fila).join('')}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${S.modo==='carga'?'cargado':'devuelto'}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
@@ -601,7 +665,8 @@ function vistaDet(){
   const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo==='carga'
     ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${esAdmin()?'ruta':'dev'}', ${faltan})">${hechos===tot?(esAdmin()?'Siguiente: la ruta':'Siguiente: descarga'):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
     : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('send','s')+' Terminar y enviar'))}</button></div>`;
-  return `<header>
+  const ptd = portada(S.num);
+  return `<header ${ptd?`class="conpt" style="--pt:url(${ptd})"`:''}>
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.num)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
@@ -618,7 +683,7 @@ function stepper(tot){
 }
 function irA(m, faltan){
   if(faltan && !confirm(`Faltan ${faltan} artículos por cargar. ¿Seguir igualmente?`)) return;
-  S.modo = m; render(); window.scrollTo(0,0);
+  S.modo = m; render(); window.scrollTo(0,0); animarPaso();
 }
 function destino(l){ return String(l||'').replace(/["“”«»]/g,'').replace(/\s*\|\s*/g,', ').trim(); }
 function tel(t){ return String(t||'').replace(/[^\d+]/g,''); }
@@ -910,7 +975,7 @@ async function guardarFichaUI(){
 /* ---------- CATEGORÍAS DEL MATERIAL ---------- */
 function cargarCatalogo(){
   if(!S.catalogo){ const c = cacheGet('ckCatalogo[]'); if(c){ S.catalogo = c; S.catIdx = null; } }
-  if(cargarCatalogo.hecho) return; cargarCatalogo.hecho = true;
+  if(cargarCatalogo.hecho) return; cargarCatalogo.hecho = true; cargarZonas();
   call('ckCatalogo').then(c => { if(Array.isArray(c)){ S.catalogo = c; S.catIdx = null; if(S.vista==='det') render(); } }).catch(()=>{ cargarCatalogo.hecho = false; });
 }
 function catDe(mat){
@@ -1015,7 +1080,7 @@ function actualizarResumen(){
 }
 function hora(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${z(d.getDate())}/${z(d.getMonth()+1)} ${z(d.getHours())}:${z(d.getMinutes())}`; }
 
-async function toggle(fila, soloMarcar){
+async function toggle(fila, soloMarcar, sinUndo){
   const it = S.items.find(i=>i.fila===fila); if(!it) return;
   if(soloMarcar && it[S.modo==='carga'?'cargado':'devuelto']) return;
   const modo = S.modo, k = modo==='carga'?'cargado':'devuelto', hk = modo==='carga'?'hCarga':'hDev';
@@ -1024,6 +1089,8 @@ async function toggle(fila, soloMarcar){
   vib(it[k] ? 15 : [8,40,8]);
   S.ultimo = fila; clearTimeout(toggle.t); toggle.t = setTimeout(()=>{ S.ultimo = null; }, 700);
   actualizarResumen(); if(!SCAN) render();
+  if(!SCAN && !sinUndo) mostrarDeshacer(fila, it[k]);
+  if(!SCAN && it[k]){ const lv = itemsVista(); if(lv.length && lv.every(x=>x[k])) setTimeout(confeti, 150); }
   guardarMatCache();
   try{ const r = await enviar('ckMarcar', fila, S.num, it.material, modo, it[k]); if(r!=null){ it[hk] = r; guardarMatCache(); } if(!SCAN) render(); }
   catch(e){ it[k]=prev[0]; it[hk]=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
@@ -1046,11 +1113,12 @@ function abrirInc(fila){
   incFila=fila; incSel=it.incidencia||'';
   $('#sheet').innerHTML = `<h3>${esc(it.material)}</h3><div class="meta">Cantidad: ${esc(it.cant)}</div>
     <div class="chips">${S.opciones.map(o=>`<button class="chip ${o===incSel?'on':''}" onclick="selInc(this,'${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}</div>
-    <textarea id="nota" placeholder="Nota (qué ha pasado, cuántas unidades…)">${esc(it.nota)}</textarea>
+    <div class="micwrap"><textarea id="nota" placeholder="Nota (qué ha pasado, cuántas unidades…)">${esc(it.nota)}</textarea>${micBtn('nota')}</div>
     <div id="incFotos"></div>
     <label class="btn sec2 fotobtn" for="incFoto" style="margin:0 0 10px">📷 Añadir foto</label><input type="file" id="incFoto" accept="image/*" capture="environment" hidden onchange="fotoIncidencia(this)">
     <div class="row2"><button class="btn sec2" onclick="guardarInc(true)">Quitar</button><button class="btn" onclick="guardarInc(false)">Guardar</button></div>
     <button class="link" onclick="cerrarSheet();verHistorial('${esc(it.material).replace(/'/g,"\\'")}','${esc(it.codigo||'')}')">Ver historial de este equipo</button>
+    ${esAdmin()?`<div class="zbox"><label class="fld" style="margin:0;flex:1"><span>Zona del almacén</span><input id="zIn" list="zList" autocomplete="off" placeholder="Ej. Estante A, Jaula de cables" value="${esc(zonaDe(it.material))}"></label><datalist id="zList">${zonasLista().map(z=>`<option value="${esc(z)}">`).join('')}</datalist><button class="btn sec2" onclick="guardarZona(this.dataset.n)" data-n="${esc(it.material)}">Guardar</button></div>`:''}
     ${esAdmin()?`<button class="link" style="padding-top:0" onclick="verFotoMat(this.dataset.n)" data-n="${esc(it.material)}">🖼 ${fotoMat(it.material)?'Ver o cambiar la foto del material':'Añadir foto del material (para reconocerlo)'}</button>`:''}`;
   $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open'));
   cargarFotos().then(()=>pintarFotosInc(it.material));
@@ -1071,7 +1139,7 @@ async function guardarInc(quitar){
 /* =========================================================
    SIN COBERTURA: caché de lecturas y cola de cambios
    ========================================================= */
-const LECT = ['ckCatalogo','ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes','ckAvisos','ckMantenimiento','ckReparaciones'];
+const LECT = ['ckZonas','ckCatalogo','ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes','ckAvisos','ckMantenimiento','ckReparaciones'];
 function cacheGet(k){ try{ const v = localStorage.getItem('ck_c_'+k); return v ? JSON.parse(v) : undefined; }catch(e){ return undefined; } }
 function cacheSet(k, v){ try{ localStorage.setItem('ck_c_'+k, JSON.stringify(v)); }catch(e){ limpiarCache(); } }
 function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_c_ckMaterial')===0||k.indexOf('ck_c_ckBolo')===0).slice(0,-6).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
@@ -1139,7 +1207,7 @@ function salirSesion(){
 }
 async function arrancar(){
   S.yo = S.yo || cacheGet('ckYo[]') || null;
-  cargarLista(); cargarFurgos(); vaciarCola();
+  cargarLista(); cargarFurgos(); vaciarCola(); atajoInicial(); guiaPrimeraVez();
   try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); }
   catch(e){ if(!e.red && /código|acceso/i.test(e.message)){ salirSesion(); } }
 }
@@ -1159,6 +1227,7 @@ function abrirMenu(){
     ${it('clock','Mantenimiento','verMant()','ITV, revisiones, pilas, lámparas…')}
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     <div class="mgrp">Gestión</div>
+    ${it('today','Panel del día','verPanel()','Quién ha salido, llegado o va con retraso')}
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
     ${it('users','Accesos del equipo','verAccesos()','Códigos y permisos del equipo')}
     ${it('plus','Nueva persona','verAccesos().then(nuevaPersona)','Dar acceso a alguien a la app')}
@@ -1170,7 +1239,9 @@ function abrirMenu(){
     <div class="mgrp">App</div>
     <button class="mitem" onclick="cambiarTema()"><span class="ic">${ic('moon')}</span><span><b>Tema: ${tema}</b><small>Toca para cambiar · Automático sigue al iPhone</small></span></button>
     <button class="mitem" onclick="cambiarTexto()"><span class="ic" style="font-weight:800">Aa</span><span><b>Texto grande: ${textoGrande()?'Sí':'No'}</b><small>Letras y botones más grandes, para usar con guantes o con poca luz</small></span></button>
-    ${('Notification' in window) && Notification.permission!=='granted' ? it('bell','Activar avisos en el móvil','activarNotis()','Recordatorio de tus bolos el día antes y el mismo día') : ''}
+    ${('Notification' in window) ? it('bell', Notification.permission==='granted' ? 'Avisos en el móvil: activados' : 'Activar avisos en el móvil','activarNotis()', Notification.permission==='granted' ? 'Toca para enviarte un aviso de prueba' : 'Bolo de mañana, notas del equipo y cambios, aunque la app esté cerrada') : ''}
+    ${it('book','Guía rápida','abrirGuia()','Cómo se usa la app en 1 minuto')}
+    ${it('link','Atajos','verAtajos()','Escanear o abrir el bolo de hoy en un toque')}
     ${it('download','Instalar en el móvil','ayudaInstalar()')}
     ${it('logout','Cerrar sesión','salirSesion()')}`);
 }
@@ -1186,7 +1257,8 @@ function diaDe(ts){ const d = new Date(ts); d.setHours(0,0,0,0); return d.getTim
 function heroBolo(p, lbl, cls){
   const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
   const paso = !p.total ? 'Ver el bolo' : p.cargados < p.total ? (p.cargados ? 'Seguir cargando' : 'Empezar a cargar') : p.devueltos === 0 ? (esAdmin() ? 'Ir al evento' : 'Marcar la descarga') : p.devueltos < p.total ? 'Terminar la vuelta' : 'Ver el bolo';
-  return `<div class="hoy ${cls||''}"><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
+  const pt = portada(p.num);
+  return `<div class="hoy ${cls||''} ${pt?'conpt':''}" ${pt?`style="--pt:url(${pt})"`:''}><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
     ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
     <div class="hst"><div><span>Carga</span><b>${p.cargados}/${p.total}</b><div class="track"><div class="fill" style="width:${pc}%"></div></div></div><div><span>Vuelta</span><b>${p.devueltos}/${p.total}</b><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div></div>
     ${(p.tecnicos||[]).length?`<div class="htec">${ic('users','xs')} ${esc(p.tecnicos.join(', '))}</div>`:''}
@@ -1279,7 +1351,7 @@ function abrirGasto(){
     <div id="gPer" class="fld"><span>Persona</span><div class="chips" style="margin:6px 0 0">${tecs.map((t,i)=>`<button class="chip gp ${i===0?'on':''}" data-n="${esc(t)}" onclick="document.querySelectorAll('.gp').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${esc(t)}</button>`).join('')}</div></div>
     <label class="fld"><span id="gLbl">Horas</span><input id="gCant" inputmode="decimal" value="${hs||''}" placeholder="0"></label>
     ${hs?`<div class="meta" id="gHint" style="margin:-4px 0 10px">De la llegada al fin de montaje: ${hs} h</div>`:''}
-    <label class="fld"><span>Nota</span><input id="gNota" autocomplete="off" placeholder="Opcional"></label>
+    <div class="fld"><span>Nota</span><div class="micwrap"><input id="gNota" autocomplete="off" placeholder="Opcional">${micBtn('gNota')}</div></div>
     <div id="gFotoBox"></div>
     <label class="btn sec2 fotobtn" for="gFoto">📷 Foto del ticket</label><input type="file" id="gFoto" accept="image/*" capture="environment" hidden onchange="fotoTicket(this)">
     <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="gBtn" onclick="guardarGasto()">Guardar</button></div>`);
@@ -1503,6 +1575,8 @@ function abrirMas(){
     ${it('nav','Modo en ruta',`cerrarSheet();abrirEnRuta('${esc(p.num||S.num)}')`,'Hora, dirección y llamadas en grande')}
     ${it('checksq','Resumen del bolo','abrirResumenBolo()','Horas, km y gastos al terminar')}
     ${esAdmin()? it('users','Repartir material','abrirReparto()','Quién carga cada cosa · cada uno ve «Lo mío»'):''}
+    ${esAdmin()? it('camera','Foto de portada','abrirPortada()','Para reconocer el bolo de un vistazo'):''}
+    ${esAdmin()? it('clip','Copiar de otro bolo','abrirCopiar()','Material y equipo de un bolo anterior'):''}
     ${!esAdmin() ? '' : `${it('plus','Añadir material','abrirExtra()','Escaneando el QR o desde el inventario')}
     ${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
     ${it('link','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
@@ -1575,9 +1649,15 @@ function avisarRecordatorios(){
     <button class="btn" style="margin-top:10px" onclick="cerrarSheet()">Entendido</button>`);
 }
 async function activarNotis(){
-  try{ const r = await Notification.requestPermission(); toast(r==='granted' ? 'Avisos activados' : 'Avisos no activados'); }
-  catch(e){ toast('Este móvil no permite avisos. Instala la app en la pantalla de inicio'); }
   cerrarSheet();
+  if(esIOSsinInstalar()){ toast('En iPhone, primero instala la app en la pantalla de inicio'); setTimeout(ayudaInstalar, 300); return; }
+  try{
+    const r = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if(r !== 'granted'){ toast('Avisos no activados'); return; }
+    if(!pushPosible()){ toast('Avisos activados (solo con la app abierta en este móvil)'); return; }
+    toast('Activando avisos…');
+    try{ await suscribirPush(true); toast('Avisos activados: te llega uno de prueba'); }catch(e){ toast(e.red ? 'Necesitas conexión para activar los avisos' : 'No se pudieron activar: '+e.message); }
+  }catch(e){ toast('Este móvil no permite avisos. Instala la app en la pantalla de inicio'); }
 }
 function calendario(){
   const p = S.presus.find(x=>x.num===S.num)||{}, f = ficha();
@@ -1984,7 +2064,7 @@ function abrirNotas(){
   const c = ficha().chat || [];
   abrirSheet(`<h3>${ic('msg')} Notas del equipo</h3><div class="meta">Las ve todo el equipo de este bolo.</div>
     <div class="chat" id="chat">${burbujas(c)}</div>
-    <div class="chatin"><textarea id="ntx" rows="2" placeholder="Escribe una nota…"></textarea><button class="btn" id="nBtn" onclick="enviarNota()" aria-label="Enviar">${ic('send','s')}</button></div>`);
+    <div class="chatin"><textarea id="ntx" rows="2" placeholder="Escribe una nota…"></textarea>${micBtn('ntx')}<button class="btn" id="nBtn" onclick="enviarNota()" aria-label="Enviar">${ic('send','s')}</button></div>`);
   marcarLeidas(S.num, c.length);
   setTimeout(()=>{ const ch = $('#chat'); if(ch) ch.scrollTop = ch.scrollHeight; }, 50);
   const num = S.num;
@@ -2020,7 +2100,7 @@ function abrirResumenBolo(){
     ${mio ? `<div class="done-banner">${ic('check','s')} Confirmado ${esc(mio.hora)} · ${mio.horas} h${mio.km?' · '+mio.km+' km':''}</div>` : ''}
     <div class="row2"><label class="fld"><span>Mis horas</span><input id="rH" inputmode="decimal" value="${mio ? mio.horas : (misHoras || hs || '')}"></label><label class="fld"><span>Km (opcional)</span><input id="rK" inputmode="decimal" value="${mio && mio.km ? mio.km : ''}"></label></div>
     ${hs && !mio ? `<div class="meta" style="margin:-4px 0 10px">De la llegada al fin de montaje: ${hs} h</div>` : ''}
-    <label class="fld"><span>Nota (opcional)</span><input id="rN" autocomplete="off" value="${esc(mio ? mio.nota : '')}" placeholder="Algo a destacar del bolo"></label>
+    <div class="fld"><span>Nota (opcional)</span><div class="micwrap"><input id="rN" autocomplete="off" value="${esc(mio ? mio.nota : '')}" placeholder="Algo a destacar del bolo">${micBtn('rN')}</div></div>
     ${otros.length ? `<div class="sec" style="margin-top:6px">Equipo</div>${otros.map(([n,r])=>`<div class="meta" style="margin:4px 4px">${esc(n)}: ${r.horas} h${r.km?' · '+r.km+' km':''} · ${esc(r.hora)}${r.nota?' · «'+esc(r.nota)+'»':''}</div>`).join('')}` : ''}
     <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet();abrirGasto()">+ Gasto</button><button class="btn" id="rBtn" onclick="confirmarResumen(${misHoras})">${mio?'Actualizar':'Confirmar'}</button></div>`);
 }
@@ -2055,7 +2135,7 @@ async function cargarFotosMat(){
 function verFotoMat(nombre){
   const f = fotoMat(nombre);
   abrirSheet(`<h3>${esc(nombre)}</h3>${f?`<img src="${f}" class="prev" style="width:100%;margin:12px 0;border-radius:16px">`:'<div class="meta" style="margin:12px 0">Sin foto todavía.</div>'}
-    ${esAdmin()?`<label class="btn sec2 fotobtn" for="fmIn">📷 ${f?'Cambiar foto':'Añadir foto'}</label><input type="file" id="fmIn" accept="image/*" capture="environment" hidden data-n="${esc(nombre)}" onchange="subirFotoMat(this)">${f?`<button class="link" onclick="quitarFotoMat(this.dataset.n)" data-n="${esc(nombre)}">Quitar foto</button>`:''}`:''}
+    ${esAdmin()?`<label class="btn sec2 fotobtn" for="fmatIn">📷 ${f?'Cambiar foto':'Añadir foto'}</label><input type="file" id="fmatIn" accept="image/*" capture="environment" hidden data-n="${esc(nombre)}" onchange="subirFotoMat(this)">${f?`<button class="link" onclick="quitarFotoMat(this.dataset.n)" data-n="${esc(nombre)}">Quitar foto</button>`:''}`:''}
     <button class="btn" style="margin-top:10px" onclick="cerrarSheet()">Cerrar</button>`);
 }
 async function subirFotoMat(inp){
@@ -2127,7 +2207,7 @@ function pintarScnt(){
   el.textContent = c + '/' + l.length; el.classList.toggle('ok', c===l.length && l.length>0);
   const fb = $('#sfalta'); if(fb){ const n = l.length - c; fb.textContent = n ? `Faltan ${n}` : 'Todo listo'; fb.classList.toggle('ok', !n); }
   const pn = $('#spanel'); if(pn && !pn.hidden) pintarPanelFalta();
-  if(c===l.length && l.length && !SCAN_FIN){ SCAN_FIN = true; vib([30,50,30,50,80]); const s = $('#scanlast'); if(s){ s.className='scanlast good'; s.innerHTML = `🎉 ${S.modo==='carga'?'Todo cargado':'Todo devuelto'}${soloMio()?' (lo tuyo)':''}<div style="margin-top:10px"><button class="btn gold" onclick="cerrarScan()">Terminar</button></div>`; } }
+  if(c===l.length && l.length && !SCAN_FIN){ SCAN_FIN = true; confeti(); const s = $('#scanlast'); if(s){ s.className='scanlast good'; s.innerHTML = `🎉 ${S.modo==='carga'?'Todo cargado':'Todo devuelto'}${soloMio()?' (lo tuyo)':''}<div style="margin-top:10px"><button class="btn gold" onclick="cerrarScan()">Terminar</button></div>`; } }
 }
 let SCAN_FIN = false;
 function pintarPanelFalta(){
@@ -2136,9 +2216,239 @@ function pintarPanelFalta(){
 }
 function verFaltaScan(){ const pn = $('#spanel'); if(!pn) return; pn.hidden = !pn.hidden; if(!pn.hidden) pintarPanelFalta(); }
 
+/* =========================================================
+   MEJORAS 2: push, búsqueda, deshacer, zonas, voz, guía, atajos,
+   portadas, colores, animaciones, iconos, panel del día, copiar bolo
+   ========================================================= */
+
+/* ---------- 1. NOTIFICACIONES PUSH (con la app cerrada) ---------- */
+function b64aBytes(s){ s = s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s += '='; const b = atob(s), u = new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u; }
+async function guardarCfgSW(){ try{ const c = await caches.open('ck-cfg'); await c.put('cfg', new Response(JSON.stringify({ api: API, k: KEY }))); }catch(e){} }
+function pushPosible(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+async function suscribirPush(probar){
+  if(!pushPosible() || Notification.permission !== 'granted') return false;
+  await guardarCfgSW();
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if(!sub){ const pub = await call('ckVapid'); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64aBytes(pub) }); }
+  await call('ckSuscribir', sub.toJSON());
+  try{ localStorage.setItem('ck_push', String(Date.now())); }catch(e){}
+  if(probar) try{ await call('ckProbarPush'); }catch(e){}
+  return true;
+}
+function revisarPush(){
+  // una vez al día renueva la suscripción (y guarda la clave para el aviso)
+  try{ if(!pushPosible() || Notification.permission !== 'granted') return; const t = +localStorage.getItem('ck_push') || 0; guardarCfgSW(); if(Date.now() - t > 864e5) suscribirPush(false).catch(()=>{}); }catch(e){}
+}
+function esIOSsinInstalar(){ return /iPhone|iPad|iPod/.test(navigator.userAgent) && !navigator.standalone && !matchMedia('(display-mode: standalone)').matches; }
+
+/* ---------- 2. BÚSQUEDA DENTRO DEL BOLO ---------- */
+function filtrarMat(v){
+  S.qm = v; const pos = ($('#bsq')||{}).selectionStart; render();
+  const i = $('#bsq'); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(e){} }
+}
+function coincide(i){ if(!S.qm) return true; const q = UP(S.qm); return UP(i.material).includes(q) || UP(zonaDe(i.material)).includes(q) || UP(catDe(i.material)).includes(q); }
+
+/* ---------- 3. DESHACER ---------- */
+let UNDO = null;
+function mostrarDeshacer(fila, marcado){
+  const it = S.items.find(i=>i.fila===fila); if(!it) return;
+  let el = $('#undo'); if(!el){ el = document.createElement('div'); el.id = 'undo'; el.className = 'undo'; document.body.appendChild(el); }
+  el.innerHTML = `<span>${marcado ? (S.modo==='carga'?'Cargado':'Devuelto') : 'Desmarcado'}: <b>${esc(it.material)}</b></span><button onclick="deshacer()">Deshacer</button>`;
+  el.classList.add('show'); UNDO = fila;
+  clearTimeout(mostrarDeshacer.t); mostrarDeshacer.t = setTimeout(()=>{ el.classList.remove('show'); UNDO = null; }, 5000);
+}
+function deshacer(){ const f = UNDO; UNDO = null; const el = $('#undo'); if(el) el.classList.remove('show'); if(f != null){ toggle(f, false, true); toast('Deshecho'); } }
+
+/* ---------- 4. ZONAS DEL ALMACÉN ---------- */
+let ZONAS = cacheGet('ckZonas[]') || {};
+function cargarZonas(){ call('ckZonas').then(z => { if(z && typeof z === 'object'){ ZONAS = z; if(S.vista==='det' && !$('#sheet').classList.contains('open')) render(); } }).catch(()=>{}); }
+function zonaDe(mat){ return ZONAS[UP(mat)] || ZONAS[UP(String(mat||'').replace(/\s*\([^)]*\)\s*$/,''))] || ''; }
+function hayZonas(){ return Object.keys(ZONAS).length > 0; }
+function agrupacion(){ try{ return localStorage.getItem('ck_agr') || (hayZonas() ? 'zona' : 'cat'); }catch(e){ return 'cat'; } }
+function ponerAgr(v){ try{ localStorage.setItem('ck_agr', v); }catch(e){} vib(8); render(); }
+function agruparZona(l){
+  const g = new Map();
+  l.forEach(i => { const z = zonaDe(i.material) || 'Sin zona'; if(!g.has(z)) g.set(z, []); g.get(z).push(i); });
+  return [...g.entries()].sort((a,b)=> a[0]==='Sin zona' ? 1 : b[0]==='Sin zona' ? -1 : a[0].localeCompare(b[0], 'es', { numeric:true }));
+}
+function zonasLista(){ return [...new Set(Object.values(ZONAS))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true})); }
+async function guardarZona(nombre){
+  const z = ($('#zIn').value||'').trim();
+  try{ ZONAS = await call('ckZona', nombre, z) || ZONAS; cacheSet('ckZonas[]', ZONAS); toast(z ? 'Zona guardada: '+z : 'Zona quitada'); cerrarSheet(); render(); }
+  catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
+
+/* ---------- 5. DICTADO POR VOZ ---------- */
+function vozPosible(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function micBtn(id){ return vozPosible() ? `<button type="button" class="mic" onclick="dictar('${id}', this)" aria-label="Dictar por voz">${ic('mic','s')}</button>` : ''; }
+let REC = null;
+function dictar(id, btn){
+  if(REC){ try{ REC.stop(); }catch(e){} return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition, el = document.getElementById(id); if(!SR || !el) return;
+  REC = new SR(); REC.lang = 'es-ES'; REC.interimResults = false; REC.continuous = false;
+  btn.classList.add('on'); vib(10);
+  REC.onresult = e => { const t = [...e.results].map(r=>r[0].transcript).join(' ').trim(); if(t){ el.value = (el.value ? el.value.replace(/\s*$/,' ') : '') + t.charAt(0).toUpperCase() + t.slice(1); el.dispatchEvent(new Event('input')); } };
+  REC.onerror = e => { if(e.error === 'not-allowed') toast('Permite el micrófono para dictar'); };
+  REC.onend = () => { btn.classList.remove('on'); REC = null; };
+  try{ REC.start(); }catch(e){ REC = null; btn.classList.remove('on'); }
+}
+
+/* ---------- 6. GUÍA RÁPIDA ---------- */
+const GUIA = [
+  ['👋', 'Bienvenido a Carga', 'Aquí tienes tus bolos: el material que hay que cargar, la ruta, el montaje y la vuelta al almacén.'],
+  ['👉', 'Marca el material', 'Toca un artículo o deslízalo a la derecha para marcarlo como cargado. Si te equivocas, pulsa «Deshacer».'],
+  ['⚠️', 'Incidencias', 'Desliza a la izquierda si algo está roto o falta. Puedes añadir una foto y una nota (también dictándola).'],
+  ['📷', 'Escanea el QR', 'Con «Escanear QR» la cámara se queda abierta: suena y vibra con cada equipo y te dice cuántos faltan.'],
+  ['🧭', 'El día del bolo', 'Usa «Modo en ruta» para tener la hora, la dirección y las llamadas en grande, y «Notas del equipo» para avisar a todos.']
+];
+let GP = 0;
+function abrirGuia(){ GP = 0; pintarGuia(); }
+function pintarGuia(){
+  const [e, t, x] = GUIA[GP], ult = GP === GUIA.length - 1;
+  abrirSheet(`<div class="guia"><div class="gico">${e}</div><h3>${t}</h3><p>${x}</p>
+    <div class="gdots">${GUIA.map((_,i)=>`<i class="${i===GP?'on':''}"></i>`).join('')}</div>
+    <div class="row2"><button class="btn sec2" onclick="${GP ? 'GP--;pintarGuia()' : 'finGuia()'}">${GP ? 'Atrás' : 'Saltar'}</button><button class="btn" onclick="${ult ? 'finGuia()' : 'GP++;pintarGuia()'}">${ult ? '¡Empezar!' : 'Siguiente'}</button></div></div>`);
+}
+function finGuia(){ try{ localStorage.setItem('ck_guia', '1'); }catch(e){} cerrarSheet(); }
+function guiaPrimeraVez(){ try{ if(localStorage.getItem('ck_guia')) return; }catch(e){ return; } let n = 0; const t = () => { if(++n > 120) return; try{ if(localStorage.getItem('ck_guia')) return; }catch(e){ return; } if(S.listo && S.vista==='lista' && !$('#sheet').classList.contains('open') && !$('#splash')) abrirGuia(); else setTimeout(t, 1000); }; setTimeout(t, 1200); }
+
+/* ---------- 7. ATAJOS (desde el icono o un enlace) ---------- */
+function atajoInicial(){
+  let q; try{ q = new URLSearchParams(location.search); }catch(e){ return; }
+  const acc = q.get('accion'), bolo = q.get('bolo');
+  if(!acc && !bolo) return;
+  try{ history.replaceState(null, '', location.pathname); }catch(e){}
+  const ir = () => {
+    if(bolo){ abrir(bolo); return; }
+    const hoy = diaDe(Date.now()), l = (S.presus||[]).filter(p=>p.ts && diaDe(p.ts) >= hoy && !p.cerrado).sort((a,b)=>a.ts-b.ts);
+    if(acc === 'ruta' && l[0]){ abrirEnRuta(l[0].num); return; }
+    if(!l[0]){ toast('No tienes bolos próximos'); return; }
+    abrir(l[0].num).then(()=>{ if(acc === 'escanear') abrirScan(); });
+  };
+  const espera = () => S.listo ? ir() : setTimeout(espera, 300); espera();
+}
+function verAtajos(){
+  const base = location.origin + location.pathname;
+  const l = [['Escanear material', base+'?accion=escanear'], ['Bolo de hoy', base+'?accion=hoy'], ['Modo en ruta', base+'?accion=ruta']];
+  abrirSheet(`<h3>${ic('link')} Atajos</h3><div class="meta" style="margin-bottom:10px">En Android aparecen al mantener pulsado el icono de la app. En iPhone, crea un atajo en la app <b>Atajos</b> con la acción «Abrir URL» y uno de estos enlaces, y añádelo a la pantalla de inicio.</div>
+    ${l.map(([t,u])=>`<div class="furg"><b>${t}</b><div class="codigo" style="font-size:12.5px;word-break:break-all;margin-top:6px"><span class="sel">${esc(u)}</span></div><button class="link" style="padding:8px 0 0" onclick="copiar('${u}')">Copiar enlace</button></div>`).join('')}`);
+}
+
+/* ---------- 8. PORTADA DE CADA BOLO ---------- */
+function portada(num){ return fotoMat('PORTADA:' + num); }
+async function cargarPortadas(){
+  const nums = (S.presus||[]).map(p=>p.num); if(!nums.length) return;
+  try{
+    const r = await call('ckFotosMat', nums.map(n=>'PORTADA:'+n)) || {}; let cambio = false;
+    nums.forEach(n => { const k = UP('PORTADA:'+n); if((r[k]||'') !== (FM[k]||'')){ cambio = true; if(r[k]) FM[k] = r[k]; else delete FM[k]; } });
+    if(cambio){ guardarFM(); let n = 0; const t = () => { if(S.vista!=='lista' || ++n > 60) return; if($('#sheet').classList.contains('open')) setTimeout(t, 1000); else render(); }; t(); }
+  }catch(e){}
+}
+function abrirPortada(){
+  const f = portada(S.num);
+  abrirSheet(`<h3>${ic('camera')} Foto de portada</h3><div class="meta">Sale en la tarjeta del bolo y en su cabecera, para reconocerlo de un vistazo. Puede ser el lugar o un montaje anterior.</div>
+    ${f?`<img src="${f}" class="prev" style="width:100%;margin:12px 0;border-radius:16px">`:''}
+    <label class="btn fotobtn" for="porIn" style="margin-top:12px">📷 ${f?'Cambiar portada':'Elegir foto'}</label><input type="file" id="porIn" accept="image/*" hidden onchange="subirPortada(this)">
+    ${f?`<button class="link" onclick="quitarPortada()">Quitar portada</button>`:''}`);
+}
+async function subirPortada(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  try{ toast('Subiendo portada…'); const d = await comprimir(f, 800, 42000); await callPost('ckFotoMat', 'PORTADA:'+S.num, d); FM[UP('PORTADA:'+S.num)] = d; guardarFM(); cerrarSheet(); toast('Portada guardada'); render(); }
+  catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
+async function quitarPortada(){ try{ await callPost('ckFotoMat', 'PORTADA:'+S.num, ''); delete FM[UP('PORTADA:'+S.num)]; guardarFM(); cerrarSheet(); render(); }catch(e){ toast('Error: '+e.message); } }
+
+/* ---------- 9. COLORES POR ESTADO ---------- */
+function estadoBolo(p){
+  if(p.archivado) return ['fin', p.estado || 'Terminado'];
+  if(p.cerrado || (p.total && p.devueltos === p.total)) return ['listo', 'Listo para facturar'];
+  if(p.devueltos > 0) return ['vuelta', 'Por devolver'];
+  if(p.total && p.cargados === p.total) return ['curso', 'En curso'];
+  if(p.cargados > 0) return ['prep', 'Cargando'];
+  return ['pend', 'Por preparar'];
+}
+
+/* ---------- 10. ANIMACIONES ---------- */
+function confeti(){
+  const c = document.createElement('div'); c.className = 'confeti';
+  const col = ['#c9a66b','#e2c48f','#15935a','#2563eb','#f5a524','#ffffff'];
+  for(let i=0;i<46;i++){ const s = document.createElement('i'); s.style.left = Math.random()*100+'%'; s.style.background = col[i%col.length]; s.style.animationDelay = (Math.random()*.35)+'s'; s.style.animationDuration = (1.4+Math.random()*1.1)+'s'; s.style.setProperty('--x', (Math.random()*120-60)+'px'); s.style.setProperty('--r', (Math.random()*720-360)+'deg'); c.appendChild(s); }
+  document.body.appendChild(c); vib([30,40,30,40,90]); setTimeout(()=>c.remove(), 3000);
+}
+function animarPaso(){ const m = document.querySelector('main'); if(m){ m.classList.remove('anim'); void m.offsetWidth; m.classList.add('anim'); } }
+
+/* ---------- 11. PANTALLA DE BIENVENIDA ---------- */
+function ocultarSplash(){ const s = $('#splash'); if(!s || s.dataset.fuera) return; s.dataset.fuera = 1; const min = 900 - (Date.now() - (window.T0||0)); setTimeout(()=>{ s.classList.add('fuera'); setTimeout(()=>s.remove(), 500); }, Math.max(0, min)); }
+
+/* ---------- 12. ICONOS POR TIPO DE MATERIAL ---------- */
+const ICOMAT = [
+  [/FOCO|PAR\b|LED|LUZ|LUCES|CABEZA|M[OÓ]VIL|WASH|BEAM|SPOT|STROBO|BARRA|ILUMIN|FRESNEL|RECORTE|PANTALLA LED|UPLIGHT/, 'bulb'],
+  [/ALTAVOZ|MONITOR|SUB|BAFLE|ETAPA|AMPLI|MESA|MEZCLA|SONIDO|DJ|CDJ|CONTROLADORA|LINE ARRAY|PA\b/, 'spk'],
+  [/MICRO|MIC\b|PETACA|INAL[AÁ]MBRICO|DI\b|CAJA DIRECTA/, 'mic'],
+  [/CABLE|XLR|JACK|SCHUKO|MANGUERA|ALARGO|REGLETA|POWERCON|DMX|CETAC|SPEAKON|HDMI|BASE/, 'plug'],
+  [/TRUSS|TARIMA|PIE|SOPORTE|TORRE|ESTRUCT|TARIMA|PLATAFORMA|BARANDILLA|PASARELA|BASE PESADA|CROWN/, 'truss'],
+  [/PROYECTOR|TV|TELEVISOR|PANTALLA|LED WALL|V[IÍ]DEO|C[AÁ]MARA|MONITOR TV/, 'screen'],
+  [/HUMO|NIEBLA|HAZER|CO2|CONFETI|CHISPA|BURBUJA/, 'cloud']
+];
+function icoMat(nombre){ const U = String(nombre||'').toUpperCase(); for(const [re, i] of ICOMAT) if(re.test(U)) return i; return ''; }
+
+/* ---------- 13. PANEL DEL DÍA (administrador) ---------- */
+async function verPanel(){
+  S.vista = 'panel'; S.panel = S.panel || {}; S.panelDia = S.panelDia || 0;
+  try{ history.pushState({v:'panel'},''); }catch(e){}
+  render(); window.scrollTo(0,0); cargarPanel();
+}
+function bolosPanel(){ const d = diaDe(Date.now()) + (S.panelDia||0)*864e5; return (S.presus||[]).filter(p=>p.ts && diaDe(p.ts)===d && !p.archivado).sort((a,b)=>a.ts-b.ts); }
+async function cargarPanel(){
+  const l = bolosPanel();
+  await Promise.all(l.map(p => call('ckBolo', p.num).then(b => { S.panel[p.num] = b; }).catch(()=>{})));
+  if(S.vista==='panel') render();
+}
+function horaDe(txt){ const m = String(txt||'').match(/(\d{1,2})[:.h](\d{2})/); return m ? +m[1]*60 + +m[2] : null; }
+function vistaPanel(){
+  const l = bolosPanel(), ahora = new Date(), min = ahora.getHours()*60 + ahora.getMinutes(), hoyV = !S.panelDia;
+  const pasos = f => [['Salida', f.salida], ['Llegada', f.llegada], ['Montaje', f.finMontaje], ['Firma', f.firma ? (f.firmaHora||'✓') : ''], ['Vuelta', f.vuelta]];
+  const tarjeta = p => {
+    const b = S.panel[p.num], f = b ? b.ficha : null;
+    if(!f) return `<div class="furg"><b>${esc(p.evento)}</b><div class="meta">Cargando…</div></div>`;
+    const h = horaDe(f.horario), tarde = hoyV && h != null && min > h && !f.llegada;
+    const tecs = f.tecnicos || [], conf = f.conf || {};
+    const [ec, et] = estadoBolo(p);
+    return `<button class="furg pcard ${tarde?'tarde':''}" onclick="abrir('${esc(p.num)}')">
+      <div class="top"><b>${esc(p.evento)}</b><span class="est est-${ec}">${et}</span></div>
+      <div class="meta">${esc(p.num)}${f.horario?' · '+esc(f.horario):''}${p.lugar?' · '+esc(destino(p.lugar)):''}</div>
+      ${tarde ? `<div class="aviso" style="margin:10px 0 0">${ic('alert','s')} Retraso: era a las ${String(Math.floor(h/60)).padStart(2,'0')}:${String(h%60).padStart(2,'0')} y aún no han llegado</div>` : ''}
+      <div class="pline">${pasos(f).map(([t,v])=>`<span class="ps ${v?'ok':''}"><i></i><b>${t}</b><small>${v?esc(String(v).slice(-5)):'—'}</small></span>`).join('')}</div>
+      <div class="pbar"><span>Carga ${p.cargados}/${p.total}</span><div class="track"><div class="fill" style="width:${p.total?p.cargados/p.total*100:0}%"></div></div><span>Vuelta ${p.devueltos}/${p.total}</span></div>
+      ${tecs.length ? `<div class="ptecs">${tecs.map(n=>{ const c = conf[n]||{}, v = c.voy; return `<span class="pill ${v ? (v.si?'ok':'warn') : ''}">${esc(n)} · ${v ? (v.si?'va':'no va') : 'sin confirmar'}${c.leido?' · leído':''}</span>`; }).join('')}</div>` : `<div class="meta" style="margin-top:8px">Sin equipo asignado</div>`}
+    </button>`;
+  };
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Panel del día</h1><button class="ref" onclick="cargarPanel()" aria-label="Actualizar">${ic('refresh')}</button></div>
+    <div class="seg"><button class="${!S.panelDia?'on':''}" onclick="S.panelDia=0;render();cargarPanel()">Hoy</button><button class="${S.panelDia===1?'on':''}" onclick="S.panelDia=1;render();cargarPanel()">Mañana</button></div></header>
+    <main>${l.length ? l.map(tarjeta).join('') : `<div class="empty">${ic('today')}<div>No hay bolos ${S.panelDia?'mañana':'hoy'}.</div></div>`}</main>`;
+}
+
+/* ---------- 14. COPIAR MATERIAL DE OTRO BOLO ---------- */
+function abrirCopiar(){
+  const l = (S.presus||[]).filter(p=>p.num!==S.num).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,40);
+  abrirSheet(`<h3>${ic('clip')} Copiar de otro bolo</h3><div class="meta" style="margin-bottom:10px">Se añade a este bolo el material del bolo que elijas (lo que no esté ya). Si este bolo no tiene equipo, también se copia quién va.</div>
+    <input class="search" style="background:var(--card2);color:var(--txt);border:1.5px solid var(--line)" placeholder="Buscar bolo" oninput="document.querySelectorAll('.cprow').forEach(b=>b.hidden=!b.dataset.t.includes(this.value.toUpperCase()))">
+    <div class="replist" style="margin-top:10px">${l.map(p=>`<button class="reprow cprow" data-t="${esc(UP(p.num+' '+p.evento+' '+(p.lugar||'')))}" onclick="copiarDe('${esc(p.num)}')"><span class="rm"><b>${esc(p.evento)}</b><br><span class="meta">${esc(p.num)} · ${esc(p.montaje||'')}</span></span><span class="rp">${p.total} art.</span></button>`).join('')}</div>`);
+}
+async function copiarDe(origen){
+  const o = S.presus.find(p=>p.num===origen) || {};
+  if(!confirm(`¿Copiar el material de «${o.evento||origen}» a este bolo?`)) return;
+  try{
+    const r = await call('ckCopiarBolo', origen, S.num);
+    if(S.bolo){ S.bolo.ficha.extra = r.extra; if((r.tecnicos||[]).length) S.bolo.ficha.tecnicos = r.tecnicos; guardarBoloCache(); }
+    cerrarSheet(); vib(25); toast(r.copiados ? `${r.copiados} artículos copiados` : 'Ya tenía todo ese material'); render();
+  }catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta }; const tabs = S.vista==='lista' || S.vista==='furgos'; document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); }
-function abrirSheet(h){ $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); }
+function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
 setInterval(() => {
@@ -2150,7 +2460,8 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg => { reg.update().catch(()=>{}); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{});
   let recargado = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(recargado || COLA.length) return; recargado = true; location.reload(); });
 }
-if(!KEY){ S.vista='login'; render(); setTimeout(()=>{ const i=$('#lgCod'); if(i) i.focus(); }, 300); }
+setTimeout(ocultarSplash, 5000);
+if(!KEY){ S.vista='login'; render(); ocultarSplash(); setTimeout(()=>{ const i=$('#lgCod'); if(i) i.focus(); }, 300); }
 else arrancar();
 </script>
 </body>
