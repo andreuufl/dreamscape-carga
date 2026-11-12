@@ -58,3 +58,24 @@ Las fotos de referencia del material de la app son de **Wikimedia Commons**, con
 | Herramientas | JOBOX tool box, Huntington Station.jpg | Ser Amantio di Nicolao | CC BY-SA 4.0 |
 
 El resto del material (escenario, focos, cabezas móviles, altavoces…) no tiene foto todavía porque no había una imagen libre que se pareciera de verdad al equipo: se ve con su icono y se puede añadir una foto propia desde la app.
+
+## Segunda tanda (Wikimedia Commons y Openverse/Flickr)
+
+| Material | Archivo | Autor | Licencia |
+|---|---|---|---|
+| BRIDA SUJECIÓN 2P y 4P | Coupler 3.jpg (Commons) | Warburg | CC BY-SA 3.0 |
+| CDJ 3000 | Pioneer CDJ-2000.jpg (Commons, modelo anterior) | Arnold Jaeger Werner | CC BY 2.0 |
+| MARTILLO NYLON | Rubber mallets.jpg (Commons) | MartinMerinsky | CC BY-SA 4.0 |
+| BARANDILLA ESCALERA | Smith College Plant Houses and Gardens (Flickr vía Openverse) | Rusty Clark | CC BY 2.0 |
+| CINTA DOBLE CARA | Двухсторонний скотч f001.jpg (Commons) | Ural-66 | CC BY-SA 4.0 |
+| FOCO MÓVIL MARTIN MAC QUANTUM PROFILE | 050616-scheinwerfer-manufaktur.jpg (Commons) | Martin Röll | Dominio público |
+| HOLOGRAMA 42CM | 3D holograms (Flickr vía Openverse) | Phillie Casablanca | CC BY 2.0 |
+| CARRETILLA PLANA 4 RUEDAS | Flatbed trolley at Castle Cary railway station.jpg (Commons) | Chris McKenna | CC BY-SA 4.0 |
+| SOPORTE TV PARED | DIY TV Wall Mount (Flickr vía Openverse) | jalexartis | CC BY 2.0 |
+| TV43" | SAMSUNG CURVED VA LCD TV.jpg (Commons) | Dinkun Chen | CC BY-SA 4.0 |
+| iPAD 7TH GENERACIÓN | IPad and iPad Pro.jpg (Commons) | 彭家杰 | CC BY-SA 4.0 |
+| CARRETILLA 3 EN 1 | Hand-truck.jpg (Commons) | — | CC BY-SA 3.0 |
+| CARROZA VERSIÓN NAVIDAD | The Christmas float parade 1.jpg (Commons) | Bim24 | CC0 |
+| MÁQUINA DE HUMO | Smoke Machine.jpg (Commons) | — | CC BY-SA 2.0 |
+| LÁSER MÉTRICO 50M | Leica D2 Laser Rangefinder (Flickr vía Openverse) | toolstop | CC BY 2.0 |
+| LOGITECH PASADIAPOSITIVAS NEGRO | August LP205R Wireless Presenter.jpg (Commons) | Katie Chan | CC BY-SA 3.0 |

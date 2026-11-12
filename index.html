@@ -387,6 +387,7 @@ header.hd-listo{background:linear-gradient(135deg,#0f4a32 0%,var(--navy) 65%)}
 :root[data-theme="sala"] .btn{color:#ffd4ce;background:#3a100c}:root[data-theme="sala"] .btn.okb,:root[data-theme="sala"] .fich .btn{background:#5a1610!important;color:#ffd4ce!important}
 :root[data-theme="sala"] .item.on .chk{color:#000}:root[data-theme="sala"] img{filter:grayscale(1) sepia(1) hue-rotate(-40deg) saturate(4) brightness(.5)}
 :root[data-theme="sala"] .tabbar{background:#0a0202}:root[data-theme="sala"] .brand .bw{color:#ff6d60}
+.sfc{display:block;cursor:pointer}.gimg .sfcam svg.i{width:18px;height:18px;opacity:1}.sfcam{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;background:var(--gold);color:#16243a;display:grid;place-items:center}
 @media print{ .noprint,.toast,.foot,.tabbar{display:none!important} body{background:#fff} main.etiq{padding:0} .labels{grid-template-columns:repeat(3,1fr)} .sec{margin-top:8px} }
 .redbar{position:fixed;left:0;right:0;top:0;z-index:40;background:#b45309;color:#fff;text-align:center;font-size:13px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px}
 .login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px max(28px,env(safe-area-inset-left));background:radial-gradient(120% 80% at 50% 0%,#1d2f4d 0%,var(--navy) 60%);color:#fff;max-width:none}
@@ -1298,6 +1299,7 @@ function abrirMenu(){
     ${it('wrench','En reparación','verRep()','Equipos rotos o dañados')}
     ${it('clock','Mantenimiento','verMant()','ITV, revisiones, pilas, lámparas…')}
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
+    ${it('camera','Fotos del material','verSesionFotos()','Haz las fotos que faltan en un momento')}
     <div class="mgrp">Gestión</div>
     ${it('today','Panel del día','verPanel()','Quién ha salido, llegado o va con retraso')}
     ${it('chart','Calendario','verCalendario()','Bolos del mes, equipo y furgonetas')}
@@ -2829,8 +2831,38 @@ async function guardarExtras(){
   return call('ckGuardarExtras', c);
 }
 
+
+/* ---------- SESIÓN DE FOTOS: material del catálogo sin foto ---------- */
+const NO_FISICO = c => /^(PER|PCK)/.test(c.codigo) || /^TRA01[1-5]$/.test(c.codigo) || /^OTR00[235]$/.test(c.codigo) || c.codigo === 'ILU002';
+async function verSesionFotos(){
+  S.vista = 'sfotos'; S.sfFiltro = S.sfFiltro || 'sin';
+  try{ history.pushState({v:'sfotos'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{
+    if(!S.catalogo){ S.catalogo = await call('ckCatalogo'); S.catIdx = null; }
+    const l = S.catalogo.filter(c=>!NO_FISICO(c));
+    const r = await call('ckFotosMat', l.map(c=>c.nombre)) || {};
+    l.forEach(c=>{ const k = UP(c.nombre); if(r[k]) FM[k] = r[k]; else delete FM[k]; }); guardarFM();
+  }catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+  if(S.vista==='sfotos') render();
+}
+function vistaSesionFotos(){
+  const l = (S.catalogo||[]).filter(c=>!NO_FISICO(c)), con = l.filter(c=>fotoMat(c.nombre)).length;
+  const ver = S.sfFiltro==='sin' ? l.filter(c=>!fotoMat(c.nombre)) : l;
+  const body = !S.catalogo ? `<div class="loading"><div class="spin"></div>Cargando catálogo…</div>`
+    : `<div class="furg"><div class="top"><b>${con} de ${l.length} con foto</b><span class="meta">${Math.round(con/Math.max(1,l.length)*100)}%</span></div><div class="track" style="margin-top:8px"><div class="fill" style="width:${con/Math.max(1,l.length)*100}%"></div></div><div class="meta" style="margin-top:8px">Haz la foto a tu propio equipo en el almacén: es como mejor lo reconoce el equipo. Toca la cámara de cada artículo.</div></div>
+      <div class="grid">${ver.map(c=>{ const f = fotoMat(c.nombre), ico = icoMat(c.nombre) || 'box'; return `<label class="gcell sfc" for="sf_${esc(c.codigo)}"><div class="gimg">${f?`<img src="${f}" alt="">`:ic(ico)}<span class="gq">${esc(c.codigo)}</span><span class="sfcam">${ic('camera','s')}</span></div><div class="gname">${esc(c.nombre)}</div></label><input type="file" id="sf_${esc(c.codigo)}" accept="image/*" capture="environment" hidden data-n="${esc(c.nombre)}" onchange="subirFotoSesion(this)">`; }).join('') || '<div class="meta">¡Todo el material tiene foto! 🎉</div>'}</div>`;
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Fotos del material</h1></div>
+    <div class="seg"><button class="${S.sfFiltro==='sin'?'on':''}" onclick="S.sfFiltro='sin';render()">Sin foto</button><button class="${S.sfFiltro!=='sin'?'on':''}" onclick="S.sfFiltro='todo';render()">Todo</button></div></header><main>${body}</main>`;
+}
+async function subirFotoSesion(inp){
+  const f = inp.files && inp.files[0], n = inp.dataset.n; if(!f || !n) return;
+  try{ toast('Subiendo foto de ' + n + '…'); const d = await comprimir(f, 420, 30000); await callPost('ckFotoMat', n, d); FM[UP(n)] = d; guardarFM(); vib(20); toast('Foto guardada'); render(); }
+  catch(e){ toast(e.red ? 'Necesitas conexión para subir la foto' : 'Error: '+e.message); }
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
 function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
