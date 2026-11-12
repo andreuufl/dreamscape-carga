@@ -320,6 +320,73 @@ button.pcard{display:block;width:100%;text-align:left}.pcard.tarde{box-shadow:0 
 .ps b{font-weight:700;color:var(--mut)}.ps.ok b{color:var(--txt)}.ps small{color:var(--mut);font-variant-numeric:tabular-nums}
 .pbar{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12.5px;color:var(--mut)}
 .ptecs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+
+/* ===== Mejoras 3 ===== */
+.vbtn{width:44px;height:44px;flex:none;border-radius:12px;background:var(--card);border:1.5px solid var(--line);display:grid;place-items:center;color:var(--mut)}
+.vbtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.seg.orden{display:flex;margin:0 0 10px;width:100%}.seg.orden button{flex:1}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px}
+.gcell{position:relative;background:var(--card);border-radius:18px;overflow:hidden;box-shadow:var(--sh);transition:transform .12s}
+.gcell:active{transform:scale(.97)}
+.gimg{position:relative;aspect-ratio:4/3;background:var(--card2);display:grid;place-items:center;color:var(--mut)}
+.gimg img{width:100%;height:100%;object-fit:cover}.gimg svg.i{width:40px;height:40px;opacity:.6}
+.gq{position:absolute;left:8px;top:8px;background:rgba(15,26,43,.82);color:#fff;font-weight:800;font-size:14px;padding:3px 9px;border-radius:10px}
+.gok{position:absolute;inset:0;background:rgba(21,147,90,.55);display:grid;place-items:center;color:#fff}.gok svg.i{width:44px;height:44px;stroke-width:3}
+.mode-dev .gok{background:rgba(37,99,235,.55)}
+.gcell.pop .gok{animation:pop .45s cubic-bezier(.2,.8,.2,1.4)}
+.gname{padding:9px 34px 11px 11px;font-weight:650;font-size:14px;line-height:1.25;min-height:46px}
+.gcell.on .gname{color:var(--mut)}.gcell.has-inc{box-shadow:0 0 0 2px var(--warn)}
+.ginc{position:absolute;right:4px;bottom:6px;width:30px;height:30px;border-radius:9px;color:var(--mut);font-weight:800}
+.svoz{background:rgba(255,255,255,.18);color:#fff;width:44px;height:40px;border-radius:12px;font-size:18px;backdrop-filter:blur(8px)}
+.svoz.on{background:#c9a66b}
+.fich{display:flex;align-items:center;gap:12px}
+.fich .ft{flex:1;display:flex;gap:10px;align-items:center;min-width:0}
+.fich .ft .ic{width:40px;height:40px;border-radius:12px;background:var(--card2);display:grid;place-items:center;flex:none}
+.fich .btn{width:auto;padding:13px 20px;flex:none}.fich .btn.entro{background:var(--ok)}.fich .btn.salgo{background:var(--bad)}
+.fich.dentro{box-shadow:0 0 0 2px var(--ok)}
+.pulso{width:12px;height:12px;border-radius:50%;background:var(--ok);flex:none;box-shadow:0 0 0 0 rgba(21,147,90,.6);animation:pulso 1.6s infinite}
+@keyframes pulso{70%{box-shadow:0 0 0 10px rgba(21,147,90,0)}100%{box-shadow:0 0 0 0 rgba(21,147,90,0)}}
+.fich.osc{background:rgba(255,255,255,.07);border-radius:20px;padding:14px 16px;margin:0 0 16px;color:#fff}.fich.osc .meta{color:#a9b6ca}.fich.osc .ft .ic{background:rgba(255,255,255,.12)}
+.widget{background:var(--card);border-radius:20px;padding:15px 16px;margin-bottom:12px;box-shadow:var(--sh)}
+.wtop{display:flex;align-items:center;gap:12px}.wemo{font-size:38px;line-height:1}.wtop b{font-size:22px}.wtop b small{font-size:15px;color:var(--mut);font-weight:600}
+.wsal{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:15px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.wsal b{color:var(--ok);font-size:17px}.wsal small{width:100%;color:var(--mut);font-size:12.5px}
+.mapa{position:relative;z-index:0;isolation:isolate;height:52vh;min-height:280px;border-radius:20px;overflow:hidden;margin-bottom:12px;box-shadow:var(--sh);background:var(--card2)}
+.mpin{width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.35);border:2px solid #fff}
+.mpin>*{transform:rotate(45deg)}.mpin{line-height:1}.mpin.alm{background:var(--gold);border-radius:50%;transform:none;font-size:15px}
+.mpin.est-prep{background:#b08a4c}.mpin.est-curso{background:#2563eb}.mpin.est-vuelta{background:#c56a04}.mpin.est-listo{background:#15935a}
+.mrow{display:flex!important;align-items:center;gap:12px}.mnum{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+header.hd-pend{background:linear-gradient(135deg,#1d2636 0%,var(--navy) 70%)}
+header.hd-prep{background:linear-gradient(135deg,#4a3a1e 0%,var(--navy) 65%)}
+header.hd-curso{background:linear-gradient(135deg,#17336b 0%,var(--navy) 65%)}
+header.hd-vuelta{background:linear-gradient(135deg,#5a3410 0%,var(--navy) 65%)}
+header.hd-listo{background:linear-gradient(135deg,#0f4a32 0%,var(--navy) 65%)}
+.hoy.hd-prep{background:linear-gradient(155deg,#4a3a1e 0%,var(--navy) 70%)}.hoy.hd-curso{background:linear-gradient(155deg,#17336b 0%,var(--navy) 70%)}.hoy.hd-vuelta{background:linear-gradient(155deg,#5a3410 0%,var(--navy) 70%)}.hoy.hd-listo{background:linear-gradient(155deg,#0f4a32 0%,var(--navy) 70%)}
+.hoy.conpt,header.conpt{background:linear-gradient(160deg,rgba(15,26,43,.55),rgba(15,26,43,.94) 70%),var(--pt) center/cover}
+.logros{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-height:62vh;overflow-y:auto}
+.logro{background:var(--card2);border:1.5px solid var(--line);border-radius:16px;padding:12px;text-align:center;opacity:.75}
+.logro.ok{opacity:1;background:linear-gradient(160deg,rgba(201,166,107,.18),var(--card));border-color:var(--gold)}
+.logro .le{display:block;font-size:30px;filter:grayscale(1)}.logro.ok .le{filter:none}
+.logro b{display:block;font-size:14.5px;margin-top:4px}.logro small{display:block;color:var(--mut);font-size:12px;line-height:1.3}
+.logro .lt{height:5px;background:var(--track);border-radius:3px;margin:8px 0 3px;overflow:hidden}.logro .lt div{height:100%;background:var(--gold)}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
+.cdh{text-align:center;font-size:11.5px;font-weight:750;color:var(--mut);padding:4px 0}
+.cd{min-height:64px;background:var(--card);border-radius:10px;padding:4px 3px;display:flex;flex-direction:column;align-items:stretch;gap:2px;overflow:hidden;text-align:left}
+.cd.vac{background:transparent}.cd span{font-size:12.5px;font-weight:700;text-align:center}
+.cd.hoy{outline:2px solid var(--gold);outline-offset:-2px}.cd.on{background:var(--navy);color:#fff}
+.cev{font-style:normal;font-size:9.5px;line-height:1.2;padding:2px 3px;border-radius:4px;background:var(--card2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid #9aa3b2}
+.cev.est-prep{border-color:var(--gold)}.cev.est-curso{border-color:var(--dev)}.cev.est-vuelta{border-color:var(--warn)}.cev.est-listo,.cev.est-fin{border-color:var(--ok)}
+.cd.on .cev{background:rgba(255,255,255,.12);color:#fff}.cmas{font-style:normal;font-size:10px;color:var(--mut);text-align:center}
+.chkrow{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:14px}
+.chkrow input{width:22px;height:22px;margin-top:2px;accent-color:var(--ok)}.chkrow small{display:block;color:var(--mut);font-size:13px}
+.leaflet-popup-content a{color:#2563eb;font-weight:700}
+/* Modo sala: luz roja tenue para no deslumbrar */
+:root[data-theme="sala"]{--bg:#000;--card:#120404;--card2:#1b0606;--txt:#ff6d60;--mut:#a3463c;--line:#3a100c;--navy:#1d0605;--navy2:#2c0b08;--navy3:#3a100c;--gold:#d65a4b;--gold2:#ff7a6b;--ok:#ff6d60;--okbg:rgba(255,80,60,.12);--dev:#ff8a7a;--devbg:rgba(255,80,60,.12);--warn:#ff9a6b;--warnbg:rgba(255,120,80,.12);--bad:#ff3b30;--badbg:rgba(255,59,48,.14);--inp:#0d0202;--track:#2a0a08;--sh:none}
+:root[data-theme="sala"] header,:root[data-theme="sala"] .sub,:root[data-theme="sala"] .hoy,:root[data-theme="sala"] .back,:root[data-theme="sala"] .ref{color:#ff6d60}
+:root[data-theme="sala"] header,:root[data-theme="sala"] header.conpt{background:#0d0202!important}
+:root[data-theme="sala"] .btn{color:#ffd4ce;background:#3a100c}:root[data-theme="sala"] .btn.okb,:root[data-theme="sala"] .fich .btn{background:#5a1610!important;color:#ffd4ce!important}
+:root[data-theme="sala"] .item.on .chk{color:#000}:root[data-theme="sala"] img{filter:grayscale(1) sepia(1) hue-rotate(-40deg) saturate(4) brightness(.5)}
+:root[data-theme="sala"] .tabbar{background:#0a0202}:root[data-theme="sala"] .brand .bw{color:#ff6d60}
 @media print{ .noprint,.toast,.foot,.tabbar{display:none!important} body{background:#fff} main.etiq{padding:0} .labels{grid-template-columns:repeat(3,1fr)} .sec{margin-top:8px} }
 .redbar{position:fixed;left:0;right:0;top:0;z-index:40;background:#b45309;color:#fff;text-align:center;font-size:13px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px}
 .login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px max(28px,env(safe-area-inset-left));background:radial-gradient(120% 80% at 50% 0%,#1d2f4d 0%,var(--navy) 60%);color:#fff;max-width:none}
@@ -464,7 +531,7 @@ const ICO = {
 const ic = (n, c) => `<svg class="i ${c||''}" viewBox="0 0 24 24" aria-hidden="true">${ICO[n]||''}</svg>`;
 let TEMA = 'auto'; try{ TEMA = localStorage.getItem('ck_tema') || 'auto'; }catch(e){}
 function aplicarTema(){ const r = document.documentElement; if(TEMA==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', TEMA); }
-function cambiarTema(){ TEMA = TEMA==='auto' ? 'dark' : TEMA==='dark' ? 'light' : 'auto'; try{ localStorage.setItem('ck_tema', TEMA); }catch(e){} aplicarTema(); abrirMenu(); }
+function cambiarTema(){ TEMA = TEMA==='auto' ? 'dark' : TEMA==='dark' ? 'light' : TEMA==='light' ? 'sala' : 'auto'; try{ localStorage.setItem('ck_tema', TEMA); }catch(e){} aplicarTema(); abrirMenu(); }
 const EMPRESA = { tel:'+34613089894', telTxt:'613 08 98 94', mail:'info@dreamscapeevents.es' };
 function contactoEmpresa(){ return `<div class="empresa"><a href="tel:${EMPRESA.tel}">${ic('phone')}Llamar</a><a href="https://wa.me/${EMPRESA.tel.replace('+','')}" target="_blank" rel="noopener">${ic('msg')}WhatsApp</a><a href="mailto:${EMPRESA.mail}">${ic('mail')}Correo</a></div><div class="meta" style="text-align:center">${EMPRESA.telTxt} · ${EMPRESA.mail}</div>`; }
 const BRAND = `<div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>`;
@@ -507,7 +574,7 @@ async function cargarLista(){
   ocultarSplash();
   cargarAvisos();
   avisarRecordatorios();
-  cargarPortadas(); revisarPush();
+  cargarPortadas(); revisarPush(); revisarLogros();
 }
 function filtrados(){
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -554,7 +621,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${hero}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
+    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -634,11 +701,15 @@ function vistaDet(){
   else {
     const f = ficha();
     const pct = vt ? vh/vt : 0, CIR = 2*Math.PI*27, nInc = S.items.filter(i=>i.incidencia).length;
-    const grupos = agrupacion()==='zona' && hayZonas() ? agruparZona(pend) : agrupar(pend);
-    const herr = S.items.length > 6 || hayZonas() ? `<div class="mtools"><input id="bsq" class="msearch" type="search" placeholder="Buscar en el material" value="${esc(S.qm||'')}" oninput="filtrarMat(this.value)" autocomplete="off">${hayZonas()?`<div class="seg mini"><button class="${agrupacion()==='zona'?'on':''}" onclick="ponerAgr('zona')">Por zona</button><button class="${agrupacion()!=='zona'?'on':''}" onclick="ponerAgr('cat')">Por tipo</button></div>`:''}</div>${S.qm && !IV.length ? `<div class="meta" style="margin:4px 4px 14px">Nada coincide con «${esc(S.qm)}».</div>` : ''}` : '';
+    const grupos = agruparSegun(pend), G = modoGrid();
+    const lst = l => G ? `<div class="grid">${l.map(i=>celda(i,k)).join('')}</div>` : l.map(fila).join('');
+    const ag = agrupacion();
+    const herr = `<div class="mtools"><input id="bsq" class="msearch" type="search" placeholder="Buscar en el material" value="${esc(S.qm||'')}" oninput="filtrarMat(this.value)" autocomplete="off"><button class="vbtn ${G?'':'on'}" onclick="ponerGrid(false)" aria-label="Ver en lista">${ic('list','s')}</button><button class="vbtn ${G?'on':''}" onclick="ponerGrid(true)" aria-label="Ver en cuadrícula">${ic('grid','s')}</button></div>
+      <div class="seg mini orden">${hayZonas()?`<button class="${ag==='zona'?'on':''}" onclick="ponerAgr('zona')">Por zona</button>`:''}<button class="${ag==='cat'||(ag==='zona'&&!hayZonas())?'on':''}" onclick="ponerAgr('cat')">Por tipo</button><button class="${ag==='carga'?'on':''}" onclick="ponerAgr('carga')">Orden de carga</button></div>
+      ${S.qm && !IV.length ? `<div class="meta" style="margin:4px 4px 14px">Nada coincide con «${esc(S.qm)}».</div>` : ''}`;
     const listaPend = !pend.length ? '' : grupos.length>1
-      ? grupos.map(([c,l])=>`<div class="sec">${esc(c)} <span class="cnt">${l.length}</span></div>${l.map(fila).join('')}`).join('')
-      : `<div class="sec">Pendiente <span class="cnt">${pend.length}</span></div>${pend.map(fila).join('')}`;
+      ? grupos.map(([c,l])=>`<div class="sec">${esc(c)} <span class="cnt">${l.length}</span></div>${lst(l)}`).join('')
+      : `<div class="sec">Pendiente <span class="cnt">${pend.length}</span></div>${lst(ordenar(pend))}`;
     body = `
     ${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
@@ -655,7 +726,7 @@ function vistaDet(){
     ${tarjetaNotas()}
     ${herr}
     ${listaPend}
-    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${ok.map(fila).join('')}`:''}
+    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${S.modo==='carga'?'cargado':'devuelto'}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
     ${bloqueExtras()}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
@@ -666,7 +737,7 @@ function vistaDet(){
     ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${esAdmin()?'ruta':'dev'}', ${faltan})">${hechos===tot?(esAdmin()?'Siguiente: la ruta':'Siguiente: descarga'):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
     : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('send','s')+' Terminar y enviar'))}</button></div>`;
   const ptd = portada(S.num);
-  return `<header ${ptd?`class="conpt" style="--pt:url(${ptd})"`:''}>
+  return `<header class="${claseEstado(S.num)} ${ptd?'conpt':''}" ${ptd?`style="--pt:url(${ptd})"`:''}>
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.num)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
@@ -897,12 +968,13 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${hito('llegada','He llegado',ic('pin'))}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaGastos()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaFichaje()}${hito('llegada','He llegado',ic('pin'))}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaGastos()}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: vuelta al almacén ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
 async function hito(campo, borrar){
   if(!S.bolo) return;
+  if(campo==='finMontaje' && !borrar && await faltaFotoMontaje()){ toast('Antes de terminar, sube al menos una foto del montaje'); const i = $('#fmIn'); if(i){ i.scrollIntoView({ block:'center', behavior:'smooth' }); setTimeout(()=>i.click(), 500); } return; }
   if(campo==='finMontaje' && !borrar){ const l=((S.yo||{}).config||{}).checklist||[], ch=S.bolo.ficha.checks||{}, f=l.filter(x=>!ch[x]).length; if(f && !confirm(`Quedan ${f} pasos de la checklist sin marcar. ¿Terminar el montaje igualmente?`)) return; }
   if(borrar && !confirm('¿Borrar esta hora?')) return;
   const prev = S.bolo.ficha[campo]; S.bolo.ficha[campo] = borrar ? '' : hora(); vib(20); render();
@@ -1006,12 +1078,12 @@ async function abrirScan(modoScan){
   SCANMODO = modoScan || S.modo;
   const ov = document.createElement('div'); ov.className='scanov'; ov.id='scanov';
   ov.innerHTML = `<video id="scanv" playsinline muted></video><div class="scanframe"></div>
-    <div class="scantop"><b>${SCANMODO==='consulta'?'Consultar equipo':SCANMODO==='añadir'?'Añadir material':SCANMODO==='carga'?'Cargar escaneando':'Devolver escaneando'}</b>${SCANMODO==='carga'||SCANMODO==='dev'?'<span class="scnt" id="scnt"></span>':''}<button onclick="cerrarScan()">Cerrar</button></div>
+    <div class="scantop"><b>${SCANMODO==='consulta'?'Consultar equipo':SCANMODO==='añadir'?'Añadir material':SCANMODO==='carga'?'Cargar escaneando':'Devolver escaneando'}</b>${SCANMODO==='carga'||SCANMODO==='dev'?`<span class="scnt" id="scnt"></span><button class="svoz ${vozOn()?'on':''}" onclick="cambiarVoz(this)" aria-label="Modo sin manos">${vozOn()?'🔊':'🔇'}</button>`:''}<button onclick="cerrarScan()">Cerrar</button></div>
     ${SCANMODO==='carga'||SCANMODO==='dev'?'<button class="sfalta" id="sfalta" onclick="verFaltaScan()"></button><div class="spanel" id="spanel" hidden></div>':''}
     <div class="scanlast" id="scanlast">Apunta al código QR de la etiqueta</div>`;
   document.body.appendChild(ov);
   SCAN_FIN = false; try{ SCAN_AC = SCAN_AC || new (window.AudioContext||window.webkitAudioContext)(); SCAN_AC.resume && SCAN_AC.resume(); }catch(e){}
-  pintarScnt();
+  pintarScnt(); if(vozOn() && (SCANMODO==='carga'||SCANMODO==='dev')) setTimeout(siguienteVoz, 600);
   try{
     await cargarScript('jsqr.js');
     const st = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' }, audio:false });
@@ -1051,7 +1123,7 @@ function leido(txt){
   if(SCANMODO==='añadir'){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya está en el albarán'; return; }
   if(it[k]){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya estaba marcado'; return; }
   el.className='scanlast good'; el.textContent = '✓ ' + it.cant + ' × ' + it.material; vib(40); pitido(true);
-  toggle(it.fila, true); pintarScnt();
+  toggle(it.fila, true); pintarScnt(); setTimeout(siguienteVoz, 250);
 }
 
 /* ---------- ETIQUETAS QR ---------- */
@@ -1139,7 +1211,7 @@ async function guardarInc(quitar){
 /* =========================================================
    SIN COBERTURA: caché de lecturas y cola de cambios
    ========================================================= */
-const LECT = ['ckZonas','ckCatalogo','ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes','ckAvisos','ckMantenimiento','ckReparaciones'];
+const LECT = ['ckCalendario','ckStockAvisos','ckZonas','ckCatalogo','ckPresupuestos','ckMaterial','ckBolo','ckYo','ckFurgonetas','ckGastos','ckPendientes','ckAvisos','ckMantenimiento','ckReparaciones'];
 function cacheGet(k){ try{ const v = localStorage.getItem('ck_c_'+k); return v ? JSON.parse(v) : undefined; }catch(e){ return undefined; } }
 function cacheSet(k, v){ try{ localStorage.setItem('ck_c_'+k, JSON.stringify(v)); }catch(e){ limpiarCache(); } }
 function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_c_ckMaterial')===0||k.indexOf('ck_c_ckBolo')===0).slice(0,-6).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
@@ -1208,7 +1280,7 @@ function salirSesion(){
 async function arrancar(){
   S.yo = S.yo || cacheGet('ckYo[]') || null;
   cargarLista(); cargarFurgos(); vaciarCola(); atajoInicial(); guiaPrimeraVez();
-  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); }
+  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); cargarStock(); }
   catch(e){ if(!e.red && /código|acceso/i.test(e.message)){ salirSesion(); } }
 }
 
@@ -1218,7 +1290,7 @@ async function arrancar(){
 function abrirMenu(){
   const u = (S.yo||{}).usuario || {};
   const it = (ico, t, f, sub) => `<button class="mitem" onclick="cerrarSheet();${f}"><span class="ic">${ic(ico)}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
-  const tema = TEMA==='dark' ? 'Oscuro' : TEMA==='light' ? 'Claro' : 'Automático';
+  const tema = TEMA==='dark' ? 'Oscuro' : TEMA==='light' ? 'Claro' : TEMA==='sala' ? 'Sala (luz roja)' : 'Automático';
   abrirSheet(`<h3>${esc(u.nombre||'Menú')}</h3><div class="meta">${u.rol==='admin'?'Administrador':'Técnico'}</div>
     <div class="mgrp">Contacto de Dreamscape Events</div>${contactoEmpresa()}
     ${esAdmin() ? `<div class="mgrp">Material</div>
@@ -1228,6 +1300,7 @@ function abrirMenu(){
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     <div class="mgrp">Gestión</div>
     ${it('today','Panel del día','verPanel()','Quién ha salido, llegado o va con retraso')}
+    ${it('chart','Calendario','verCalendario()','Bolos del mes, equipo y furgonetas')}
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
     ${it('users','Accesos del equipo','verAccesos()','Códigos y permisos del equipo')}
     ${it('plus','Nueva persona','verAccesos().then(nuevaPersona)','Dar acceso a alguien a la app')}
@@ -1237,9 +1310,11 @@ function abrirMenu(){
     ${it('save','Copias de seguridad','verCopias()','Una por semana, en tu Drive')}
     ${it('gear','Ajustes','abrirAjustes()','Enlace de reseñas de Google')}` : ''}
     <div class="mgrp">App</div>
-    <button class="mitem" onclick="cambiarTema()"><span class="ic">${ic('moon')}</span><span><b>Tema: ${tema}</b><small>Toca para cambiar · Automático sigue al iPhone</small></span></button>
+    <button class="mitem" onclick="cambiarTema()"><span class="ic">${ic('moon')}</span><span><b>Tema: ${tema}</b><small>Toca para cambiar · Automático sigue al iPhone y pone luz roja en montajes de noche</small></span></button>
     <button class="mitem" onclick="cambiarTexto()"><span class="ic" style="font-weight:800">Aa</span><span><b>Texto grande: ${textoGrande()?'Sí':'No'}</b><small>Letras y botones más grandes, para usar con guantes o con poca luz</small></span></button>
     ${('Notification' in window) ? it('bell', Notification.permission==='granted' ? 'Avisos en el móvil: activados' : 'Activar avisos en el móvil','activarNotis()', Notification.permission==='granted' ? 'Toca para enviarte un aviso de prueba' : 'Bolo de mañana, notas del equipo y cambios, aunque la app esté cerrada') : ''}
+    ${it('pin','Mapa de bolos','verMapa()','Dónde son los bolos de la semana')}
+    ${it('star','Logros','verLogros()','Bolos completados, rachas sin incidencias…')}
     ${it('book','Guía rápida','abrirGuia()','Cómo se usa la app en 1 minuto')}
     ${it('link','Atajos','verAtajos()','Escanear o abrir el bolo de hoy en un toque')}
     ${it('download','Instalar en el móvil','ayudaInstalar()')}
@@ -1258,7 +1333,7 @@ function heroBolo(p, lbl, cls){
   const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
   const paso = !p.total ? 'Ver el bolo' : p.cargados < p.total ? (p.cargados ? 'Seguir cargando' : 'Empezar a cargar') : p.devueltos === 0 ? (esAdmin() ? 'Ir al evento' : 'Marcar la descarga') : p.devueltos < p.total ? 'Terminar la vuelta' : 'Ver el bolo';
   const pt = portada(p.num);
-  return `<div class="hoy ${cls||''} ${pt?'conpt':''}" ${pt?`style="--pt:url(${pt})"`:''}><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
+ return `<div class="hoy ${cls||''} hd-${estadoBolo(p)[0]} ${pt?'conpt':''}" ${pt?`style="--pt:url(${pt})"`:''}><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
     ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
     <div class="hst"><div><span>Carga</span><b>${p.cargados}/${p.total}</b><div class="track"><div class="fill" style="width:${pc}%"></div></div></div><div><span>Vuelta</span><b>${p.devueltos}/${p.total}</b><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div></div>
     ${(p.tecnicos||[]).length?`<div class="htec">${ic('users','xs')} ${esc(p.tecnicos.join(', '))}</div>`:''}
@@ -1577,6 +1652,8 @@ function abrirMas(){
     ${esAdmin()? it('users','Repartir material','abrirReparto()','Quién carga cada cosa · cada uno ve «Lo mío»'):''}
     ${esAdmin()? it('camera','Foto de portada','abrirPortada()','Para reconocer el bolo de un vistazo'):''}
     ${esAdmin()? it('clip','Copiar de otro bolo','abrirCopiar()','Material y equipo de un bolo anterior'):''}
+    ${esAdmin()? it('qr','Hoja de QR del bolo','cerrarSheet();verQrBolo()','Para imprimir y llevar en la carga'):''}
+    ${esAdmin()? it('book','Enviar informe al cliente','enviarInforme()','Fotos del montaje, horarios y equipo'):''}
     ${!esAdmin() ? '' : `${it('plus','Añadir material','abrirExtra()','Escaneando el QR o desde el inventario')}
     ${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
     ${it('link','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
@@ -1769,10 +1846,13 @@ function abrirAjustes(){
   abrirSheet(`<h3>⚙ Ajustes</h3>
     <label class="fld"><span>Enlace para dejar reseña en Google</span><input id="ajRes" value="${esc(c.resenaUrl||'')}" placeholder="https://g.page/r/…/review"></label>
     <div class="meta" style="margin:-4px 0 12px">Lo encuentras en tu Perfil de Empresa de Google → «Pedir reseñas». Si lo dejas vacío, se usa una búsqueda de Dreamscape Events en Google.</div>
-    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarAjustes()">Guardar</button></div>`);
+    <label class="fld"><span>Dirección del almacén</span><input id="ajAlm" value="${esc(c.almacen||'')}" placeholder="Calle, número y población"></label>
+    <div class="meta" style="margin:-4px 0 12px">Para calcular a qué hora salir hacia cada bolo y verlo en el mapa.</div>
+    <label class="chkrow"><input type="checkbox" id="ajFoto" ${c.fotoObligatoria?'checked':''}><span><b>Foto obligatoria del montaje</b><small>No se puede marcar «Montaje terminado» sin al menos una foto</small></span></label>
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="ajBtn" onclick="guardarAjustes()">Guardar</button></div>`);
 }
 async function guardarAjustes(){
-  try{ const c = await call('ckGuardarConfig', { resenaUrl: $('#ajRes').value.trim() }); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Ajustes guardados'); }
+  try{ $('#ajBtn').disabled = true; await call('ckGuardarConfig', { resenaUrl: $('#ajRes').value.trim() }); const c = await guardarExtras(); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Ajustes guardados'); render(); }
   catch(e){ toast('No se guardó: '+e.message); }
 }
 
@@ -2188,6 +2268,7 @@ function vistaEnRuta(){
       ${S.bolo ? b('msg','Notas', nuevas ? nuevas+' nueva'+(nuevas>1?'s':'') : 'Del equipo', { on:'abrirNotas()', cls: nuevas?'warn':'' }) : ''}
       ${b('box','Material','Ver el bolo',{ on:`abrir('${esc(S.num)}')` })}
     </div>
+    ${tarjetaFichaje(true)}
     ${f.acceso||f.notas||furgo||(f.tecnicos||[]).length ? `<dl class="kv rkv">${f.acceso?`<dt>Acceso</dt><dd>${esc(f.acceso)}</dd>`:''}${f.notas?`<dt>Notas</dt><dd>${esc(f.notas)}</dd>`:''}${furgo?`<dt>Furgoneta</dt><dd>${esc([furgo.matricula, furgo.marca, furgo.modelo].filter(Boolean).join(' · '))}</dd>`:''}${(f.tecnicos||[]).length?`<dt>Equipo</dt><dd>${esc(f.tecnicos.join(', '))}</dd>`:''}</dl>` : ''}
   </div>`;
 }
@@ -2211,7 +2292,7 @@ function pintarScnt(){
 }
 let SCAN_FIN = false;
 function pintarPanelFalta(){
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = itemsVista().filter(i=>!i[k]);
+  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = ordenar(itemsVista().filter(i=>!i[k]));
   $('#spanel').innerHTML = l.length ? l.map(i=>`<div class="sfi">${fotoMat(i.material)?`<img src="${fotoMat(i.material)}">`:''}<b>${esc(i.cant)}×</b> ${esc(i.material)}</div>`).join('') : '<div class="sfi">Nada pendiente</div>';
 }
 function verFaltaScan(){ const pn = $('#spanel'); if(!pn) return; pn.hidden = !pn.hidden; if(!pn.hidden) pintarPanelFalta(); }
@@ -2446,8 +2527,310 @@ async function copiarDe(origen){
   }catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
 }
 
+/* =========================================================
+   MEJORAS 3: QR del bolo, sin manos, orden de carga, stock, fichaje,
+   foto obligatoria, mapa, tiempo y salida, cabeceras por estado,
+   modo sala, cuadrícula, logros, calendario e informe del cliente
+   ========================================================= */
+function cfg(){ return (S.yo||{}).config || {}; }
+
+/* ---------- 1. HOJA DE QR DEL BOLO ---------- */
+async function verQrBolo(){
+  S.vista = 'qrbolo'; render(); window.scrollTo(0,0);
+  try{ await cargarScript('qrcode.js'); if(!S.catalogo){ S.catalogo = await call('ckCatalogo'); S.catIdx = null; } }catch(e){ toast('Error: '+e.message); }
+  if(S.vista==='qrbolo') render();
+}
+function codigoDe(mat){
+  const U = UP(mat), m = U.match(/\(([^)]+)\)\s*$/); if(m) return m[1].trim();
+  const x = (S.catalogo||[]).find(c => UP(c.nombre) === U || UP(c.nombre) === U.replace(/\s*\([^)]*\)\s*$/,''));
+  return x ? String(x.codigo||'') : '';
+}
+function vistaQrBolo(){
+  const p = S.presus.find(x=>x.num===S.num) || { num:S.num };
+  const qr = t => { try{ const q = qrcode(0,'M'); q.addData(unescape(encodeURIComponent(t))); q.make(); return q.createSvgTag({ cellSize:3, margin:0, scalable:true }); }catch(e){ return ''; } };
+  const l = S.items.concat(((ficha().extra)||[]).map(e=>({ material:e.nombre, cant:e.cant })));
+  const body = typeof qrcode === 'undefined' ? `<div class="loading"><div class="spin"></div>Preparando…</div>`
+    : `<div class="labels">${l.map(i=>{ const c = codigoDe(i.material); return `<div class="label"><div class="qr">${qr('DS|'+c+'|'+String(i.material).replace(/\s*\(extra\)$/,''))}</div><div class="lt"><b>${esc(i.material)}</b><small>${esc(i.cant)} uds${c?' · '+esc(c):''}</small><span>${esc(p.num)}</span></div></div>`; }).join('')}</div>`;
+  return `<header class="noprint"><div class="hrow"><button class="back" onclick="S.vista='det';render()" aria-label="Volver">${ic('back')}</button><div style="flex:1;min-width:0"><h1>QR del bolo</h1><div class="sub">${esc(p.evento||'')} · ${l.length} etiquetas</div></div><button class="ref" onclick="window.print()" aria-label="Imprimir">${ic('download')}</button></div>
+    <div class="sub" style="margin-top:8px;white-space:normal">Imprímela y llévala en la carga: si una etiqueta está gastada o falta, escanea el QR de esta hoja.</div></header><main class="etiq">${body}</main>`;
+}
+
+/* ---------- 2. MODO SIN MANOS (voz en el escáner) ---------- */
+function vozOn(){ try{ return localStorage.getItem('ck_voz') === '1'; }catch(e){ return false; } }
+function hablar(t){
+  try{ if(!('speechSynthesis' in window) || !vozOn()) return; speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t); u.lang = 'es-ES'; u.rate = 1.02;
+    const v = speechSynthesis.getVoices().find(v=>/^es(-|_)ES/i.test(v.lang)); if(v) u.voice = v;
+    speechSynthesis.speak(u); }catch(e){}
+}
+function siguienteVoz(){
+  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = ordenar(itemsVista().filter(i=>!i[k]));
+  if(!l.length){ hablar(S.modo==='carga' ? 'Todo cargado. Buen trabajo.' : 'Todo devuelto.'); return; }
+  const i = l[0]; hablar(`Siguiente: ${i.cant} ${String(i.material).toLowerCase().replace(/\(.*?\)/g,'')}. Faltan ${l.length}.`);
+}
+function cambiarVoz(b){
+  const on = !vozOn(); try{ localStorage.setItem('ck_voz', on ? '1' : '0'); }catch(e){}
+  if(b){ b.classList.toggle('on', on); b.innerHTML = on ? '🔊' : '🔇'; }
+  if(on){ hablar('Modo sin manos activado.'); setTimeout(siguienteVoz, 1600); } else try{ speechSynthesis.cancel(); }catch(e){}
+}
+
+/* ---------- 3. ORDEN DE CARGA ---------- */
+const ORDEN_CARGA = { truss:[1,'1 · Estructura y lo pesado'], spk:[2,'2 · Sonido'], screen:[3,'3 · Vídeo y pantallas'], bulb:[4,'4 · Iluminación y efectos'], cloud:[4,'4 · Iluminación y efectos'], plug:[5,'5 · Cables y accesorios'], '':[5,'5 · Cables y accesorios'], mic:[6,'6 · Frágil y pequeño (lo último)'] };
+function ordenDe(m){ return ORDEN_CARGA[icoMat(m)] || ORDEN_CARGA['']; }
+function agruparCarga(l){
+  const g = new Map();
+  l.slice().sort((a,b)=>ordenDe(a.material)[0]-ordenDe(b.material)[0]).forEach(i=>{ const t = ordenDe(i.material)[1]; if(!g.has(t)) g.set(t, []); g.get(t).push(i); });
+  return [...g.entries()];
+}
+function ordenar(l){ const a = agrupacion(); return a==='carga' ? l.slice().sort((x,y)=>ordenDe(x.material)[0]-ordenDe(y.material)[0]) : l; }
+function agruparSegun(l){ const a = agrupacion(); if(a==='zona' && hayZonas()) return agruparZona(l); if(a==='carga') return agruparCarga(l); return agrupar(l); }
+
+/* ---------- 4. AVISOS DE STOCK ---------- */
+async function cargarStock(){
+  if(!esAdmin()) return;
+  try{ S.stock = await call('ckStockAvisos') || []; if(!S.stock.length) return; let n = 0; const t = () => { if(++n > 90 || S.vista!=='lista') return; if($('#sheet').classList.contains('open')) setTimeout(t, 1000); else render(); }; t(); }catch(e){}
+}
+function tarjetaStock(){
+  const l = S.stock || []; if(!l.length) return '';
+  const n = l.reduce((a,b)=>a+b.falta.length,0);
+  return `<button class="card alerta" onclick="verStock()"><b>${ic('alert','s')} Falta stock: ${n} ${n>1?'equipos':'equipo'} en ${l.length} ${l.length>1?'bolos':'bolo'}</b><div class="meta">${esc(l.slice(0,3).map(b=>b.evento||b.num).join(' / '))} · próximos 14 días</div></button>`;
+}
+function verStock(){
+  const l = S.stock || [];
+  abrirSheet(`<h3>${ic('alert')} Falta stock</h3><div class="meta" style="margin-bottom:10px">Material que no llega en los próximos 14 días porque está en otro bolo a la vez o en reparación. Mejor resolverlo ahora que el día de la carga.</div>
+    ${l.map(b=>`<div class="furg"><div class="top"><b>${esc(b.evento||b.num)}</b><span class="meta">${esc(b.montaje||'')}</span></div>
+      ${b.falta.map(f=>`<div class="hrow2" style="padding:6px 0"><div><b>${esc(f.material)}</b><div class="meta inc">Necesitas ${f.usado} · hay ${f.stock}${(f.otros||[]).length?' · también en '+esc(f.otros.join(', ')):''}</div></div></div>`).join('')}
+      <button class="link" style="padding:8px 0 0" onclick="cerrarSheet();abrir('${esc(b.num)}')">Abrir el bolo ›</button></div>`).join('') || '<div class="meta">Todo el material llega. 👍</div>'}`);
+}
+
+/* ---------- 5. FICHAJE ---------- */
+function misFichajes(){ return ((ficha().fichajes)||{})[yoNombre()] || []; }
+function fichaAbierta(){ const l = misFichajes(); return l.length && !l[l.length-1].s ? l[l.length-1] : null; }
+function durTxt(ms){ const m = Math.max(0, Math.round(ms/60000)); return m < 60 ? m+' min' : Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min'; }
+function tarjetaFichaje(oscuro){
+  if(!S.bolo) return '';
+  const a = fichaAbierta(), l = misFichajes(), tot = l.reduce((s,x)=>s+(x.h||0),0);
+  const cls = oscuro ? 'fich osc' : 'furg fich';
+  if(a) return `<div class="${cls} dentro"><div class="ft"><span class="pulso"></span><div><b>Estás dentro</b><div class="meta" id="fichT" data-em="${a.em}">Desde ${esc(String(a.e).slice(-5))} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo')">Salgo</button></div>`;
+  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h apuntadas en este bolo` : 'Pulsa al empezar y al terminar: las horas se apuntan solas'}</div></div></div><button class="btn entro" onclick="fichar('entro')">Entro</button></div>`;
+}
+setInterval(()=>{ const e = $('#fichT'); if(e) e.textContent = e.textContent.replace(/·.*$/, '· ' + durTxt(Date.now() - +e.dataset.em)); }, 30000);
+async function fichar(tipo){
+  if(tipo==='salgo' && !confirm('¿Terminas ya? Se apuntarán tus horas en Gastos.')) return;
+  vib(20);
+  try{
+    const r = await call('ckFichar', S.num, tipo);
+    S.bolo.ficha.fichajes = r.fichajes; guardarBoloCache();
+    if(tipo==='salgo'){ toast(r.horas ? `${String(r.horas).replace('.',',')} h apuntadas en Gastos` : 'Salida apuntada'); call('ckGastos', S.num).then(g=>{ S.gastos = g || []; if(S.vista==='det') render(); }).catch(()=>{}); }
+    else toast('Entrada apuntada');
+    render();
+  }catch(e){ toast(e.red ? 'Necesitas conexión para fichar' : 'Error: '+e.message); }
+}
+
+/* ---------- 6. FOTO OBLIGATORIA AL TERMINAR EL MONTAJE ---------- */
+async function faltaFotoMontaje(){
+  if(!cfg().fotoObligatoria) return false;
+  await cargarFotos();
+  return !(S.fotos||[]).some(f=>f.tipo==='montaje');
+}
+
+/* ---------- 7 y 8. GEOGRAFÍA: mapa, tiempo y hora de salida ---------- */
+let GEO = {}; try{ GEO = JSON.parse(localStorage.getItem('ck_geo')||'{}') || {}; }catch(e){}
+let geoCola = Promise.resolve();
+function geocodificar(lugar){
+  const q = destino(lugar); if(!q) return Promise.resolve(null);
+  if(GEO[q] !== undefined) return Promise.resolve(GEO[q]);
+  const intentos = [q]; const partes = String(lugar).split('|').map(s=>s.trim()).filter(Boolean); if(partes.length > 1) intentos.push(partes.slice(1).join(', '));
+  const una = t => fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es,ad,fr,pt&accept-language=es&q=' + encodeURIComponent(t)).then(r=>r.json()).then(j=>j && j[0] ? { lat:+j[0].lat, lon:+j[0].lon } : null);
+  geoCola = geoCola.then(async () => {
+    if(GEO[q] !== undefined) return;
+    let r = null; for(const t of intentos){ try{ r = await una(t); }catch(e){ return; } await new Promise(z=>setTimeout(z, 1100)); if(r) break; }
+    GEO[q] = r; try{ localStorage.setItem('ck_geo', JSON.stringify(GEO)); }catch(e){}
+  });
+  return geoCola.then(()=>GEO[q] || null);
+}
+const WMO = { 0:['☀️','Despejado'],1:['🌤️','Casi despejado'],2:['⛅','Nubes y claros'],3:['☁️','Nublado'],45:['🌫️','Niebla'],48:['🌫️','Niebla'],51:['🌦️','Llovizna'],53:['🌦️','Llovizna'],55:['🌧️','Llovizna fuerte'],61:['🌧️','Lluvia débil'],63:['🌧️','Lluvia'],65:['🌧️','Lluvia fuerte'],71:['🌨️','Nieve'],73:['🌨️','Nieve'],75:['❄️','Nevada'],80:['🌦️','Chubascos'],81:['🌧️','Chubascos'],82:['⛈️','Chubascos fuertes'],95:['⛈️','Tormenta'],96:['⛈️','Tormenta con granizo'],99:['⛈️','Tormenta con granizo'] };
+const CLIMA = {};
+async function climaDe(p){
+  if(CLIMA[p.num]) return CLIMA[p.num];
+  const g = await geocodificar(p.lugar); if(!g) return null;
+  const d = new Date(p.ts), z = n=>String(n).padStart(2,'0'), f = d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+  try{
+    const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g.lat}&longitude=${g.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&timezone=Europe%2FMadrid&start_date=${f}&end_date=${f}`)).json();
+    const D = j.daily; if(!D || !D.time || !D.time.length) return null;
+    const r = { g, cod: D.weathercode[0], max: Math.round(D.temperature_2m_max[0]), min: Math.round(D.temperature_2m_min[0]), lluvia: D.precipitation_probability_max[0], viento: Math.round(D.windspeed_10m_max[0]) };
+    return CLIMA[p.num] = r;
+  }catch(e){ return null; }
+}
+async function minutosRuta(a, b){
+  try{ const j = await (await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`)).json(); return j.routes && j.routes[0] ? Math.round(j.routes[0].duration/60) : null; }catch(e){ return null; }
+}
+async function pintarWidget(p){
+  const el = $('#wtr'); if(!el) return;
+  const c = await climaDe(p); if(!$('#wtr')) return;
+  if(!c){ el.innerHTML = `<div class="meta">No se pudo consultar el tiempo de ${esc(destino(p.lugar)||'este lugar')}.</div>`; return; }
+  const [emo, txt] = WMO[c.cod] || ['🌡️',''];
+  const avisos = []; if(c.lluvia >= 40) avisos.push(`☔ ${c.lluvia}% de lluvia`); if(c.viento >= 35) avisos.push(`💨 viento de ${c.viento} km/h`);
+  let salida = '';
+  const al = cfg().almacenGeo;
+  if(al){
+    const min = await minutosRuta(al, c.g);
+    let f = S.bolo && S.num===p.num ? ficha() : ((cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {});
+    const h = horaDe(f.horario);
+    if(min != null){
+      const margen = Math.round(min*0.25) + 15;
+      salida = h != null ? (()=>{ const s = h - min - margen, hh = ((s%1440)+1440)%1440; return `<div class="wsal">${ic('truck','s')} Sal del almacén a las <b>${String(Math.floor(hh/60)).padStart(2,'0')}:${String(hh%60).padStart(2,'0')}</b><small>${min} min de trayecto + ${margen} de margen por tráfico</small></div>`; })()
+        : `<div class="wsal">${ic('truck','s')} <b>${min} min</b> de trayecto desde el almacén<small>Pon la hora en la ficha del bolo para calcular la salida</small></div>`;
+    }
+  }else if(esAdmin()) salida = `<button class="link" style="padding:6px 0 0;text-align:left" onclick="abrirAjustes()">Pon la dirección del almacén en Ajustes para calcular la hora de salida ›</button>`;
+  el.innerHTML = `<div class="wtop"><span class="wemo">${emo}</span><div><b>${c.max}° <small>/ ${c.min}°</small></b><div class="meta">${txt} en ${esc(destino(String(p.lugar).split('|').pop()))}</div></div></div>${avisos.length?`<div class="aviso" style="margin:10px 0 0">${avisos.join(' · ')}: ojo con el montaje en exterior</div>`:''}${salida}`;
+}
+function widgetHoy(){
+  const hoy = diaDe(Date.now()), l = (S.presus||[]).filter(p=>p.ts && p.lugar && !p.cerrado && diaDe(p.ts) >= hoy && diaDe(p.ts) <= hoy + 864e5).sort((a,b)=>a.ts-b.ts);
+  if(!l.length) return '';
+  setTimeout(()=>pintarWidget(l[0]), 0);
+  return `<div class="widget" id="wtr"><div class="meta">Consultando el tiempo…</div></div>`;
+}
+// Mapa de bolos
+async function verMapa(){
+  S.vista = 'mapa'; S.mapaDias = S.mapaDias || 7;
+  try{ history.pushState({v:'mapa'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{
+    if(!document.querySelector('link[href*="leaflet"]')){ const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(l); }
+    await cargarScript('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js');
+    pintarMapa();
+  }catch(e){ toast('No se pudo cargar el mapa'); }
+}
+function bolosMapa(){ const hoy = diaDe(Date.now()); return (S.presus||[]).filter(p=>p.ts && p.lugar && !p.archivado && diaDe(p.ts) >= hoy && diaDe(p.ts) < hoy + S.mapaDias*864e5).sort((a,b)=>a.ts-b.ts); }
+function vistaMapa(){
+  const l = bolosMapa();
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Mapa de bolos</h1></div>
+    <div class="seg"><button class="${S.mapaDias===7?'on':''}" onclick="S.mapaDias=7;render();pintarMapa()">7 días</button><button class="${S.mapaDias===30?'on':''}" onclick="S.mapaDias=30;render();pintarMapa()">30 días</button></div></header>
+    <main><div id="mapa" class="mapa"></div>
+    ${l.map((p,i)=>`<button class="card mrow" onclick="abrir('${esc(p.num)}')"><span class="mnum">${i+1}</span><span style="flex:1;min-width:0"><b>${esc(p.evento)}</b><div class="meta">${esc(new Date(p.ts).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'}))} · ${esc(destino(p.lugar))}</div></span>${ic('chev','s')}</button>`).join('') || `<div class="empty">${ic('pin')}<div>No hay bolos en estos días.</div></div>`}</main>`;
+}
+let MAPA = null;
+async function pintarMapa(){
+  const el = $('#mapa'); if(!el || typeof L === 'undefined') return;
+  if(MAPA){ try{ MAPA.remove(); }catch(e){} MAPA = null; }
+  const osc = matchMedia('(prefers-color-scheme: dark)').matches && TEMA!=='light' || TEMA==='dark' || TEMA==='sala';
+  MAPA = L.map(el, { zoomControl:false, attributionControl:true }).setView([41.39, 2.17], 9);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${osc?'dark_all':'rastertiles/voyager'}/{z}/{x}/{y}{r}.png`, { maxZoom: 18, attribution: '© OpenStreetMap · © CARTO' }).addTo(MAPA);
+  const pts = [], al = cfg().almacenGeo;
+  if(al){ L.marker([al.lat, al.lon], { icon: L.divIcon({ className:'', html:'<div class="mpin alm">🏠</div>', iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(MAPA).bindPopup('<b>Almacén</b>'); pts.push([al.lat, al.lon]); }
+  const l = bolosMapa();
+  for(let i=0;i<l.length;i++){
+    const p = l[i], g = await geocodificar(p.lugar); if(!g || !MAPA || S.vista!=='mapa') continue;
+    const [ec] = estadoBolo(p);
+    L.marker([g.lat, g.lon], { icon: L.divIcon({ className:'', html:`<div class="mpin est-${ec}"><b>${i+1}</b></div>`, iconSize:[30,30], iconAnchor:[15,15] }) }).addTo(MAPA)
+      .bindPopup(`<b>${esc(p.evento)}</b><br>${esc(new Date(p.ts).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))}<br><a href="#" onclick="abrir('${esc(p.num)}');return false">Abrir el bolo ›</a>`);
+    pts.push([g.lat, g.lon]);
+    if(pts.length > 1) MAPA.fitBounds(pts, { padding:[30,30], maxZoom: 13 }); else MAPA.setView(pts[0], 12);
+  }
+}
+
+/* ---------- 9. CABECERAS SEGÚN EL ESTADO ---------- */
+function claseEstado(num){ const p = S.presus.find(x=>x.num===num); return p ? 'hd-' + estadoBolo(p)[0] : ''; }
+
+/* ---------- 10. MODO SALA (rojo tenue de noche) ---------- */
+function salaAuto(){
+  if(TEMA !== 'auto') return;
+  const h = new Date().getHours(), noche = h >= 22 || h < 7;
+  const sala = noche && S.vista === 'det' && S.modo === 'montaje';
+  const r = document.documentElement;
+  if(sala){ if(r.getAttribute('data-theme') !== 'sala'){ r.setAttribute('data-theme','sala'); if(!salaAuto.avisado){ salaAuto.avisado = 1; setTimeout(()=>toast('Modo sala: luz roja para no deslumbrar'), 400); } } }
+  else if(r.getAttribute('data-theme') === 'sala') r.removeAttribute('data-theme');
+}
+
+/* ---------- 11. CUADRÍCULA CON FOTOS ---------- */
+function modoGrid(){ try{ return localStorage.getItem('ck_grid') === '1'; }catch(e){ return false; } }
+function ponerGrid(v){ try{ localStorage.setItem('ck_grid', v ? '1' : '0'); }catch(e){} vib(8); render(); }
+function celda(i, k){
+  const f = fotoMat(i.material), ico = icoMat(i.material) || 'box';
+  return `<div class="gcell ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" onclick="toggle(${i.fila})">
+    <div class="gimg">${f ? `<img src="${f}" alt="">` : ic(ico)}<span class="gq">${esc(i.cant)}</span>${i[k]?`<span class="gok">${ic('check','s')}</span>`:''}</div>
+    <div class="gname">${esc(i.material)}</div>
+    <button class="ginc" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${i.incidencia?'⚠':'⋯'}</button></div>`;
+}
+
+/* ---------- 12. LOGROS ---------- */
+function terminado(p){ return !!(p.cerrado || p.archivado || (p.total && p.devueltos === p.total)); }
+function misBolos(){ const yo = yoNombre(); return (S.presus||[]).filter(p => esAdmin() ? true : (p.tecnicos||[]).includes(yo)); }
+function logros(){
+  const l = misBolos().filter(terminado).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const limpios = l.filter(p=>!p.incidencias).length;
+  let racha = 0, mejor = 0; l.forEach(p=>{ racha = p.incidencias ? 0 : racha + 1; mejor = Math.max(mejor, racha); });
+  const meses = {}; l.forEach(p=>{ const d = new Date(p.ts||0), k = d.getFullYear()+'-'+d.getMonth(); meses[k] = (meses[k]||0) + 1; });
+  const maxMes = Math.max(0, ...Object.values(meses));
+  const def = [
+    ['🎬','Primer bolo','Completa tu primer bolo', l.length, 1], ['🔟','10 bolos','Completa 10 bolos', l.length, 10], ['🏅','25 bolos','Completa 25 bolos', l.length, 25], ['🏆','50 bolos','Completa 50 bolos', l.length, 50],
+    ['✨','Impecable','5 bolos sin ninguna incidencia', limpios, 5], ['💎','Cuidado extremo','20 bolos sin incidencias', limpios, 20],
+    ['🔥','En racha','5 bolos seguidos sin incidencias', mejor, 5], ['⚡','Imparable','10 seguidos sin incidencias', mejor, 10],
+    ['📅','Mes intenso','8 bolos en un mismo mes', maxMes, 8]
+  ];
+  return def.map(([e,t,d,v,m])=>({ e, t, d, v: Math.min(v,m), m, ok: v >= m }));
+}
+function verLogros(){
+  const L = logros(), n = L.filter(x=>x.ok).length;
+  abrirSheet(`<h3>🏆 ${esAdmin()?'Logros del equipo':'Mis logros'}</h3><div class="meta" style="margin-bottom:12px">${n} de ${L.length} conseguidos${esAdmin()?' · cuenta todos los bolos':''}</div>
+    <div class="logros">${L.map(x=>`<div class="logro ${x.ok?'ok':''}"><span class="le">${x.e}</span><b>${x.t}</b><small>${x.d}</small>${x.ok?'':`<div class="lt"><div style="width:${x.v/x.m*100}%"></div></div><small>${x.v}/${x.m}</small>`}</div>`).join('')}</div>`);
+}
+function revisarLogros(){
+  try{
+    const ok = logros().filter(x=>x.ok).map(x=>x.t), antes = JSON.parse(localStorage.getItem('ck_logros')||'null');
+    localStorage.setItem('ck_logros', JSON.stringify(ok));
+    if(!antes) return;
+    const nuevo = ok.find(t=>!antes.includes(t)); if(nuevo){ setTimeout(()=>{ toast('🏆 Nuevo logro: ' + nuevo); confeti(); }, 1500); }
+  }catch(e){}
+}
+
+/* ---------- 13. CALENDARIO MENSUAL ---------- */
+async function verCalendario(){
+  S.vista = 'cal'; if(!S.calMes){ const d = new Date(); S.calMes = [d.getFullYear(), d.getMonth()]; }
+  try{ history.pushState({v:'cal'},''); }catch(e){}
+  S.cal = S.cal || cacheGet('ckCalendario[]') || null; render(); window.scrollTo(0,0);
+  try{ S.cal = await call('ckCalendario'); if(S.vista==='cal') render(); }catch(e){ if(!S.cal) toast('Error: '+e.message); }
+}
+function moverCal(d){ const [y,m] = S.calMes, x = new Date(y, m+d, 1); S.calMes = [x.getFullYear(), x.getMonth()]; S.calDia = null; render(); }
+function vistaCalendario(){
+  const [y, m] = S.calMes, l = S.cal || S.presus || [];
+  const ini = new Date(y, m, 1), dias = new Date(y, m+1, 0).getDate(), off = (ini.getDay()+6)%7, hoy = diaDe(Date.now());
+  const de = t => l.filter(p => p.ts && diaDe(p.ts) === t);
+  const ocup = {}; l.filter(p=>{ const d = new Date(p.ts||0); return d.getFullYear()===y && d.getMonth()===m; }).forEach(p=>(p.tecnicos||[]).forEach(t=>{ ocup[t] = (ocup[t]||0) + 1; }));
+  let celdas = ''; for(let i=0;i<off;i++) celdas += '<div class="cd vac"></div>';
+  for(let d=1; d<=dias; d++){ const t = new Date(y, m, d).getTime(), b = de(t);
+    celdas += `<button class="cd ${t===hoy?'hoy':''} ${S.calDia===t?'on':''} ${b.length?'con':''}" onclick="S.calDia=S.calDia===${t}?null:${t};render()"><span>${d}</span>${b.slice(0,2).map(p=>`<i class="cev est-${estadoBolo(p)[0]}">${esc(String(p.evento||p.num).replace(/^Evento\s+/i,'').slice(0,14))}</i>`).join('')}${b.length>2?`<i class="cmas">+${b.length-2}</i>`:''}</button>`; }
+  const sel = S.calDia ? de(S.calDia) : null;
+  let tit = new Date(y, m, 1).toLocaleDateString('es-ES', { month:'long', year:'numeric' }); tit = tit.charAt(0).toUpperCase()+tit.slice(1);
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Calendario</h1></div>
+    <div class="mesnav"><button onclick="moverCal(-1)" aria-label="Mes anterior">‹</button><b>${esc(tit)}</b><button onclick="moverCal(1)" aria-label="Mes siguiente">›</button></div></header>
+    <main><div class="calg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${celdas}</div>
+    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>'}` : ''}
+    ${Object.keys(ocup).length ? `<div class="sec">Ocupación del mes</div><div class="furg">${Object.entries(ocup).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="bar2"><span>${esc(n)}</span><div class="bt"><div style="width:${Math.min(100,c/Math.max(...Object.values(ocup))*100)}%"></div></div><b>${c} ${c>1?'bolos':'bolo'}</b></div>`).join('')}</div>` : ''}</main>`;
+}
+
+/* ---------- 14. INFORME PARA EL CLIENTE ---------- */
+async function enviarInforme(){
+  try{
+    const t = await tokenCliente(), u = urlCliente(t), f = ficha(), p = S.presus.find(x=>x.num===S.num)||{};
+    const msg = `Hola${f.contacto?' '+f.contacto.split(' ')[0]:''}, gracias por confiar en Dreamscape Events. Aquí tienes el informe de ${p.evento||'tu evento'}, con fotos del montaje, horarios y el equipo: ${u}`;
+    abrirSheet(`<h3>📄 Informe para el cliente</h3><div class="meta" style="margin-bottom:10px">El cliente ve una página con las fotos del montaje, los horarios, el equipo, el albarán y el dossier. Sin precios.</div>
+      <div class="row2">${f.telefono?`<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${telIntl(f.telefono)}?text=${encodeURIComponent(msg)}">WhatsApp</a>`:`<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a>`}<button class="btn sec2" onclick="copiar(${JSON.stringify(msg).replace(/"/g,'&quot;')})">Copiar mensaje</button></div>
+      <a class="link" href="${u}" target="_blank" rel="noopener">Ver el informe como el cliente</a>`);
+  }catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+
+/* ---------- AJUSTES EXTRA (almacén y foto obligatoria) ---------- */
+async function guardarExtras(){
+  const alm = ($('#ajAlm').value||'').trim(), fo = $('#ajFoto').checked;
+  const c = { almacen: alm, fotoObligatoria: fo };
+  if(alm && alm !== cfg().almacen){ toast('Buscando la dirección…'); const g = await geocodificar(alm); if(g) c.almacenGeo = g; else toast('No encuentro esa dirección: prueba con calle, número y población'); }
+  return call('ckGuardarExtras', c);
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
 function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });

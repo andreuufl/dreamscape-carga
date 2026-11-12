@@ -47,6 +47,12 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12
 @keyframes s{to{transform:rotate(360deg)}}
 footer{text-align:center;color:var(--mut);font-size:13px;margin-top:20px}
 footer a{color:var(--mut)}
+.inf .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.inf .fg img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:zoom-in}
+.inf .hr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;text-align:center}
+.inf .hr div{background:var(--bg);border-radius:12px;padding:10px 4px}.inf .hr b{display:block;font-size:17px}.inf .hr small{color:var(--mut);font-size:12px}
+.inf .eq{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.inf .eq span{background:var(--bg);border-radius:20px;padding:5px 12px;font-size:14px;font-weight:600}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:grid;place-items:center;z-index:9;padding:16px}.lb img{max-width:100%;max-height:90vh;border-radius:12px}
 </style>
 </head>
 <body>
@@ -79,10 +85,25 @@ function pinta(){
     ${D.firma ? `<div class="card"><div class="lbl">Albarán de entrega</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.firma)}</b>${D.firmaHora?' · '+esc(D.firmaHora):''}.</p><button class="btn gold" id="albBtn" onclick="albaran('entrega',this)">Descargar albarán (PDF)</button></div>` : ''}
     ${D.recogida ? `<div class="card"><div class="lbl">Albarán de recogida</div><p style="margin:0 0 12px">Firmado por <b>${esc(D.recogida)}</b>${D.recogidaHora?' · '+esc(D.recogidaHora):''}.</p><button class="btn gold" onclick="albaran('recogida',this)">Descargar recogida (PDF)</button></div>` : ''}
     ${D.dossier ? `<div class="card"><div class="lbl">Dossier de tu evento</div><p style="margin:0 0 12px">Fotos del montaje, el día y el material, en un PDF para guardar.</p><button class="btn" onclick="dossier(this)">Descargar dossier (PDF)</button></div>` : ''}
+    <div id="inf"></div>
     ${val}
     <div class="card"><div class="lbl">Material confirmado (${D.material.length})</div>${D.material.map(m=>`<div class="mat"><span class="q">${esc(m.cant)}</span><span>${esc(m.material)}</span></div>`).join('')}</div>
     <footer>Dreamscape Events &amp; Productions · <a href="https://eventsandproductionsap.com" target="_blank" rel="noopener">eventsandproductionsap.com</a></footer>`;
 }
+async function informe(){
+  if(!['montado','terminado'].includes(D.estado)) return;
+  try{
+    const I = await api('ckInformeCliente', [T]), el = $('#inf'); if(!el) return;
+    const h = (t, v) => v ? `<div><b>${esc(String(v).slice(-5))}</b><small>${t}</small></div>` : '';
+    const hs = [h('Llegada', I.llegada), h('Montaje listo', I.finMontaje), h('Recogida', I.vuelta)].join('');
+    if(!I.fotos.length && !hs && !I.equipo.length) return;
+    el.innerHTML = `<div class="card inf"><div class="lbl">Informe de tu evento</div>
+      ${hs ? `<div class="hr">${hs}</div>` : ''}
+      ${I.equipo.length ? `<div class="eq">${I.equipo.map(n=>`<span>👤 ${esc(n)}</span>`).join('')}</div>` : ''}
+      ${I.fotos.length ? `<div class="fg">${I.fotos.map(f=>`<img src="${f}" alt="Foto del montaje" onclick="verFoto(this.src)">`).join('')}</div>` : ''}</div>`;
+  }catch(e){}
+}
+function verFoto(src){ const d = document.createElement('div'); d.className = 'lb'; d.innerHTML = `<img src="${src}" alt="">`; d.onclick = () => d.remove(); document.body.appendChild(d); }
 function resena(){
   const u = D.resena || 'https://www.google.com/search?q=' + encodeURIComponent('Dreamscape Events Barcelona reseñas');
   return `<a class="btn gold" href="${esc(u)}" target="_blank" rel="noopener">Dejar una reseña en Google</a>`;
@@ -118,7 +139,7 @@ async function albaran(tipo, b){
 }
 (async () => {
   if(!T){ $('#app').innerHTML = '<div class="card center">Este enlace no es válido. Pide uno nuevo a Dreamscape Events.</div>'; return; }
-  try{ D = await api('ckCliente', [T]); pinta(); }
+  try{ D = await api('ckCliente', [T]); pinta(); informe(); }
   catch(e){ $('#app').innerHTML = `<div class="card center">${/conexi|fetch/i.test(e.message)?'No hay conexión. Vuelve a intentarlo en un momento.':'Este enlace no es válido. Pide uno nuevo a Dreamscape Events.'}</div>`; }
 })();
 </script>
