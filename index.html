@@ -2202,9 +2202,9 @@ async function confirmarResumen(yaApuntadas){
 /* ---------- 4. FOTOS DEL MATERIAL ---------- */
 let FM = {}; try{ FM = JSON.parse(localStorage.getItem('ck_fm')||'{}') || {}; }catch(e){}
 function guardarFM(){ try{ localStorage.setItem('ck_fm', JSON.stringify(FM)); }catch(e){ try{ const ks = Object.keys(FM); ks.slice(0, Math.ceil(ks.length/2)).forEach(k=>delete FM[k]); localStorage.setItem('ck_fm', JSON.stringify(FM)); }catch(e2){} } }
-function fotoMat(nombre){ return FM[UP(nombre)] || ''; }
+function fotoMat(nombre){ return FM[UP(nombre)] || FM[UP(String(nombre||'').replace(/\s*\([^)]*\)\s*$/,''))] || ''; }
 async function cargarFotosMat(){
-  const num = S.num, nombres = S.items.map(i=>i.material); if(!nombres.length) return;
+  const num = S.num, base = S.items.map(i=>i.material); if(!base.length) return; const nombres = [...new Set(base.concat(base.map(n=>String(n).replace(/\s*\([^)]*\)\s*$/,''))))];
   try{
     const r = await call('ckFotosMat', nombres) || {};
     let cambio = false;
