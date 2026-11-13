@@ -388,6 +388,16 @@ header.hd-listo{background:linear-gradient(135deg,#0f4a32 0%,var(--navy) 65%)}
 :root[data-theme="sala"] .item.on .chk{color:#000}:root[data-theme="sala"] img{filter:grayscale(1) sepia(1) hue-rotate(-40deg) saturate(4) brightness(.5)}
 :root[data-theme="sala"] .tabbar{background:#0a0202}:root[data-theme="sala"] .brand .bw{color:#ff6d60}
 .sfc{display:block;cursor:pointer}.gimg .sfcam svg.i{width:18px;height:18px;opacity:1}.sfcam{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;background:var(--gold);color:#16243a;display:grid;place-items:center}
+.offok{display:flex;align-items:center;gap:5px;font-size:12.5px;color:#7ee2a8;font-weight:700;margin:-4px 0 10px}
+.avr .top{align-items:flex-start}.avn{display:flex;flex-direction:column;align-items:center;font-size:22px;font-weight:800;line-height:1;color:var(--mut)}.avn small{font-size:10px;font-weight:600}
+.avr.mal{border-left:5px solid var(--bad)}.avr.mal .avn{color:var(--bad)}
+.cob .row2 .btn{padding:12px}
+.cd.nd:disabled{opacity:.4}.cd.nd.no{background:var(--badbg);color:var(--bad)}.ndx{font-style:normal;font-size:9.5px;font-weight:800;text-align:center}.ndb{font-style:normal;font-size:9.5px;text-align:center;color:var(--dev)}
+.ndtag{font-size:11px;background:var(--badbg);color:var(--bad);border-radius:8px;padding:1px 6px;margin-left:4px}
+.rgr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 10px;text-align:center}.rgr div{background:var(--card2);border-radius:12px;padding:9px 4px}.rgr span{display:block;font-size:12px;color:var(--mut)}.rgr b{font-size:16px}
+.rgr .bien b{color:var(--ok)}.rgr .medio b{color:var(--warn)}.rgr .bajo b{color:var(--bad)}
+.rbar{height:8px;background:var(--track);border-radius:5px;overflow:hidden;margin-bottom:8px}.rbar div{height:100%;border-radius:5px}.rbar .bien{background:var(--ok)}.rbar .medio{background:var(--warn)}.rbar .bajo{background:var(--bad)}
+.labels.kits .label b{font-size:14px}
 @media print{ .noprint,.toast,.foot,.tabbar{display:none!important} body{background:#fff} main.etiq{padding:0} .labels{grid-template-columns:repeat(3,1fr)} .sec{margin-top:8px} }
 .redbar{position:fixed;left:0;right:0;top:0;z-index:40;background:#b45309;color:#fff;text-align:center;font-size:13px;font-weight:700;padding:calc(env(safe-area-inset-top) + 6px) 12px 6px}
 .login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px max(28px,env(safe-area-inset-left));background:radial-gradient(120% 80% at 50% 0%,#1d2f4d 0%,var(--navy) 60%);color:#fff;max-width:none}
@@ -575,7 +585,7 @@ async function cargarLista(){
   ocultarSplash();
   cargarAvisos();
   avisarRecordatorios();
-  cargarPortadas(); revisarPush(); revisarLogros();
+  cargarPortadas(); revisarPush(); revisarLogros(); if(navigator.onLine !== false) setTimeout(()=>prepararOffline(false), 2500);
 }
 function filtrados(){
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -622,7 +632,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
+    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -725,6 +735,7 @@ function vistaDet(){
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn" onclick="verFactura()">${ic('receipt','s')} Factura</button>`:''}<button class="btn sec2" onclick="pedirValoracion()">${ic('star','s')} Valoración</button></div></div>`:''}
     ${S.modo==='dev' && esAdmin() ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
     ${tarjetaNotas()}
+    ${S.modo==='dev' ? tarjetaChecklistVuelta() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''}
     ${herr}
     ${listaPend}
     ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
@@ -840,9 +851,9 @@ async function confirmar(tipo, valor, nota){
 }
 function abrirQuien(){
   if(!S.bolo){ toast('Cargando…'); return; }
-  const eq = S.bolo.equipo || [], sel = new Set(ficha().tecnicos || []);
+  const eq = S.bolo.equipo || [], sel = new Set(ficha().tecnicos || []), pq = S.presus.find(x=>x.num===S.num) || {};
   abrirSheet(`<h3>${ic('users')} ¿Quién va a este bolo?</h3><div class="meta" style="margin-bottom:4px">Toca para añadir o quitar. Solo las personas marcadas verán este bolo en su app.</div>
-    <div class="chips">${eq.length ? eq.map(t=>`<button class="chip tec qv ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}</button>`).join('') : '<span class="meta">Aún no hay nadie en el equipo.</span>'}</div>
+    <div class="chips">${eq.length ? eq.map(t=>`<button class="chip tec qv ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}${pq.ts && noDispDe(t.nombre, pq.ts)?' <span class="ndtag">no puede</span>':''}</button>`).join('') : '<span class="meta">Aún no hay nadie en el equipo.</span>'}</div>
     <button class="link" onclick="cerrarSheet();verAccesos().then(nuevaPersona)">${ic('plus','s')} Crear una persona nueva</button>
     <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarQuien()">Guardar</button></div>`);
 }
@@ -952,7 +963,8 @@ function salidaAuto(){
 }
 async function vuelta(){
   if(S.enviando) return;
-  const falt = S.items.filter(i=>!i.devuelto).length;
+  const falt = S.items.filter(i=>!i.devuelto).length, chv = ficha().checksVuelta || {}, nv = listaVuelta().filter(x=>!chv[x]).length;
+  if(nv && !confirm(`Quedan ${nv} pasos de «Antes de guardar» sin marcar. ¿Seguir igualmente?`)) return;
   if(!confirm(falt ? `Faltan ${falt} artículos por devolver. ¿Enviar el resumen igualmente?` : '¿Enviar el resumen de vuelta?')) return;
   S.enviando = true; render();
   try{ const h = await enviar('ckVuelta', S.num); if(S.bolo){ S.bolo.ficha.vuelta = h || hora().slice(6); guardarBoloCache(); } vib(30); if(h) toast('Resumen de vuelta enviado'); S.enviando = false; render(); if(!((ficha().resumen||{})[yoNombre()])) setTimeout(abrirResumenBolo, 400); return; }
@@ -969,7 +981,7 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaFichaje()}${hito('llegada','He llegado',ic('pin'))}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaGastos()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaFichaje()}${hito('llegada','He llegado',ic('pin'))}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaGastos()}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: vuelta al almacén ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1106,6 +1118,7 @@ async function abrirScan(modoScan){
 }
 function cerrarScan(){ if(SCAN){ SCAN.on=false; try{ SCAN.st.getTracks().forEach(t=>t.stop()); }catch(e){} SCAN=null; } const o=$('#scanov'); if(o) o.remove(); if(SCANMODO!=='consulta') render(); }
 function leido(txt){
+  if(/^DSKIT\|/.test(String(txt))){ const q = String(txt).split('|'); if(SCANMODO==='consulta' || SCANMODO==='añadir'){ cerrarScan(); toast('Es el QR de un kit: úsalo al cargar o devolver'); return; } leidoKit(q[1], q[2]); return; }
   const p = String(txt).split('|'), cod = (p[0]==='DS' ? p[1] : '') || '', nom = (p[0]==='DS' ? p[2] : txt) || '';
   if(SCANMODO==='consulta'){ cerrarScan(); verHistorial(nom, cod); return; }
   const U = s => String(s||'').trim().toUpperCase();
@@ -1281,7 +1294,7 @@ function salirSesion(){
 async function arrancar(){
   S.yo = S.yo || cacheGet('ckYo[]') || null;
   cargarLista(); cargarFurgos(); vaciarCola(); atajoInicial(); guiaPrimeraVez();
-  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); cargarStock(); }
+  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); cargarStock(); cargarAdmin4(); }
   catch(e){ if(!e.red && /código|acceso/i.test(e.message)){ salirSesion(); } }
 }
 
@@ -1300,21 +1313,26 @@ function abrirMenu(){
     ${it('clock','Mantenimiento','verMant()','ITV, revisiones, pilas, lámparas…')}
     ${it('qr','Etiquetas QR','verEtiquetas()','Para imprimir y pegar en el material')}
     ${it('camera','Fotos del material','verSesionFotos()','Haz las fotos que faltan en un momento')}
+    ${it('alert','Averías por equipo','verAverias()','Qué equipos fallan más a menudo')}
     <div class="mgrp">Gestión</div>
     ${it('today','Panel del día','verPanel()','Quién ha salido, llegado o va con retraso')}
     ${it('chart','Calendario','verCalendario()','Bolos del mes, equipo y furgonetas')}
+    ${it('euro','Cobros','verCobros()','Qué falta por facturar y por cobrar')}
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
     ${it('users','Accesos del equipo','verAccesos()','Códigos y permisos del equipo')}
     ${it('plus','Nueva persona','verAccesos().then(nuevaPersona)','Dar acceso a alguien a la app')}
     ${it('clip','Plantillas de material','verPlantillas()','Se aplican a un bolo en un toque')}
     ${it('box','Siempre llevar','editarSiempre()','Lo que va en todos los bolos')}
     ${it('checksq','Checklist de montaje','editarChecklist()','Pasos que se revisan en cada montaje')}
+    ${it('checksq','Checklist de vuelta','editarChecklistVuelta()','Lo que se revisa al devolver el material')}
     ${it('save','Copias de seguridad','verCopias()','Una por semana, en tu Drive')}
     ${it('gear','Ajustes','abrirAjustes()','Enlace de reseñas de Google')}` : ''}
     <div class="mgrp">App</div>
     <button class="mitem" onclick="cambiarTema()"><span class="ic">${ic('moon')}</span><span><b>Tema: ${tema}</b><small>Toca para cambiar · Automático sigue al iPhone y pone luz roja en montajes de noche</small></span></button>
     <button class="mitem" onclick="cambiarTexto()"><span class="ic" style="font-weight:800">Aa</span><span><b>Texto grande: ${textoGrande()?'Sí':'No'}</b><small>Letras y botones más grandes, para usar con guantes o con poca luz</small></span></button>
     ${('Notification' in window) ? it('bell', Notification.permission==='granted' ? 'Avisos en el móvil: activados' : 'Activar avisos en el móvil','activarNotis()', Notification.permission==='granted' ? 'Toca para enviarte un aviso de prueba' : 'Bolo de mañana, notas del equipo y cambios, aunque la app esté cerrada') : ''}
+    ${it('today','Días que no puedo','verDisponibilidad()','Para que no te asignen bolos esos días')}
+    ${it('download','Preparar sin cobertura','prepararOffline(true)','Guarda en el móvil los bolos de hoy y mañana')}
     ${it('pin','Mapa de bolos','verMapa()','Dónde son los bolos de la semana')}
     ${it('star','Logros','verLogros()','Bolos completados, rachas sin incidencias…')}
     ${it('book','Guía rápida','abrirGuia()','Cómo se usa la app en 1 minuto')}
@@ -1339,6 +1357,7 @@ function heroBolo(p, lbl, cls){
     ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
     <div class="hst"><div><span>Carga</span><b>${p.cargados}/${p.total}</b><div class="track"><div class="fill" style="width:${pc}%"></div></div></div><div><span>Vuelta</span><b>${p.devueltos}/${p.total}</b><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div></div>
     ${(p.tecnicos||[]).length?`<div class="htec">${ic('users','xs')} ${esc(p.tecnicos.join(', '))}</div>`:''}
+    ${offHoy().includes(p.num)?`<div class="offok">${ic('check','xs')} Listo para trabajar sin cobertura</div>`:''}
     <button class="btn" onclick="abrir('${esc(p.num)}')">${paso} ${ic('chev','s')}</button>${lbl==='HOY'?`<button class="btn rutab" onclick="abrirEnRuta('${esc(p.num)}')">${ic('nav','s')} Modo en ruta</button>`:''}</div>`;
 }
 function tarjetasHoy(){
@@ -1984,7 +2003,7 @@ function vistaPlantillas(){
   const body = !l ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `<div class="meta" style="margin:0 4px 12px">Las primeras las he creado con el material de tus bolos. En cada bolo, «＋ Añadir material extra» te deja aplicarlas: solo añade lo que no esté ya en el presupuesto.</div>` +
     (l.length ? l.map((p,i)=>`<div class="furg"><div class="top"><div style="min-width:0"><b>${esc(p.nombre)}</b><div class="meta">${p.items.length} ${p.items.length===1?'cosa':'cosas'} · ${esc(p.origen||'')}</div></div><button class="edit" onclick="editarPlantilla(${i})">Editar</button></div><div class="meta">${esc(p.items.slice(0,6).map(x=>x.cant+' × '+x.nombre).join(' · '))}${p.items.length>6?' …':''}</div></div>`).join('') : '<div class="empty" style="padding:20px">No hay plantillas.</div>');
   const foot = l ? `<div class="foot"><button class="btn" onclick="editarPlantilla(-1)">+ Nueva plantilla</button></div>` : '';
-  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div><div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Plantillas</h1></div></header><main>${body}</main>${foot}`;
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div><div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Plantillas</h1><button class="ref" onclick="verQrKits()" aria-label="QR de los kits">${ic('qr')}</button></div><div class="sub" style="margin-top:8px;white-space:normal">Cada plantilla es un kit: con el botón QR imprimes su código para escanear el kit entero de una vez.</div></header><main>${body}</main>${foot}`;
 }
 const aTexto = items => items.map(x=>`${x.cant} x ${x.nombre}`).join('\n');
 const deTexto = t => t.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const m = l.match(/^(\d+[\w ]*?)\s*[x×]\s+(.+)$/i); return m ? { cant:m[1].trim(), nombre:m[2].trim() } : { cant:'1', nombre:l }; });
@@ -2808,7 +2827,7 @@ function vistaCalendario(){
   return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Calendario</h1></div>
     <div class="mesnav"><button onclick="moverCal(-1)" aria-label="Mes anterior">‹</button><b>${esc(tit)}</b><button onclick="moverCal(1)" aria-label="Mes siguiente">›</button></div></header>
     <main><div class="calg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${celdas}</div>
-    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>'}` : ''}
+    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${(()=>{ const nd = Object.entries(S.nodisp||{}).filter(([n,l])=>l.includes(fechaISO(S.calDia))).map(([n])=>n); return nd.length ? `<div class="aviso" style="margin:0 0 10px">No pueden: ${esc(nd.join(', '))}</div>` : ''; })()}${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>'}` : ''}
     ${Object.keys(ocup).length ? `<div class="sec">Ocupación del mes</div><div class="furg">${Object.entries(ocup).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="bar2"><span>${esc(n)}</span><div class="bt"><div style="width:${Math.min(100,c/Math.max(...Object.values(ocup))*100)}%"></div></div><b>${c} ${c>1?'bolos':'bolo'}</b></div>`).join('')}</div>` : ''}</main>`;
 }
 
@@ -2861,8 +2880,229 @@ async function subirFotoSesion(inp){
   catch(e){ toast(e.red ? 'Necesitas conexión para subir la foto' : 'Error: '+e.message); }
 }
 
+/* =========================================================
+   MEJORAS 4: averías, cobros, kits, checklist de vuelta,
+   disponibilidad, estado del lugar, sin cobertura y rentabilidad
+   ========================================================= */
+function fechaISO(t){ const d = new Date(t), z = n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function cargarAdmin4(){
+  if(!esAdmin()) return;
+  call('ckAverias').then(a=>{ S.averias = a || []; refrescarHoy(); }).catch(()=>{});
+  call('ckCobros').then(c=>{ S.cobros = c || []; refrescarHoy(); }).catch(()=>{});
+  call('ckNoDisp').then(m=>{ S.nodisp = m || {}; }).catch(()=>{});
+}
+function refrescarHoy(){ let n = 0; const t = () => { if(++n > 60 || S.vista!=='lista' || (S.tab||'hoy')!=='hoy') return; if($('#sheet').classList.contains('open')) setTimeout(t, 1000); else render(); }; t(); }
+
+/* ---------- 1. AVERÍAS POR EQUIPO ---------- */
+function averiasAlerta(){ return (S.averias||[]).filter(a=>a.recientes >= 3); }
+function tarjetaAverias(){
+  const l = averiasAlerta(); if(!l.length) return '';
+  return `<button class="card alerta" onclick="verAverias()"><b>${ic('wrench','s')} ${l.length} ${l.length>1?'equipos fallan':'equipo falla'} a menudo</b><div class="meta">${esc(l.slice(0,3).map(a=>a.material+' ('+a.recientes+')').join(' / '))} · últimos 6 meses</div></button>`;
+}
+async function verAverias(){
+  S.vista = 'averias'; try{ history.pushState({v:'averias'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{ S.averias = await call('ckAverias') || []; }catch(e){ if(!S.averias) toast('Error: '+e.message); }
+  if(S.vista==='averias') render();
+}
+function vistaAverias(){
+  const l = S.averias;
+  const body = !l ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : !l.length ? `<div class="empty">${ic('check')}<div>Ningún equipo ha tenido incidencias. 👍</div></div>` :
+    `<div class="meta" style="margin:0 4px 12px">Roturas, daños y faltas de cada equipo. En rojo, los que han fallado 3 veces o más en los últimos 6 meses: conviene revisarlos o cambiarlos.</div>` +
+    l.map(a=>`<button class="card avr ${a.recientes>=3?'mal':''}" onclick="verHistorial(this.dataset.n,'')" data-n="${esc(a.material)}">
+      <div class="top"><b class="ev" style="margin:0">${esc(a.material)}</b><span class="avn">${a.recientes}<small>6 meses</small></span></div>
+      <div class="meta">${a.total} en total${a.enRep?` · <span class="inc">${a.enRep} en reparación</span>`:''}</div>
+      <div class="meta" style="margin-top:4px">${esc(a.ultimas.slice(0,3).map(u=>(u.inc||'Incidencia')+(u.num?' ('+u.num+')':'')).join(' · '))}</div></button>`).join('');
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Averías por equipo</h1></div></header><main>${body}</main>`;
+}
+
+/* ---------- 2. COBROS Y FACTURAS ---------- */
+function diasDesde(ts){ return Math.floor((Date.now() - ts) / 864e5); }
+function cobrosAlerta(){
+  const l = S.cobros || [];
+  return { sinFacturar: l.filter(c=>c.cerrado && !c.facturado), vencidos: l.filter(c=>c.facturado && !c.cobrado && c.facturadoTs && diasDesde(c.facturadoTs) > 30) };
+}
+function tarjetaCobros(){
+  const a = cobrosAlerta(); if(!a.sinFacturar.length && !a.vencidos.length) return '';
+  const t = [a.sinFacturar.length ? `${a.sinFacturar.length} sin facturar` : '', a.vencidos.length ? `${a.vencidos.length} sin cobrar hace más de 30 días` : ''].filter(Boolean).join(' · ');
+  return `<button class="card alerta ${a.vencidos.length?'':'azul'}" onclick="verCobros()"><b>${ic('euro','s')} Cobros: ${t}</b><div class="meta">${esc(a.vencidos.concat(a.sinFacturar).slice(0,3).map(c=>c.evento||c.num).join(' / '))}</div></button>`;
+}
+async function verCobros(){
+  S.vista = 'cobros'; try{ history.pushState({v:'cobros'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{ S.cobros = await call('ckCobros') || []; }catch(e){ if(!S.cobros) toast('Error: '+e.message); }
+  if(S.vista==='cobros') render();
+}
+function vistaCobros(){
+  const l = S.cobros;
+  const fila = (c, acc) => `<div class="furg cob"><div class="top"><div style="min-width:0"><b>${esc(c.evento||c.num)}</b><div class="meta">${esc(c.num)} · ${esc(c.montaje||'')}${c.facturado?` · facturado ${esc(c.facturado)}`:''}${c.cobrado?` · cobrado ${esc(c.cobrado)}`:''}</div>
+      ${c.facturado && !c.cobrado && c.facturadoTs ? `<div class="meta ${diasDesde(c.facturadoTs)>30?'inc':''}" style="font-weight:700">Hace ${diasDesde(c.facturadoTs)} días</div>` : ''}</div></div>
+    <div class="row2" style="margin-top:10px">${acc}</div></div>`;
+  const b = (num, campo, val, txt, cls) => `<button class="btn ${cls||''}" onclick="marcarCobro('${esc(num)}','${campo}',${val})">${txt}</button>`;
+  let body;
+  if(!l) body = `<div class="loading"><div class="spin"></div>Cargando…</div>`;
+  else {
+    const sinF = l.filter(c=>!c.facturado), pend = l.filter(c=>c.facturado && !c.cobrado).sort((a,b)=>a.facturadoTs-b.facturadoTs), cob = l.filter(c=>c.cobrado);
+    body = `<div class="sec">Por facturar <span class="cnt">${sinF.length}</span></div>${sinF.map(c=>fila(c, b(c.num,'facturado',true,'Marcar facturado') + `<button class="btn sec2" onclick="abrir('${esc(c.num)}').then(verFactura)">Datos factura</button>`)).join('') || '<div class="meta" style="margin:0 4px">Nada pendiente.</div>'}
+      <div class="sec">Pendiente de cobro <span class="cnt">${pend.length}</span></div>${pend.map(c=>fila(c, b(c.num,'cobrado',true,'Marcar cobrado','okb') + b(c.num,'facturado',false,'Deshacer','sec2'))).join('') || '<div class="meta" style="margin:0 4px">Todo cobrado. 👍</div>'}
+      ${cob.length ? `<div class="sec">Cobrados (últimos 60 días) <span class="cnt">${cob.length}</span></div>${cob.map(c=>fila(c, b(c.num,'cobrado',false,'Deshacer','sec2'))).join('')}` : ''}`;
+  }
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Cobros</h1><button class="ref" onclick="verCobros()" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
+}
+async function marcarCobro(num, campo, val){
+  try{ const r = await call('ckCobro', num, campo, val); const c = (S.cobros||[]).find(x=>x.num===num); if(c){ c.facturado = r.facturado||''; c.facturadoTs = r.facturadoTs||0; c.cobrado = r.cobrado||''; } vib(15); toast(val ? (campo==='cobrado'?'Marcado como cobrado':'Marcado como facturado') : 'Deshecho'); render(); }
+  catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
+
+/* ---------- 3. KITS: un QR marca todo el kit ---------- */
+async function leidoKit(id, nombre){
+  const el = $('#scanlast') || {};
+  try{
+    if(!S.plantillas) S.plantillas = await call('ckPlantillas');
+    const pl = (S.plantillas||[]).find(p=>String(p.id)===String(id)) || (S.plantillas||[]).find(p=>UP(p.nombre)===UP(nombre));
+    if(!pl){ el.className='scanlast bad'; el.textContent = '✕ Kit no encontrado: ' + (nombre||id); pitido(false); return; }
+    const k = S.modo==='carga' ? 'cargado' : 'devuelto', sin = s => UP(String(s).replace(/\s*\([^)]*\)\s*$/,''));
+    let n = 0, ya = 0, fuera = [];
+    pl.items.forEach(x => {
+      const it = S.items.find(i => sin(i.material) === sin(x.nombre));
+      if(it){ if(it[k]) ya++; else { toggle(it.fila, true); n++; } return; }
+      const ex = enExtras(x.nombre); if(ex){ const c = S.modo==='dev' ? 'd' : 'c'; if(!ex[c]){ marcarExtra('extra', ex.nombre); n++; } else ya++; return; }
+      fuera.push(x.nombre);
+    });
+    el.className = 'scanlast good'; el.innerHTML = `✓ Kit «${esc(pl.nombre)}»: ${n} marcados${ya?` · ${ya} ya estaban`:''}${fuera.length?`<br><span style="font-size:13px;font-weight:600;opacity:.9">${fuera.length} no están en este bolo</span>`:''}`;
+    vib([30,40,30]); pitido(true); pintarScnt(); setTimeout(siguienteVoz, 300);
+  }catch(e){ el.className='scanlast bad'; el.textContent = e.red ? 'Sin conexión para leer el kit' : 'Error: '+e.message; }
+}
+async function verQrKits(){
+  S.vista = 'qrkits'; render(); window.scrollTo(0,0);
+  try{ await cargarScript('qrcode.js'); if(!S.plantillas) S.plantillas = await call('ckPlantillas'); }catch(e){ toast('Error: '+e.message); }
+  if(S.vista==='qrkits') render();
+}
+function vistaQrKits(){
+  const qr = t => { try{ const q = qrcode(0,'M'); q.addData(unescape(encodeURIComponent(t))); q.make(); return q.createSvgTag({ cellSize:4, margin:0, scalable:true }); }catch(e){ return ''; } };
+  const l = S.plantillas || [];
+  const body = typeof qrcode === 'undefined' || !S.plantillas ? `<div class="loading"><div class="spin"></div>Preparando…</div>`
+    : `<div class="labels kits">${l.map(p=>`<div class="label"><div class="qr">${qr('DSKIT|'+p.id+'|'+p.nombre)}</div><div class="lt"><b>KIT · ${esc(p.nombre)}</b><small>${p.items.length} cosas</small><span>DREAMSCAPE</span></div></div>`).join('')}</div>`;
+  return `<header class="noprint"><div class="hrow"><button class="back" onclick="verPlantillas()" aria-label="Volver">${ic('back')}</button><h1>QR de los kits</h1><button class="ref" onclick="window.print()" aria-label="Imprimir">${ic('download')}</button></div>
+    <div class="sub" style="margin-top:8px;white-space:normal">Pega cada QR en la caja o flight case del kit. Al escanearlo se marca todo lo que lleva el kit de una vez.</div></header><main class="etiq">${body}</main>`;
+}
+
+/* ---------- 4. CHECKLIST DE VUELTA ---------- */
+const VUELTA_DEF = ['Material limpio', 'Baterías y pilas a cargar', 'Cables enrollados y con brida', 'Probado y funciona', 'Cada cosa en su sitio del almacén'];
+function listaVuelta(){ const l = cfg().checklistVuelta; return l && l.length ? l : VUELTA_DEF; }
+function tarjetaChecklistVuelta(){
+  if(!S.bolo) return '';
+  const l = listaVuelta(), ch = ficha().checksVuelta || {}, h = l.filter(x=>ch[x]).length;
+  return `<div class="furg"><div class="top"><b>${ic('checksq','s')} Antes de guardar</b><span class="meta">${h}/${l.length}</span></div>
+    ${l.map((x,i)=>`<button class="ck ${ch[x]?'on':''}" onclick="marcarVuelta(${i})"><span class="cb">${ch[x]?'✓':''}</span><span><b>${esc(x)}</b>${ch[x]?`<small>${esc(ch[x])}</small>`:''}</span></button>`).join('')}</div>`;
+}
+async function marcarVuelta(i){
+  const x = listaVuelta()[i], f = S.bolo.ficha; f.checksVuelta = f.checksVuelta || {};
+  const val = !f.checksVuelta[x], prev = f.checksVuelta[x];
+  if(val) f.checksVuelta[x] = yoNombre() + ' · ' + hora(); else delete f.checksVuelta[x];
+  vib(12); render();
+  try{ const r = await call('ckCheckVuelta', S.num, x, val); f.checksVuelta = r || {}; guardarBoloCache(); }
+  catch(e){ if(prev) f.checksVuelta[x] = prev; else delete f.checksVuelta[x]; render(); toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
+function editarChecklistVuelta(){
+  abrirSheet(`<h3>${ic('checksq')} Checklist de vuelta</h3><div class="meta" style="margin-bottom:10px">Lo que hay que revisar al devolver el material al almacén. Una línea por paso.</div>
+    <textarea id="clv" rows="8">${esc(listaVuelta().join('\n'))}</textarea>
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarChecklistVuelta()">Guardar</button></div>`);
+}
+async function guardarChecklistVuelta(){
+  try{ const c = await call('ckGuardarChecklistVuelta', $('#clv').value.split('\n').map(s=>s.trim()).filter(Boolean)); S.yo.config = c; cacheSet('ckYo[]', S.yo); cerrarSheet(); toast('Checklist guardada'); }
+  catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* ---------- 5. DISPONIBILIDAD DEL EQUIPO ---------- */
+function noDispDe(nombre, ts){ return ((S.nodisp||{})[nombre]||[]).includes(fechaISO(ts)); }
+async function verDisponibilidad(){
+  S.vista = 'nodisp'; if(!S.ndMes){ const d = new Date(); S.ndMes = [d.getFullYear(), d.getMonth()]; }
+  try{ history.pushState({v:'nodisp'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{ S.nodisp = await call('ckNoDisp') || {}; }catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+  if(S.vista==='nodisp') render();
+}
+function vistaDisponibilidad(){
+  const [y, m] = S.ndMes, mios = new Set((S.nodisp||{})[yoNombre()] || []), hoy = fechaISO(Date.now());
+  const ini = new Date(y, m, 1), dias = new Date(y, m+1, 0).getDate(), off = (ini.getDay()+6)%7;
+  const bolosDia = iso => (S.presus||[]).filter(p=>p.ts && fechaISO(p.ts)===iso && (esAdmin() ? (p.tecnicos||[]).includes(yoNombre()) : true)).length;
+  let c = ''; for(let i=0;i<off;i++) c += '<div class="cd vac"></div>';
+  for(let d=1; d<=dias; d++){ const iso = fechaISO(new Date(y,m,d)), pas = iso < hoy, nb = bolosDia(iso);
+    c += `<button class="cd nd ${mios.has(iso)?'no':''} ${iso===hoy?'hoy':''}" ${pas?'disabled':''} onclick="toggleNoDisp('${iso}')"><span>${d}</span>${mios.has(iso)?'<i class="ndx">No puedo</i>':''}${nb?`<i class="ndb">${nb} bolo${nb>1?'s':''}</i>`:''}</button>`; }
+  let tit = ini.toLocaleDateString('es-ES', { month:'long', year:'numeric' }); tit = tit.charAt(0).toUpperCase()+tit.slice(1);
+  const otros = esAdmin() ? Object.entries(S.nodisp||{}).filter(([n,l])=>n!==yoNombre() && l.length) : [];
+  return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Días que no puedo</h1></div>
+    <div class="mesnav"><button onclick="moverND(-1)" aria-label="Mes anterior">‹</button><b>${esc(tit)}</b><button onclick="moverND(1)" aria-label="Mes siguiente">›</button></div></header>
+    <main><div class="meta" style="margin:0 4px 10px">Toca los días que <b>no</b> puedes trabajar. Andreu lo verá al asignar los bolos.</div>
+    <div class="calg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${c}</div>
+    ${otros.length ? `<div class="sec">El equipo no puede</div>${otros.map(([n,l])=>`<div class="furg"><b>${esc(n)}</b><div class="meta">${esc(l.slice(0,12).map(d=>new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'})).join(' · '))}${l.length>12?' …':''}</div></div>`).join('')}` : ''}</main>`;
+}
+function moverND(d){ const [y,m] = S.ndMes, x = new Date(y, m+d, 1); S.ndMes = [x.getFullYear(), x.getMonth()]; render(); }
+let ND_T = null;
+function toggleNoDisp(iso){
+  S.nodisp = S.nodisp || {}; const l = new Set(S.nodisp[yoNombre()] || []);
+  l.has(iso) ? l.delete(iso) : l.add(iso); S.nodisp[yoNombre()] = [...l].sort(); vib(10); render();
+  clearTimeout(ND_T); ND_T = setTimeout(async ()=>{ try{ S.nodisp[yoNombre()] = await call('ckGuardarNoDisp', S.nodisp[yoNombre()]); toast('Guardado'); }catch(e){ toast(e.red ? 'Sin conexión: no se guardó' : 'Error: '+e.message); } }, 900);
+}
+
+/* ---------- 6. ESTADO DEL LUGAR (fotos al llegar y al irse) ---------- */
+function tarjetaEstadoLugar(tipo){
+  if(S.fotos === null){ cargarFotos().then(()=>{ if(S.vista==='det') render(); }); }
+  const l = (S.fotos||[]).filter(f=>f.tipo===tipo), lleg = tipo==='lugar-llegada';
+  return `<div class="furg"><div class="top"><b>${ic('camera','s')} Estado del lugar ${lleg?'al llegar':'al irnos'}</b><span class="meta">${l.length}</span></div>
+    ${l.length?`<div class="fgrid">${l.map(f=>`<img src="${f.img}" alt="Estado del lugar">`).join('')}</div>`:`<div class="meta" style="margin-bottom:10px">${lleg?'Fotos de cómo está el sitio antes de montar (suelo, paredes, enchufes…). Te cubren si luego hay una reclamación.':'Fotos de cómo dejamos el sitio al recoger.'}</div>`}
+    <label class="btn sec2 fotobtn" for="el_${tipo}">＋ Fotos ${lleg?'al llegar':'al irnos'}</label><input type="file" id="el_${tipo}" accept="image/*" multiple hidden data-t="${tipo}" onchange="fotosLugar(this)"></div>`;
+}
+async function fotosLugar(inp){
+  const fs = [...(inp.files||[])].slice(0,9), tipo = inp.dataset.t; if(!fs.length) return;
+  S.fotos = S.fotos || [];
+  for(const f of fs){ try{ const d = await comprimir(f, 900, 45000); S.fotos.push({ fecha: hora(), material:'Estado del lugar', tipo, img:d }); render(); await enviar('ckFoto', S.num, 'Estado del lugar', tipo, d); }catch(e){ toast(e.message); } }
+  toast(fs.length>1 ? fs.length+' fotos guardadas' : 'Foto guardada');
+}
+
+/* ---------- 7. LISTO SIN COBERTURA ---------- */
+function offHoy(){ try{ const o = JSON.parse(localStorage.getItem('ck_off')||'{}'); return o.dia === fechaISO(Date.now()) ? o.nums || [] : []; }catch(e){ return []; } }
+async function prepararOffline(manual){
+  const hoy = diaDe(Date.now()), l = (S.presus||[]).filter(p=>p.ts && !p.cerrado && diaDe(p.ts) >= hoy && diaDe(p.ts) <= hoy + 864e5);
+  if(!l.length){ if(manual) toast('No tienes bolos hoy ni mañana'); return; }
+  if(!manual && offHoy().length >= l.length) return;
+  if(manual) toast('Descargando ' + l.length + (l.length>1?' bolos…':' bolo…'));
+  const ok = [];
+  for(const p of l){
+    try{
+      const [m] = await Promise.all([call('ckMaterial', p.num), call('ckBolo', p.num), call('ckGastos', p.num)]);
+      const nombres = [...new Set((m.items||[]).map(i=>i.material).concat((m.items||[]).map(i=>String(i.material).replace(/\s*\([^)]*\)\s*$/,''))))];
+      try{ const r = await call('ckFotosMat', nombres) || {}; Object.keys(r).forEach(k=>FM[k]=r[k]); guardarFM(); }catch(e){}
+      ok.push(p.num);
+    }catch(e){}
+  }
+  try{ await cargarScript('jsqr.js'); }catch(e){}
+  try{ localStorage.setItem('ck_off', JSON.stringify({ dia: fechaISO(Date.now()), nums: ok })); }catch(e){}
+  if(manual) toast(ok.length ? `✓ Listo: ${ok.length} ${ok.length>1?'bolos guardados':'bolo guardado'} para trabajar sin cobertura` : 'Necesitas conexión para descargarlos');
+  if(S.vista==='lista' && !$('#sheet').classList.contains('open')) render();
+}
+
+/* ---------- 8. RENTABILIDAD EN TIEMPO REAL ---------- */
+async function cargarRent(num){
+  const p = S.presus.find(x=>x.num===num); if(!p || !p.ts) return;
+  const d = new Date(p.ts), mes = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  try{ const r = await call('ckResumen', mes); S.rent = S.rent || {}; S.rent[num] = ((r||{}).rentabilidad||[]).find(x=>x.num===num) || { vacio:true }; if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render(); }catch(e){}
+}
+function tarjetaRentabilidad(){
+  if(!esAdmin()) return '';
+  const x = (S.rent||{})[S.num];
+  if(!x){ if(!tarjetaRentabilidad.pide || tarjetaRentabilidad.pide !== S.num){ tarjetaRentabilidad.pide = S.num; cargarRent(S.num); } return `<div class="furg"><b>${ic('chart','s')} Rentabilidad</b><div class="meta">Calculando…</div></div>`; }
+  if(x.vacio) return `<div class="furg"><b>${ic('chart','s')} Rentabilidad</b><div class="meta">Aún no hay importe del presupuesto para este bolo.</div></div>`;
+  const pct = Math.max(0, Math.min(100, x.pct));
+  return `<div class="furg rentv"><div class="top"><b>${ic('chart','s')} Rentabilidad en tiempo real</b><button class="edit" onclick="S.rent[S.num]=null;tarjetaRentabilidad.pide=null;render()">Actualizar</button></div>
+    <div class="rgr"><div><span>Presupuesto</span><b>${eur(x.importe)}</b></div><div><span>Gastado</span><b>${eur(x.real)}</b></div><div class="${x.pct<20?'bajo':x.pct<40?'medio':'bien'}"><span>Margen</span><b>${eur(x.margen)}</b></div></div>
+    <div class="rbar"><div style="width:${pct}%" class="${x.pct<20?'bajo':x.pct<40?'medio':'bien'}"></div></div>
+    <div class="meta">${x.pct}% de margen${x.horas?' · '+x.horas+' h apuntadas':''}${x.horasSinPrecio?' · hay horas sin €/hora en la pestaña Equipo':''}. Se actualiza con cada gasto, hora y fichaje.</div></div>`;
+}
+
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
 function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
