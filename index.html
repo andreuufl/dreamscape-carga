@@ -143,6 +143,8 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 /* Pasos */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .steps .ln{display:none}
+.steps.many .step{font-size:10.5px;letter-spacing:-.01em}.steps.many .step .t{white-space:nowrap;overflow:hidden}
+.ida{display:grid;grid-template-columns:4fr 3fr;gap:6px;margin-top:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8ea0bb;font-weight:700}.ida span+span{border-left:1px solid rgba(255,255,255,.18);padding-left:6px}
 .step{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:0;color:#8ea0bb;font-weight:650;font-size:12.5px;text-align:left}
 .step::before{content:"";height:4px;border-radius:4px;background:var(--navy3)}
 .step.ok::before{background:var(--ok)}
@@ -668,7 +670,7 @@ async function abrir(num, refresco){
   const p = S.presus.find(x=>x.num===num);
   if(nuevo){
     const f = (S.bolo||{}).ficha || {};
-    S.modo = !p || !p.total || p.cargados<p.total ? 'carga' : (p.devueltos>0 ? 'dev' : 'ruta');
+    S.tocado = false; S.modo = modoInicial(p);
   }
   if(nuevo){ try{history.pushState({v:'det'},'')}catch(e){} render(); window.scrollTo(0,0); }
   if(COLA.length){ await vaciarCola(); }
@@ -681,7 +683,7 @@ async function abrir(num, refresco){
   if(rb.status==='fulfilled'){
     S.bolo = rb.value; S.furgos = rb.value.furgonetas || [];
     const f = S.bolo.ficha||{};
-    if(nuevo && S.modo==='ruta' && (f.llegada || SALIDAS[num])) S.modo='montaje';
+    if(nuevo && !S.tocado && S.num===num) S.modo = modoInicial(p);
   }
   if(auto && JSON.stringify([S.items, S.bolo]) === antes) return;
   if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render();
@@ -689,26 +691,27 @@ async function abrir(num, refresco){
 function ficha(){ return (S.bolo && S.bolo.ficha) || {}; }
 function vistaDet(){
   const p = S.presus.find(x=>x.num===S.num) || {num:S.num, evento:''};
-  if(!esAdmin() && S.modo!=='carga' && S.modo!=='dev') S.modo = S.items.length && S.items.every(i=>i.cargado) ? 'dev' : 'carga';
-  const lista = S.modo==='carga' || S.modo==='dev';
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto';
-  const hk = S.modo==='carga' ? 'hCarga' : 'hDev';
+  if(!esAdmin() && S.modo==='ruta') S.modo = 'descSitio';
+  const lista = esLista(); aplicarFases();
+  const k = KM().k;
+  const hk = KM().hk;
   const IV0 = lista ? itemsVista() : S.items, IV = IV0.filter(coincide);
   const tot = S.items.length, hechos = S.items.filter(i=>i[k]).length;
   const pend = IV.filter(i=>!i[k]), ok = IV.filter(i=>i[k]);
   const vt = IV0.length, vh = IV0.filter(i=>i[k]).length;
   let foot0 = null;
-  const fila = i => `<div class="swipe"><div class="under l">${ic('check','s')} ${i[k]?'Desmarcar':(S.modo==='carga'?'Cargado':'Devuelto')}</div><div class="under">${ic('alert','s')} Incidencia</div><div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" id="it${i.fila}" data-f="${i.fila}" onclick="if(!SW.moved)toggle(${i.fila})">
+  const fila = i => `<div class="swipe"><div class="under l">${ic('check','s')} ${i[k]?'Desmarcar':KM().hecho}</div><div class="under">${ic('alert','s')} Incidencia</div><div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" id="it${i.fila}" data-f="${i.fila}" onclick="if(!SW.moved)toggle(${i.fila})">
       <div class="chk">${i[k]?ic('check'):''}</div>
       ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?(S.modo==='carga'?'Cargado ':'Devuelto ')+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
   if(!tot) body = (p.archivado || (!S.actualizando && S.bolo)) ? `<div class="empty">${ic('box')}<div>${p.archivado ? 'Bolo terminado: su material ya no está en la pestaña Carga.' : 'Este bolo no tiene material en la pestaña Carga.'}</div></div>${tarjetaQuien()}` : `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
   else if(S.modo==='ruta'){ const r = vistaRuta(p, tot); body = r.body; foot0 = r.foot; }
   else if(S.modo==='montaje'){ const r = vistaMontaje(p, tot); body = r.body; foot0 = r.foot; }
+  else if(S.modo==='desm'){ const r = vistaDesmontaje(p, tot); body = r.body; foot0 = r.foot; }
   else {
     const f = ficha();
     const pct = vt ? vh/vt : 0, CIR = 2*Math.PI*27, nInc = S.items.filter(i=>i.incidencia).length;
@@ -724,8 +727,8 @@ function vistaDet(){
     body = `
     ${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
-      <div><div class="big">${vh}<span> / ${vt}</span></div><div class="pm">${soloMio()?'de lo tuyo · ':''}${S.modo==='carga'?'cargados en la furgoneta':'devueltos al almacén'}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
-    ${hechos===tot && S.modo==='carga' ? (esAdmin() ? `<button class="next" onclick="irA('ruta')">${ic('check')}<span>Todo cargado<small>Siguiente paso: la ruta al lugar</small></span>${ic('chev')}</button>` : `<button class="next" onclick="irA('dev')">${ic('check')}<span>Todo cargado en la furgoneta<small>Al volver, marca aquí la descarga en el almacén</small></span>${ic('chev')}</button>`) : ''}
+      <div><div class="big">${vh}<span> / ${vt}</span></div><div class="pm">${soloMio()?'de lo tuyo · ':''}${KM().pm}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
+    ${hechos===tot && S.modo!=='dev' ? `<button class="next" onclick="irA('${sigPaso()}')">${ic('check')}<span>${KM().todo}<small>Siguiente paso: ${nombrePaso(sigPaso())}</small></span>${ic('chev')}</button>` : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${segMio(k)}
     ${tarjetaConfirmar()}
@@ -738,15 +741,15 @@ function vistaDet(){
     ${S.modo==='dev' ? tarjetaChecklistVuelta() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''}
     ${herr}
     ${listaPend}
-    ${ok.length?`<div class="sec">${S.modo==='carga'?'En la furgoneta':'En el almacén'} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
-    ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${S.modo==='carga'?'cargado':'devuelto'}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
-    ${bloqueExtras()}
+    ${ok.length?`<div class="sec">${KM().donde} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
+    ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${KM().como}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
+    ${esFase() ? '' : bloqueExtras()}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
   }
   const faltan = tot - hechos;
   const sinInc = pend.filter(i=>!i.incidencia).length;
-  const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo==='carga'
-    ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${esAdmin()?'ruta':'dev'}', ${faltan})">${hechos===tot?(esAdmin()?'Siguiente: la ruta':'Siguiente: descarga'):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
+  const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo!=='dev'
+    ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${sigPaso()}', ${faltan})">${hechos===tot?'Siguiente: '+nombrePaso(sigPaso()):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
     : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('send','s')+' Terminar y enviar'))}</button></div>`;
   const ptd = portada(S.num);
   return `<header class="${claseEstado(S.num)} ${ptd?'conpt':''}" ${ptd?`style="--pt:url(${ptd})"`:''}>
@@ -759,14 +762,57 @@ function vistaDet(){
   </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
 }
 function stepper(tot){
-  const c = S.items.filter(i=>i.cargado).length, d = S.items.filter(i=>i.devuelto).length, f = ficha();
-  const ok = { carga: c===tot, ruta: !!(SALIDAS[S.num] || f.salida), montaje: !!(f.finMontaje || f.firma), dev: d===tot };
-  const pasos = esAdmin() ? [['carga','1','Cargar'],['ruta','2','Ruta'],['montaje','3','Montaje'],['dev','4','Vuelta']] : [['carga','1','Cargar'],['dev','2','Descargar']];
-  return `<div class="steps" style="grid-template-columns:repeat(${pasos.length},1fr)">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span><span class="t">${t}</span></button>`).join('<span class="ln"></span>')}</div>`;
+  aplicarFases();
+  const n = k => S.items.filter(i=>i[k]).length, f = ficha();
+  const ok = { carga: n('cargado')===tot, ruta: !!(SALIDAS[S.num] || f.salida), descSitio: n('descSitio')===tot, montaje: !!(f.finMontaje || f.firma), desm: !!f.finDesmontaje, cargaSitio: n('cargaSitio')===tot, dev: n('devuelto')===tot };
+  const pasos = PASOS().map((x,i)=>[x[0], String(i+1), x[1]]);
+  return `<div class="ida" style="grid-template-columns:${esAdmin()?'4fr 3fr':'1fr 1fr'}"><span>Ida</span><span>Vuelta</span></div><div class="steps many" style="grid-template-columns:repeat(${pasos.length},1fr)">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span><span class="t">${t}</span></button>`).join('<span class="ln"></span>')}</div>`;
 }
 function irA(m, faltan){
-  if(faltan && !confirm(`Faltan ${faltan} artículos por cargar. ¿Seguir igualmente?`)) return;
-  S.modo = m; render(); window.scrollTo(0,0); animarPaso();
+  if(faltan && !confirm(`Faltan ${faltan} artículos sin marcar como ${KM().comos}. ¿Seguir igualmente?`)) return;
+  S.modo = m; S.tocado = true; render(); window.scrollTo(0,0); animarPaso();
+}
+/* ---------- FASES: ida (carga almacén → descarga en el lugar) y vuelta (carga en el lugar → descarga en el almacén) ---------- */
+const MODOS = {
+  carga:{ k:'cargado', hk:'hCarga', hecho:'Cargado', como:'cargado', comos:'cargados', pm:'cargados en la furgoneta (almacén)', donde:'En la furgoneta', todo:'Todo cargado en la furgoneta' },
+  descSitio:{ k:'descSitio', hk:'hDescSitio', hecho:'Descargado', como:'descargado', comos:'descargados', pm:'descargados en el lugar', donde:'Descargado en el lugar', todo:'Todo descargado en el lugar' },
+  cargaSitio:{ k:'cargaSitio', hk:'hCargaSitio', hecho:'Cargado', como:'cargado', comos:'cargados', pm:'recogidos y cargados en la furgoneta', donde:'En la furgoneta', todo:'Todo recogido y cargado' },
+  dev:{ k:'devuelto', hk:'hDev', hecho:'Devuelto', como:'devuelto', comos:'devueltos', pm:'descargados en el almacén', donde:'En el almacén', todo:'Todo descargado en el almacén' }
+};
+function KM(m){ return MODOS[m||S.modo] || MODOS.carga; }
+function esLista(m){ return !!MODOS[m||S.modo]; }
+function esFase(m){ m = m||S.modo; return m==='descSitio' || m==='cargaSitio'; }
+function PASOS(){ const l = [['carga','Carga'],['ruta','Ruta'],['descSitio','Descarga'],['montaje','Montaje'],['desm','Desmontaje'],['cargaSitio','Recoger'],['dev','Almacén']]; return esAdmin() ? l : l.filter(x=>x[0]!=='ruta'); }
+function sigPaso(m){ const l = PASOS().map(x=>x[0]), i = l.indexOf(m||S.modo); return l[Math.min(l.length-1, i+1)] || 'dev'; }
+function nombrePaso(m){ return { carga:'cargar la furgoneta', ruta:'la ruta al lugar', descSitio:'descargar en el lugar', montaje:'el montaje', desm:'el desmontaje', cargaSitio:'recoger y cargar el material', dev:'descargar en el almacén' }[m] || m; }
+function aplicarFases(){
+  const fs = ficha().fases || {};
+  (S.items||[]).forEach(i=>{ ['descSitio','cargaSitio'].forEach(fz=>{ const h = (fs[fz]||{})[i.material]; i[fz] = !!h; i[MODOS[fz].hk] = h || ''; }); });
+}
+function faseLocal(fz, material, h){
+  if(!S.bolo) return; const f = S.bolo.ficha = S.bolo.ficha || {}; f.fases = f.fases || {}; const o = f.fases[fz] = f.fases[fz] || {};
+  if(h) o[material] = h; else delete o[material];
+}
+function modoInicial(p){
+  const f = ficha(), it = S.items || [], tot = it.length || (p && p.total) || 0;
+  if(!tot) return 'carga';
+  aplicarFases();
+  const n = k => it.length ? it.filter(i=>i[k]).length : (k==='cargado' ? (p.cargados||0) : k==='devuelto' ? (p.devueltos||0) : 0);
+  if(n('cargado') < tot) return 'carga';
+  if(n('devuelto') > 0 || n('cargaSitio') >= tot) return 'dev';
+  if(n('cargaSitio') > 0 || f.finDesmontaje) return 'cargaSitio';
+  if(f.llegadaDesm || f.finMontaje || f.firma) return 'desm';
+  if(n('descSitio') >= tot) return 'montaje';
+  if(n('descSitio') > 0 || f.llegada) return 'descSitio';
+  return esAdmin() && !(SALIDAS[S.num] || f.salida) ? 'ruta' : 'descSitio';
+}
+function ubicacion(){
+  return new Promise(res => {
+    if(!navigator.geolocation) return res(null);
+    let hecho = false; const fin = v => { if(!hecho){ hecho = true; res(v); } };
+    setTimeout(() => fin(null), 7000);
+    try{ navigator.geolocation.getCurrentPosition(p => fin({ lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy }), () => fin(null), { enableHighAccuracy:true, timeout:6500, maximumAge:60000 }); }catch(e){ fin(null); }
+  });
 }
 function destino(l){ return String(l||'').replace(/["“”«»]/g,'').replace(/\s*\|\s*/g,', ').trim(); }
 function tel(t){ return String(t||'').replace(/[^\d+]/g,''); }
@@ -817,7 +863,21 @@ function tarjetaQuien(){
   const t = ficha().tecnicos || [];
   return `<div class="furg"><div class="top"><b>${ic('users','s')} ¿Quién va?</b><button class="edit" onclick="abrirQuien()">${t.length?'Cambiar':'Elegir'}</button></div>
     ${t.length ? t.map(n => { const c = (ficha().conf||{})[n] || {}, v = c.voy;
-        return `<div class="cfrow"><b>${esc(n)}</b><span class="pill ${v ? (v.si?'ok':'warn') : ''}" title="${esc(v&&v.nota||'')}">${v ? (v.si?'✓ Va':'✕ No va') : 'Sin confirmar'}</span><span class="pill ${c.leido?'ok':''}">${c.leido?'✓ Leído':'Sin leer'}</span></div>${v&&!v.si&&v.nota?`<div class="meta" style="margin:-4px 0 6px">«${esc(v.nota)}»</div>`:''}`; }).join('') : '<div class="meta">Nadie asignado todavía: los técnicos no ven este bolo.</div>'}</div>`;
+        return `<div class="cfrow"><b>${esc(n)}</b><button class="pill ${v ? (v.si?'ok':'warn') : ''}" style="border:0;cursor:pointer" onclick="abrirAsist(this.dataset.n)" data-n="${esc(n)}" title="Tocar para confirmar">${v ? (v.si?'✓ Va':'✕ No va') : 'Sin confirmar ›'}</button><span class="pill ${c.leido?'ok':''}">${c.leido?'✓ Leído':'Sin leer'}</span></div>${v&&!v.si&&v.nota?`<div class="meta" style="margin:-4px 0 6px">«${esc(v.nota)}»</div>`:''}`; }).join('') : '<div class="meta">Nadie asignado todavía: los técnicos no ven este bolo.</div>'}</div>`;
+}
+function abrirAsist(n){
+  const v = (((ficha().conf)||{})[n]||{}).voy;
+  abrirSheet(`<h3>${ic('user')} ${esc(n)}</h3><div class="meta" style="margin-bottom:12px">${v ? (v.si?'Va':'No va')+' · '+esc(v.h)+(v.nota?' · '+esc(v.nota):'') : 'Aún no ha confirmado'}. Puedes confirmarlo tú por él.</div>
+    <div class="row2"><button class="btn okb" onclick="confirmarPor(this.dataset.n,true)" data-n="${esc(n)}">${ic('check','s')} Va</button><button class="btn sec2" onclick="confirmarPor(this.dataset.n,false)" data-n="${esc(n)}">No va</button></div>
+    ${v?`<button class="link" onclick="confirmarPor(this.dataset.n,null)" data-n="${esc(n)}">Quitar confirmación</button>`:''}<button class="link" onclick="cerrarSheet()">Cancelar</button>`);
+}
+async function confirmarPor(n, valor){
+  const f = S.bolo.ficha, prev = JSON.stringify(f.conf||{});
+  f.conf = f.conf || {}; const c = f.conf[n] = f.conf[n] || {};
+  if(valor===null) delete c.voy; else c.voy = { si: !!valor, h: hora(), nota: 'Marcado por '+yoNombre(), por: yoNombre() };
+  cerrarSheet(); vib(20); guardarBoloCache(); render();
+  try{ const r = await call('ckConfirmarPor', S.num, n, valor); if(r){ f.conf = r; guardarBoloCache(); render(); } toast(valor===null ? 'Confirmación quitada' : valor ? n+' va: guardado' : n+' no va: guardado'); }
+  catch(e){ f.conf = JSON.parse(prev); render(); toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
 }
 function miConf(){ const u = ((S.yo||{}).usuario||{}).nombre || ''; return ((ficha().conf)||{})[u] || {}; }
 function tarjetaConfirmar(){
@@ -974,15 +1034,27 @@ async function vuelta(){
 
 /* ---------- MONTAJE: llegada, fin y firma ---------- */
 function vistaMontaje(p, tot){
-  const f = ficha();
-  const hito = (campo, txt, ic2) => f[campo]
-    ? `<button class="hito ok" onclick="hito('${campo}', true)"><span class="ic">${ic('check')}</span><span><b>${txt}</b><small>${esc(f[campo])} · tocar para deshacer</small></span></button>`
-    : `<button class="hito" onclick="hito('${campo}')"><span class="ic">${ic2}</span><span><b>${txt}</b><small>Apunta la hora ahora</small></span></button>`;
+  const f = ficha(), hito = hitoBtn;
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaFichaje()}${hito('llegada','He llegado',ic('pin'))}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaGastos()}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
-  const foot = `<div class="foot"><button class="btn" onclick="irA('dev')">Siguiente: vuelta al almacén ${ic('chev','s')}</button></div>`;
+  const body = `${tarjetaFichaje(false,'montaje')}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
+  return { body, foot };
+}
+function hitoBtn(campo, txt, ic2){
+  const f = ficha(), g = (f.geoHitos||{})[campo];
+  return f[campo]
+    ? `<button class="hito ok" onclick="hito('${campo}', true)"><span class="ic">${ic('check')}</span><span><b>${txt}</b><small>${esc(f[campo])}${g?' · 📍 ubicación guardada':''} · tocar para deshacer</small></span></button>`
+    : `<button class="hito" onclick="hito('${campo}')"><span class="ic">${ic2}</span><span><b>${txt}</b><small>Apunta la hora y la ubicación ahora</small></span></button>`;
+}
+/* ---------- DESMONTAJE ---------- */
+function vistaDesmontaje(p, tot){
+  const f = ficha();
+  const dest = `<div class="dest"><div class="lbl">Desmontaje</div><div class="place">${esc(p.lugar||'Sin lugar')}</div><div class="when">${p.desmontaje ? 'Desmontaje '+esc(p.desmontaje) : 'Sin fecha de desmontaje en la pestaña Bolos'}</div></div>`;
+  const rec = !esAdmin() ? '' : f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`;
+  const body = `${dest}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
+  const foot = `<div class="foot"><button class="btn" onclick="irA('cargaSitio')">Siguiente: recoger y cargar ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
 async function hito(campo, borrar){
@@ -992,7 +1064,9 @@ async function hito(campo, borrar){
   if(borrar && !confirm('¿Borrar esta hora?')) return;
   const prev = S.bolo.ficha[campo]; S.bolo.ficha[campo] = borrar ? '' : hora(); vib(20); render();
   guardarBoloCache();
-  try{ const r = await enviar('ckHito', S.num, campo, !!borrar); if(r!=null){ S.bolo.ficha[campo] = r; guardarBoloCache(); } render(); }
+  const geo = borrar ? null : await ubicacion();
+  if(geo){ S.bolo.ficha.geoHitos = Object.assign({}, S.bolo.ficha.geoHitos, { [campo]: geo }); render(); }
+  try{ const r = await enviar('ckHito', S.num, campo, !!borrar, geo); if(r!=null){ S.bolo.ficha[campo] = r; guardarBoloCache(); } render(); }
   catch(e){ S.bolo.ficha[campo] = prev; render(); toast('No se guardó: '+e.message); }
 }
 let firmaTrazo = false;
@@ -1125,7 +1199,7 @@ function leido(txt){
   const it = S.items.find(i => U(i.material)===U(nom) || (cod && (U(i.material).includes('('+U(cod)+')') || U(i.material)===U(cod))));
   const el = $('#scanlast') || {};
   if(!it){
-    const ex = enExtras(nom), c = S.modo==='dev' ? 'd' : 'c';
+    const ex = esFase() ? null : enExtras(nom), c = S.modo==='dev' ? 'd' : 'c';
     if(ex){ if(ex[c]){ el.className='scanlast'; el.textContent = '✓ ' + ex.nombre + ' ya estaba marcado'; } else { el.className='scanlast good'; el.textContent = '✓ ' + ex.cant + ' × ' + ex.nombre + ' (extra)'; vib(40); pitido(true); marcarExtra('extra', ex.nombre); } return; }
     vib([60,60,60]); pitido(false);
     if(!esAdmin()){ el.className='scanlast bad'; el.textContent = '✕ ' + (nom||txt) + ' no está en este bolo. Avisa a Dreamscape.'; return; }
@@ -1133,7 +1207,7 @@ function leido(txt){
     el.className='scanlast bad'; el.innerHTML = `⚠ ${esc(nom||txt)}<br><span style="font-weight:600;font-size:14px;opacity:.9">No está en el albarán</span><div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="SCAN.pausa=false;S.pendFuera=null;$('#scanlast').className='scanlast';$('#scanlast').textContent='Apunta al código QR de la etiqueta'">Ignorar</button><button class="btn gold" onclick="anadirFuera('1');SCAN.pausa=false;$('#scanlast').className='scanlast good';$('#scanlast').textContent='✓ Añadido fuera de albarán'">Añadir igualmente</button></div>`;
     return;
   }
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto';
+  const k = KM().k;
   if(SCANMODO==='añadir'){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya está en el albarán'; return; }
   if(it[k]){ el.className='scanlast'; el.textContent = '✓ ' + it.material + ' ya estaba marcado'; return; }
   el.className='scanlast good'; el.textContent = '✓ ' + it.cant + ' × ' + it.material; vib(40); pitido(true);
@@ -1168,28 +1242,35 @@ function hora(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${z
 
 async function toggle(fila, soloMarcar, sinUndo){
   const it = S.items.find(i=>i.fila===fila); if(!it) return;
-  if(soloMarcar && it[S.modo==='carga'?'cargado':'devuelto']) return;
-  const modo = S.modo, k = modo==='carga'?'cargado':'devuelto', hk = modo==='carga'?'hCarga':'hDev';
+  if(soloMarcar && it[KM().k]) return;
+  const modo = S.modo, k = KM(modo).k, hk = KM(modo).hk;
   const prev = [it[k], it[hk]];
+  if(esFase(modo) && !S.bolo){ toast('Espera un momento: cargando el bolo'); return; }
   it[k] = !it[k]; it[hk] = it[k] ? hora() : '';
+  if(esFase(modo)){ faseLocal(modo, it.material, it[hk]); guardarBoloCache(); }
   vib(it[k] ? 15 : [8,40,8]);
   S.ultimo = fila; clearTimeout(toggle.t); toggle.t = setTimeout(()=>{ S.ultimo = null; }, 700);
   actualizarResumen(); if(!SCAN) render();
   if(!SCAN && !sinUndo) mostrarDeshacer(fila, it[k]);
   if(!SCAN && it[k]){ const lv = itemsVista(); if(lv.length && lv.every(x=>x[k])) setTimeout(confeti, 150); }
   guardarMatCache();
-  try{ const r = await enviar('ckMarcar', fila, S.num, it.material, modo, it[k]); if(r!=null){ it[hk] = r; guardarMatCache(); } if(!SCAN) render(); }
-  catch(e){ it[k]=prev[0]; it[hk]=prev[1]; actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+  try{
+    const r = esFase(modo) ? await enviar('ckFase', S.num, modo, it.material, it[k]) : await enviar('ckMarcar', fila, S.num, it.material, modo, it[k]);
+    if(r!=null){ it[hk] = r; if(esFase(modo)){ faseLocal(modo, it.material, r); guardarBoloCache(); } guardarMatCache(); } if(!SCAN) render(); }
+  catch(e){ it[k]=prev[0]; it[hk]=prev[1]; if(esFase(modo)){ faseLocal(modo, it.material, prev[0] ? prev[1] : ''); guardarBoloCache(); } actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 async function todo(valor){
-  const modo=S.modo, k = modo==='carga'?'cargado':'devuelto', hk = modo==='carga'?'hCarga':'hDev';
-  if(!confirm(valor ? `¿Marcar los ${S.items.length} artículos como ${modo==='carga'?'cargados':'devueltos'}?` : '¿Desmarcar todos?')) return;
+  const modo=S.modo, k = KM(modo).k, hk = KM(modo).hk;
+  if(!confirm(valor ? `¿Marcar los ${S.items.length} artículos como ${KM(modo).comos}?` : '¿Desmarcar todos?')) return;
   const prev = S.items.map(i=>[i[k],i[hk]]);
-  S.items.forEach(i=>{ i[k]=valor; i[hk]=valor?hora():''; }); vib(30);
+  if(esFase(modo) && !S.bolo){ toast('Espera un momento: cargando el bolo'); return; }
+  const prevF = esFase(modo) ? JSON.stringify((ficha().fases||{})[modo]||{}) : '';
+  S.items.forEach(i=>{ i[k]=valor; i[hk]=valor?hora():''; if(esFase(modo)) faseLocal(modo, i.material, i[hk]); }); vib(30);
+  if(esFase(modo)) guardarBoloCache();
   actualizarResumen(); render();
   guardarMatCache();
-  try{ const r = await enviar('ckMarcarTodo', S.num, modo, valor); if(r!==null) toast('Guardado en la hoja'); }
-  catch(e){ S.items.forEach((i,n)=>{ i[k]=prev[n][0]; i[hk]=prev[n][1]; }); actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+  try{ const r = esFase(modo) ? await enviar('ckFaseTodo', S.num, modo, valor) : await enviar('ckMarcarTodo', S.num, modo, valor); if(r!==null) toast('Guardado en el Drive'); }
+  catch(e){ S.items.forEach((i,n)=>{ i[k]=prev[n][0]; i[hk]=prev[n][1]; }); if(esFase(modo) && S.bolo){ S.bolo.ficha.fases[modo] = JSON.parse(prevF); guardarBoloCache(); } actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 
 /* ---------- INCIDENCIAS ---------- */
@@ -1663,10 +1744,10 @@ async function cargarAvisos(){
 function abrirMas(){
   const p = S.presus.find(x=>x.num===S.num) || {};
   const it = (ico, t, f, sub) => `<button class="mitem" onclick="${f}"><span class="ic">${ic(ico)}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`;
-  const lista = (S.modo==='carga' || S.modo==='dev') && S.items.length;
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto', todoHecho = lista && S.items.every(i=>i[k]);
+  const lista = esLista() && S.items.length;
+  const k = KM().k, todoHecho = lista && S.items.every(i=>i[k]);
   abrirSheet(`<h3>${esc(p.evento||'')}</h3><div class="meta" style="margin-bottom:6px">${esc(p.num||'')}${p.montaje?' · '+esc(p.montaje):''}</div>
-    ${lista ? it('checkall', todoHecho ? 'Desmarcar todo' : 'Marcar todo como '+(S.modo==='carga'?'cargado':'devuelto'), `cerrarSheet();todo(${!todoHecho})`, 'Pide confirmación antes de guardar') : ''}
+    ${lista ? it('checkall', todoHecho ? 'Desmarcar todo' : 'Marcar todo como '+KM().como, `cerrarSheet();todo(${!todoHecho})`, 'Pide confirmación antes de guardar') : ''}
     ${it('msg','Notas del equipo','abrirNotas()','Avisos y mensajes de este bolo')}
     ${it('nav','Modo en ruta',`cerrarSheet();abrirEnRuta('${esc(p.num||S.num)}')`,'Hora, dirección y llamadas en grande')}
     ${it('checksq','Resumen del bolo','abrirResumenBolo()','Horas, km y gastos al terminar')}
@@ -2305,15 +2386,15 @@ function pitido(ok){
 }
 function pintarScnt(){
   const el = $('#scnt'); if(!el || SCANMODO==='consulta' || SCANMODO==='añadir') return;
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = itemsVista(), c = l.filter(i=>i[k]).length;
+  const k = KM().k, l = itemsVista(), c = l.filter(i=>i[k]).length;
   el.textContent = c + '/' + l.length; el.classList.toggle('ok', c===l.length && l.length>0);
   const fb = $('#sfalta'); if(fb){ const n = l.length - c; fb.textContent = n ? `Faltan ${n}` : 'Todo listo'; fb.classList.toggle('ok', !n); }
   const pn = $('#spanel'); if(pn && !pn.hidden) pintarPanelFalta();
-  if(c===l.length && l.length && !SCAN_FIN){ SCAN_FIN = true; confeti(); const s = $('#scanlast'); if(s){ s.className='scanlast good'; s.innerHTML = `🎉 ${S.modo==='carga'?'Todo cargado':'Todo devuelto'}${soloMio()?' (lo tuyo)':''}<div style="margin-top:10px"><button class="btn gold" onclick="cerrarScan()">Terminar</button></div>`; } }
+  if(c===l.length && l.length && !SCAN_FIN){ SCAN_FIN = true; confeti(); const s = $('#scanlast'); if(s){ s.className='scanlast good'; s.innerHTML = `🎉 ${KM().todo}${soloMio()?' (lo tuyo)':''}<div style="margin-top:10px"><button class="btn gold" onclick="cerrarScan()">Terminar</button></div>`; } }
 }
 let SCAN_FIN = false;
 function pintarPanelFalta(){
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = ordenar(itemsVista().filter(i=>!i[k]));
+  const k = KM().k, l = ordenar(itemsVista().filter(i=>!i[k]));
   $('#spanel').innerHTML = l.length ? l.map(i=>`<div class="sfi">${fotoMat(i.material)?`<img src="${fotoMat(i.material)}">`:''}<b>${esc(i.cant)}×</b> ${esc(i.material)}</div>`).join('') : '<div class="sfi">Nada pendiente</div>';
 }
 function verFaltaScan(){ const pn = $('#spanel'); if(!pn) return; pn.hidden = !pn.hidden; if(!pn.hidden) pintarPanelFalta(); }
@@ -2356,7 +2437,7 @@ let UNDO = null;
 function mostrarDeshacer(fila, marcado){
   const it = S.items.find(i=>i.fila===fila); if(!it) return;
   let el = $('#undo'); if(!el){ el = document.createElement('div'); el.id = 'undo'; el.className = 'undo'; document.body.appendChild(el); }
-  el.innerHTML = `<span>${marcado ? (S.modo==='carga'?'Cargado':'Devuelto') : 'Desmarcado'}: <b>${esc(it.material)}</b></span><button onclick="deshacer()">Deshacer</button>`;
+  el.innerHTML = `<span>${marcado ? KM().hecho : 'Desmarcado'}: <b>${esc(it.material)}</b></span><button onclick="deshacer()">Deshacer</button>`;
   el.classList.add('show'); UNDO = fila;
   clearTimeout(mostrarDeshacer.t); mostrarDeshacer.t = setTimeout(()=>{ el.classList.remove('show'); UNDO = null; }, 5000);
 }
@@ -2585,8 +2666,8 @@ function hablar(t){
     speechSynthesis.speak(u); }catch(e){}
 }
 function siguienteVoz(){
-  const k = S.modo==='carga' ? 'cargado' : 'devuelto', l = ordenar(itemsVista().filter(i=>!i[k]));
-  if(!l.length){ hablar(S.modo==='carga' ? 'Todo cargado. Buen trabajo.' : 'Todo devuelto.'); return; }
+  const k = KM().k, l = ordenar(itemsVista().filter(i=>!i[k]));
+  if(!l.length){ hablar(KM().todo+'. Buen trabajo.'); return; }
   const i = l[0]; hablar(`Siguiente: ${i.cant} ${String(i.material).toLowerCase().replace(/\(.*?\)/g,'')}. Faltan ${l.length}.`);
 }
 function cambiarVoz(b){
@@ -2625,25 +2706,29 @@ function verStock(){
 }
 
 /* ---------- 5. FICHAJE ---------- */
-function misFichajes(){ return ((ficha().fichajes)||{})[yoNombre()] || []; }
+function misFichajes(fase){ const l = ((ficha().fichajes)||{})[yoNombre()] || []; return fase ? l.filter(x => (x.f||'montaje')===fase) : l; }
 function fichaAbierta(){ const l = misFichajes(); return l.length && !l[l.length-1].s ? l[l.length-1] : null; }
+function faseFichaje(){ const a = fichaAbierta(); if(a) return a.f||'montaje'; return S.modo==='desm' || S.modo==='cargaSitio' || ficha().finMontaje ? 'desmontaje' : 'montaje'; }
 function durTxt(ms){ const m = Math.max(0, Math.round(ms/60000)); return m < 60 ? m+' min' : Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min'; }
-function tarjetaFichaje(oscuro){
+function tarjetaFichaje(oscuro, fase){
   if(!S.bolo) return '';
-  const a = fichaAbierta(), l = misFichajes(), tot = l.reduce((s,x)=>s+(x.h||0),0);
+  fase = fase || faseFichaje();
+  const a = fichaAbierta(), l = misFichajes(fase), tot = l.reduce((s,x)=>s+(x.h||0),0), F = fase==='desmontaje' ? 'desmontaje' : 'montaje';
   const cls = oscuro ? 'fich osc' : 'furg fich';
-  if(a) return `<div class="${cls} dentro"><div class="ft"><span class="pulso"></span><div><b>Estás dentro</b><div class="meta" id="fichT" data-em="${a.em}">Desde ${esc(String(a.e).slice(-5))} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo')">Salgo</button></div>`;
-  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h apuntadas en este bolo` : 'Pulsa al empezar y al terminar: las horas se apuntan solas'}</div></div></div><button class="btn entro" onclick="fichar('entro')">Entro</button></div>`;
+  if(a){ const af = a.f||'montaje'; return `<div class="${cls} dentro"><div class="ft"><span class="pulso"></span><div><b>Dentro del ${af}</b><div class="meta" id="fichT" data-em="${a.em}">Desde ${esc(String(a.e).slice(-5))}${a.ge?' · 📍':''} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo','${af}')">Salida ${af}</button></div>`; }
+  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje de ${F}</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h de ${F} en este bolo` : 'Pulsa al empezar y al terminar: se guardan las horas y la ubicación'}</div></div></div><button class="btn entro" onclick="fichar('entro','${F}')">Entrada ${F}</button></div>`;
 }
 setInterval(()=>{ const e = $('#fichT'); if(e) e.textContent = e.textContent.replace(/·.*$/, '· ' + durTxt(Date.now() - +e.dataset.em)); }, 30000);
-async function fichar(tipo){
-  if(tipo==='salgo' && !confirm('¿Terminas ya? Se apuntarán tus horas en Gastos.')) return;
-  vib(20);
+async function fichar(tipo, fase){
+  fase = fase || faseFichaje();
+  if(tipo==='salgo' && !confirm(`¿Terminas el ${fase}? Se apuntarán tus horas en el Drive.`)) return;
+  vib(20); toast('Guardando con tu ubicación…');
   try{
-    const r = await call('ckFichar', S.num, tipo);
+    const geo = await ubicacion();
+    const r = await call('ckFichar', S.num, tipo, fase, geo);
     S.bolo.ficha.fichajes = r.fichajes; guardarBoloCache();
     if(tipo==='salgo'){ toast(r.horas ? `${String(r.horas).replace('.',',')} h apuntadas en Gastos` : 'Salida apuntada'); call('ckGastos', S.num).then(g=>{ S.gastos = g || []; if(S.vista==='det') render(); }).catch(()=>{}); }
-    else toast('Entrada apuntada');
+    else toast(`Entrada al ${fase} apuntada${geo?' con ubicación':''}`);
     render();
   }catch(e){ toast(e.red ? 'Necesitas conexión para fichar' : 'Error: '+e.message); }
 }
@@ -2961,12 +3046,12 @@ async function leidoKit(id, nombre){
     if(!S.plantillas) S.plantillas = await call('ckPlantillas');
     const pl = (S.plantillas||[]).find(p=>String(p.id)===String(id)) || (S.plantillas||[]).find(p=>UP(p.nombre)===UP(nombre));
     if(!pl){ el.className='scanlast bad'; el.textContent = '✕ Kit no encontrado: ' + (nombre||id); pitido(false); return; }
-    const k = S.modo==='carga' ? 'cargado' : 'devuelto', sin = s => UP(String(s).replace(/\s*\([^)]*\)\s*$/,''));
+    const k = KM().k, sin = s => UP(String(s).replace(/\s*\([^)]*\)\s*$/,''));
     let n = 0, ya = 0, fuera = [];
     pl.items.forEach(x => {
       const it = S.items.find(i => sin(i.material) === sin(x.nombre));
       if(it){ if(it[k]) ya++; else { toggle(it.fila, true); n++; } return; }
-      const ex = enExtras(x.nombre); if(ex){ const c = S.modo==='dev' ? 'd' : 'c'; if(!ex[c]){ marcarExtra('extra', ex.nombre); n++; } else ya++; return; }
+      const ex = esFase() ? null : enExtras(x.nombre); if(ex){ const c = S.modo==='dev' ? 'd' : 'c'; if(!ex[c]){ marcarExtra('extra', ex.nombre); n++; } else ya++; return; }
       fuera.push(x.nombre);
     });
     el.className = 'scanlast good'; el.innerHTML = `✓ Kit «${esc(pl.nombre)}»: ${n} marcados${ya?` · ${ya} ya estaban`:''}${fuera.length?`<br><span style="font-size:13px;font-weight:600;opacity:.9">${fuera.length} no están en este bolo</span>`:''}`;
