@@ -143,6 +143,7 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 /* Pasos */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .steps .ln{display:none}
+.ref.urg{background:#e5484d!important;color:#fff!important}.estrellas{display:flex;gap:6px;justify-content:center;margin:6px 0 12px}.estrellas button{border:0;background:none;font-size:40px;color:var(--gold);padding:0 2px}.tecd summary{display:flex;flex-direction:column;cursor:pointer;list-style:none}.tecd summary::-webkit-details-marker{display:none}
 .cnt2{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.cnt2 small{display:block;font-size:12.5px;opacity:.7;font-weight:500}.stp{display:flex;align-items:center;gap:6px}.stp button{width:44px;height:44px;border-radius:12px;border:0;background:var(--line);font-size:22px;font-weight:700;color:inherit}.stp input{width:64px;height:44px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1px solid var(--line)}.qty,.gq{cursor:pointer}.ctag{color:var(--ok);font-weight:600}
 .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.hgrid label{display:flex;flex-direction:column;gap:4px}.hgrid small{font-size:12px;color:var(--mut,#7a8699);font-weight:600}.hgrid input{width:100%;min-height:44px;font-size:17px;text-align:center}
 .plst{display:flex;flex-direction:column;gap:8px;margin-top:6px}.plrow{display:flex;gap:12px;align-items:flex-start}.plrow b{font-size:20px;min-width:62px;font-variant-numeric:tabular-nums}.plrow span{display:flex;flex-direction:column;font-weight:600}.plrow small{font-weight:500;opacity:.7;font-size:12.5px}
@@ -637,7 +638,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
+    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias()+tarjetaFaltasHome():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -707,7 +708,7 @@ function vistaDet(){
       <div class="chk">${i[k]?ic('check'):''}</div>
       ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty" onclick="event.stopPropagation();abrirCuenta(${i.fila})" title="Contar unidades">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', txtCuenta(i), i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', txtCuenta(i), S.modo==='carga' && !i.cargado ? txtFaltaOtro(i) : '', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
@@ -738,6 +739,9 @@ function vistaDet(){
     ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='dev' ? tarjetaAlmacen() : ''}
     ${S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : ''}
+    ${tarjetaUrgencias()}
+    ${S.modo==='descSitio' ? tarjetaLugar(p) : ''}
+    ${S.modo==='dev' ? tarjetaValoracion() : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
     ${tarjetaQuien()}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
@@ -762,7 +766,7 @@ function vistaDet(){
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
     <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button>
       <div style="flex:1;min-width:0"><h1>${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.num)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
-      <button class="ref" onclick="abrirMas()" aria-label="Más opciones del bolo">${ic('more')}</button>
+      <button class="ref urg" onclick="abrirUrgente()" aria-label="Problema urgente">${ic('alert')}</button><button class="ref" onclick="abrirMas()" aria-label="Más opciones del bolo">${ic('more')}</button>
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">${ic('refresh')}</button></div>
     ${tot ? stepper(tot) : ''}
   </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
@@ -852,7 +856,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1044,7 +1048,7 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaFichaje(false,'montaje')}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${tarjetaFichaje(false,'montaje')}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaExtrasCli()}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1059,7 +1063,7 @@ function vistaDesmontaje(p, tot){
   const f = ficha();
   const dest = `<div class="dest"><div class="lbl">Desmontaje</div><div class="place">${esc(p.lugar||'Sin lugar')}</div><div class="when">${p.desmontaje ? 'Desmontaje '+esc(p.desmontaje) : 'Sin fecha de desmontaje en la pestaña Bolos'}</div></div>`;
   const rec = !esAdmin() ? '' : f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`;
-  const body = `${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${tarjetaLugar(p)}${tarjetaExtrasCli()}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('cargaSitio')">Siguiente: recoger y cargar ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1229,6 +1233,196 @@ function tarjetaFaltan(){
   if(!l.length) return contados ? `<div class="done-banner dev">${ic('check','s')} Unidades contadas: no falta nada (${contados} artículos)</div>` : '';
   return `<div class="furg" style="border:1.5px solid var(--bad)"><div class="top"><b>${ic('alert','s')} Faltan unidades</b><span class="pill warn">${l.reduce((s,x)=>s+x.f,0)}</span></div>${l.map(x=>`<div class="cfrow" onclick="abrirCuenta(${x.i.fila})" style="cursor:pointer"><b>${esc(x.i.material)}</b><span class="meta">${x.v} de ${x.ida} · faltan ${x.f}</span></div>`).join('')}</div>`;
 }
+
+/* =========================================================
+   RONDA 6: lugar, urgente, extras del cliente, faltas, valoración, resumen por técnico
+   ========================================================= */
+/* ---------- FICHA TÉCNICA DEL LUGAR ---------- */
+const LUGAR_CAMPOS = [['acceso','Acceso','Por dónde se entra, montacargas, escaleras…'],['carga','Carga y descarga','Dónde aparcar la furgoneta, distancia, carro…'],['electricidad','Electricidad','Enchufes, potencia, cuadro, alargos necesarios'],['muelle','Horario del muelle','Ej. 8:00–14:00'],['contacto','Contacto del lugar','Nombre'],['telefono','Teléfono del lugar','600 000 000'],['notas','Notas','Lo que conviene saber la próxima vez']];
+S.lugares = {};
+function tarjetaLugar(p){
+  p = p || S.presus.find(x=>x.num===S.num) || {};
+  const L = p.lugar; if(!L) return '';
+  if(!(L in S.lugares)){ S.lugares[L] = undefined; call('ckLugar', L).then(r=>{ S.lugares[L] = r || null; if(S.vista==='det' && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{ S.lugares[L] = null; }); }
+  const d = S.lugares[L];
+  if(d === undefined) return `<div class="furg"><div class="top"><b>${ic('pin','s')} Ficha del lugar</b></div><div class="meta">Cargando…</div></div>`;
+  const filas = d ? LUGAR_CAMPOS.filter(([k])=>d[k]).map(([k,t])=>`<dt>${t}</dt><dd>${k==='telefono'?`<a href="tel:${esc(tel(d[k]))}">${esc(d[k])}</a>`:esc(d[k])}</dd>`).join('') : '';
+  return `<div class="furg"><div class="top"><b>${ic('pin','s')} Ficha del lugar</b><button class="edit" onclick="abrirLugar()">${d?'Editar':'Rellenar'}</button></div>
+    ${filas ? `<dl class="kv" style="margin:6px 0 0">${filas}</dl><div class="meta" style="margin-top:6px;font-size:12px">Actualizado ${esc(d.act||'')}${d.por?' por '+esc(d.por):''} · sirve para todos los bolos en ${esc(destino(L).split(',')[0])}</div>` : `<div class="meta">Aún no hay datos de ${esc(destino(L).split(',')[0])}: acceso, carga, electricidad… Rellénalo una vez y saldrá en los próximos bolos aquí.</div>`}</div>`;
+}
+function abrirLugar(){
+  const p = S.presus.find(x=>x.num===S.num) || {}, d = S.lugares[p.lugar] || {};
+  abrirSheet(`<h3>${ic('pin')} Ficha del lugar</h3><div class="meta" style="margin-bottom:12px">${esc(destino(p.lugar))}</div>
+    ${LUGAR_CAMPOS.map(([k,t,ph])=>`<label class="fld"><span>${t}</span>${['acceso','carga','electricidad','notas'].includes(k)?`<textarea id="lg_${k}" rows="2" placeholder="${ph}">${esc(d[k]||'')}</textarea>`:`<input id="lg_${k}" value="${esc(d[k]||'')}" placeholder="${ph}" ${k==='telefono'?'type="tel"':''} autocomplete="off">`}</label>`).join('')}
+    <div class="row2" style="margin-top:6px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="lgBtn" onclick="guardarLugar()">Guardar</button></div>`);
+}
+async function guardarLugar(){
+  const p = S.presus.find(x=>x.num===S.num) || {}, datos = {};
+  LUGAR_CAMPOS.forEach(([k]) => datos[k] = ($('#lg_'+k).value||'').trim());
+  const prev = S.lugares[p.lugar]; S.lugares[p.lugar] = Object.assign({ act: hora(), por: yoNombre() }, datos); cerrarSheet(); render();
+  try{ const r = await enviar('ckGuardarLugar', p.lugar, datos); if(r){ S.lugares[p.lugar] = r; render(); } toast('Ficha del lugar guardada en el Drive'); }
+  catch(e){ S.lugares[p.lugar] = prev; render(); toast('No se guardó: '+e.message); }
+}
+
+/* ---------- PROBLEMA URGENTE ---------- */
+let URG = { tipo:'', foto:'' };
+function abrirUrgente(){
+  if(!S.bolo){ toast('Espera a que cargue el bolo'); return; }
+  URG = { tipo:'', foto:'' };
+  const tipos = ['Equipo roto','Falta material','El cliente pide algo','Seguridad / accidente','Llego tarde','Otro'];
+  abrirSheet(`<h3 style="color:var(--bad)">🚨 Problema urgente</h3><div class="meta" style="margin-bottom:10px">Avisa al momento a ${esAdmin()?'los administradores':'Andreu'} con tu ubicación (y foto si quieres).</div>
+    <div class="chips">${tipos.map(t=>`<button class="chip ut" onclick="document.querySelectorAll('.chip.ut').forEach(b=>b.classList.remove('on'));this.classList.add('on');URG.tipo=this.textContent">${t}</button>`).join('')}</div>
+    <div class="micwrap"><textarea id="urgTxt" rows="3" placeholder="Qué pasa (ej. el altavoz 2 no enciende)"></textarea>${micBtn('urgTxt')}</div>
+    <div id="urgPrev"></div>
+    <label class="btn sec2 fotobtn" for="urgFoto" style="margin:0 0 10px">📷 Añadir foto</label><input type="file" id="urgFoto" accept="image/*" capture="environment" hidden onchange="fotoUrgente(this)">
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="urgBtn" style="background:var(--bad)" onclick="enviarUrgente()">Avisar ya</button></div>
+    ${(ficha().urgencias||[]).length?`<button class="link" onclick="cerrarSheet();verUrgencias()">Ver avisos de este bolo (${ficha().urgencias.length})</button>`:''}`);
+}
+async function fotoUrgente(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  try{ URG.foto = await comprimir(f, 1000, 220000); $('#urgPrev').innerHTML = `<img src="${URG.foto}" style="width:100%;border-radius:12px;margin-bottom:10px">`; }catch(e){ toast('No se pudo leer la foto'); }
+}
+async function enviarUrgente(){
+  const texto = ($('#urgTxt').value||'').trim(), tipo = URG.tipo || 'Problema';
+  if(!texto && !URG.foto && !URG.tipo){ toast('Elige qué pasa o escribe algo'); return; }
+  const b = $('#urgBtn'); b.disabled = true; b.textContent = 'Avisando…';
+  const geo = await ubicacion();
+  const f = S.bolo.ficha; f.urgencias = f.urgencias || [];
+  const loc = { id:'tmp'+Date.now(), tipo, texto, h: hora(), por: yoNombre(), geo, foto: !!URG.foto };
+  f.urgencias.push(loc); guardarBoloCache(); cerrarSheet(); vib([60,40,60]); render();
+  try{ const r = await enviar('ckUrgente', S.num, { tipo, texto, foto: URG.foto, geo }); if(r){ f.urgencias = r; guardarBoloCache(); render(); toast('Aviso enviado: ya lo saben'); } }
+  catch(e){ f.urgencias = f.urgencias.filter(x=>x!==loc); render(); toast('No se envió: '+e.message+'. Llama a Dreamscape'); }
+}
+function tarjetaUrgencias(){
+  const l = (ficha().urgencias||[]).filter(x=>!x.ok); if(!l.length) return '';
+  return `<div class="furg" style="border:2px solid var(--bad)"><div class="top"><b style="color:var(--bad)">🚨 ${l.length} problema${l.length>1?'s':''} sin resolver</b><button class="edit" onclick="verUrgencias()">Ver</button></div>${l.slice(-2).map(x=>`<div class="meta" style="margin-top:4px"><b>${esc(x.tipo)}</b> · ${esc(x.por)} · ${esc(x.h)}${x.texto?'<br>'+esc(x.texto):''}</div>`).join('')}</div>`;
+}
+function verUrgencias(){
+  const l = (ficha().urgencias||[]).slice().reverse();
+  abrirSheet(`<h3>🚨 Avisos del bolo</h3>${l.length? l.map(x=>`<div class="furg" style="margin:8px 0;${x.ok?'opacity:.6':''}"><div class="top"><b>${esc(x.tipo)}</b><span class="pill ${x.ok?'ok':'warn'}">${x.ok?'Resuelto':'Abierto'}</span></div><div class="meta">${esc(x.por)} · ${esc(x.h)}${x.geo?` · <a href="https://maps.google.com/?q=${x.geo.lat},${x.geo.lon}" target="_blank" rel="noopener">📍 mapa</a>`:''}${x.foto?' · 📷 foto en el correo':''}</div>${x.texto?`<div style="margin-top:6px">${esc(x.texto)}</div>`:''}${esAdmin() && !String(x.id).startsWith('tmp')?`<button class="link" style="padding:6px 0 0;text-align:left" onclick="resolverUrgencia('${esc(x.id)}',${!x.ok})">${x.ok?'Reabrir':'✓ Marcar como resuelto'}</button>`:''}</div>`).join('') : '<div class="meta">No hay avisos.</div>'}
+    <button class="btn sec2" style="margin-top:10px" onclick="cerrarSheet()">Cerrar</button>`);
+}
+async function resolverUrgencia(id, valor){
+  try{ const r = await call('ckUrgenteResuelto', S.num, id, valor); S.bolo.ficha.urgencias = r; guardarBoloCache(); render(); verUrgencias(); toast(valor?'Marcado como resuelto':'Reabierto'); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+
+/* ---------- EXTRAS PEDIDOS POR EL CLIENTE (con firma) ---------- */
+function tarjetaExtrasCli(){
+  if(!S.bolo) return '';
+  const l = ficha().extrasCli || [];
+  return `<div class="furg"><div class="top"><b>➕ Extras pedidos por el cliente</b>${l.length?`<span class="pill">${l.length}</span>`:''}</div>
+    ${l.map(x=>`<div class="grow"><div style="flex:1;min-width:0"><b>${esc(x.cant)} × ${esc(x.concepto)}</b><div class="meta">${x.precio!=null&&esAdmin()?eur2(x.precio)+' / ud · ':''}firma ${esc(x.nombre)} · ${esc(x.h)}</div></div>${esAdmin()&&x.id?`<button class="more" onclick="borrarExtraCli('${esc(x.id)}')" aria-label="Borrar">${ic('x','s')}</button>`:''}</div>`).join('')}
+    <button class="btn sec2" style="width:100%;margin-top:8px" onclick="abrirExtraCli()">+ El cliente pide algo más</button>
+    <div class="meta" style="margin-top:6px;font-size:12px">Se apunta, el cliente lo firma en el móvil y queda para la factura.</div></div>`;
+}
+function abrirExtraCli(){
+  abrirSheet(`<h3>➕ Extra pedido por el cliente</h3>
+    <label class="fld"><span>¿Qué pide?</span><input id="xcC" placeholder="Ej. Micrófono inalámbrico extra, 1 hora más de técnico" autocomplete="off"></label>
+    <div class="cnt2" style="border:0;padding-top:0"><div><b>Cantidad</b></div><div class="stp"><button onclick="sumar('xcN',-1)">−</button><input id="xcN" inputmode="numeric" value="1"><button onclick="sumar('xcN',1)">+</button></div></div>
+    ${esAdmin()?`<label class="fld"><span>Precio por unidad (€, opcional)</span><input id="xcP" inputmode="decimal" placeholder="Ej. 50"></label>`:''}
+    <label class="fld"><span>Nota (opcional)</span><input id="xcT" autocomplete="off"></label>
+    <div class="row2"><label class="fld"><span>Nombre de quien firma</span><input id="xcF" autocomplete="off"></label><label class="fld"><span>DNI (opcional)</span><input id="xcD" autocomplete="off"></label></div>
+    <div class="fld"><span>Firma del cliente</span><canvas id="xcPad" style="width:100%;height:170px;background:#fff;border:1px solid var(--line);border-radius:12px;touch-action:none"></canvas><button class="link" style="padding:4px 0 0" onclick="padBorrar('xcPad')">Borrar firma</button></div>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="xcBtn" onclick="guardarExtraCli()">Firmar y guardar</button></div>`);
+  setTimeout(()=>padInit('xcPad'), 350);
+}
+function padInit(id){
+  const c = $('#'+id); if(!c) return; const r = c.getBoundingClientRect(); c.width = r.width*2; c.height = r.height*2;
+  const x = c.getContext('2d'); x.scale(2,2); x.lineWidth = 2.4; x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = '#111'; c._ok = false; let on = false;
+  const P = e => { const t = e.touches ? e.touches[0] : e, b = c.getBoundingClientRect(); return [t.clientX-b.left, t.clientY-b.top]; };
+  const st = e => { on = true; const [a,b] = P(e); x.beginPath(); x.moveTo(a,b); e.preventDefault(); };
+  const mv = e => { if(!on) return; const [a,b] = P(e); x.lineTo(a,b); x.stroke(); c._ok = true; e.preventDefault(); };
+  const fin = () => { on = false; };
+  c.addEventListener('touchstart', st, { passive:false }); c.addEventListener('touchmove', mv, { passive:false }); c.addEventListener('touchend', fin);
+  c.addEventListener('mousedown', st); c.addEventListener('mousemove', mv); window.addEventListener('mouseup', fin);
+}
+function padBorrar(id){ const c = $('#'+id); if(!c) return; c.getContext('2d').clearRect(0,0,c.width,c.height); c._ok = false; }
+async function guardarExtraCli(){
+  const v = id => (($('#'+id)||{}).value||'').trim();
+  const x = { concepto: v('xcC'), cant: parseInt(v('xcN'),10) || 1, precio: esAdmin() ? v('xcP') : '', nota: v('xcT'), nombre: v('xcF'), dni: v('xcD') };
+  if(!x.concepto){ toast('Escribe qué pide el cliente'); return; }
+  if(!x.nombre){ toast('Falta el nombre de quien firma'); return; }
+  const c = $('#xcPad'); if(!c || !c._ok){ toast('Falta la firma del cliente'); return; }
+  x.png = c.toDataURL('image/png');
+  const b = $('#xcBtn'); b.disabled = true; b.textContent = 'Guardando…';
+  const f = S.bolo.ficha; f.extrasCli = f.extrasCli || []; const loc = Object.assign({ h: hora(), por: yoNombre(), precio: x.precio === '' ? null : +String(x.precio).replace(',','.') }, x, { png: undefined }); f.extrasCli.push(loc);
+  cerrarSheet(); vib(30); render();
+  try{ const r = await enviar('ckExtraCliente', S.num, x); if(r){ f.extrasCli = r; guardarBoloCache(); render(); toast('Extra firmado y guardado en el Drive'); } }
+  catch(e){ f.extrasCli = f.extrasCli.filter(y=>y!==loc); render(); toast('No se guardó: '+e.message); }
+}
+async function borrarExtraCli(id){
+  if(!confirm('¿Borrar este extra? También se quita de la pestaña «Extras cliente».')) return;
+  try{ const r = await call('ckBorrarExtraCliente', S.num, id); S.bolo.ficha.extrasCli = r || []; guardarBoloCache(); render(); toast('Extra borrado'); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+
+/* ---------- MATERIAL QUE FALTA TRAS LOS BOLOS ---------- */
+S.faltas = [];
+function cargarFaltas(){ call('ckFaltas').then(l=>{ S.faltas = l || []; if(S.vista==='lista') refrescarHoy(); }).catch(()=>{}); }
+function txtFaltaOtro(i){
+  const l = (S.faltas||[]).filter(x => x.material === i.material && x.num !== S.num); if(!l.length) return '';
+  return `<span class="inc">⚠ Faltaron ${l.reduce((a,x)=>a+x.falta,0)} en ${esc(l.map(x=>x.num).join(', '))}: comprueba que hay suficientes</span>`;
+}
+function tarjetaFaltasHome(){
+  const l = S.faltas || []; if(!l.length) return '';
+  return `<button class="card alerta" onclick="verFaltas()"><b>${ic('alert','s')} Material que no ha vuelto</b><div class="meta">${esc(l.slice(0,3).map(x=>x.falta+' × '+x.material).join(' / '))}${l.length>3?' y '+(l.length-3)+' más':''}</div></button>`;
+}
+function verFaltas(){
+  const l = S.faltas || [];
+  abrirSheet(`<h3>${ic('alert')} Material que no ha vuelto</h3><div class="meta" style="margin-bottom:10px">Sale como aviso en los próximos bolos que lleven ese material hasta que lo marques como resuelto.</div>
+    ${l.length ? l.map(x=>`<div class="grow"><div style="flex:1;min-width:0"><b>${x.falta} × ${esc(x.material)}</b><div class="meta">${esc(x.num)} · ${esc(x.h)}${x.por?' · '+esc(x.por):''}</div></div>${esAdmin()?`<button class="btn sec2" style="width:auto;padding:8px 12px" onclick="resolverFalta(this.dataset.n,this.dataset.m)" data-n="${esc(x.num)}" data-m="${esc(x.material)}">Resuelto</button>`:''}</div>`).join('') : '<div class="meta">Todo ha vuelto. 👍</div>'}
+    <button class="btn sec2" style="margin-top:12px" onclick="cerrarSheet()">Cerrar</button>`);
+}
+async function resolverFalta(num, mat){
+  try{ S.faltas = await call('ckResolverFalta', num, mat) || []; toast('Marcado como resuelto'); verFaltas(); render(); }
+  catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); }
+}
+
+/* ---------- VALORACIÓN INTERNA DEL BOLO ---------- */
+function tarjetaValoracion(){
+  if(!S.bolo) return '';
+  const v = ficha().valInterna || {}, mia = v[yoNombre()], otros = Object.entries(v).filter(([n])=>n!==yoNombre());
+  const est = n => '★'.repeat(n) + '☆'.repeat(5-n);
+  return `<div class="furg"><div class="top"><b>${ic('star','s')} Valoración interna del bolo</b><button class="edit" onclick="abrirValoracion()">${mia?'Cambiar':'Valorar'}</button></div>
+    ${mia ? `<div class="meta">Tu nota: <span style="color:var(--gold)">${est(mia.nota)}</span>${mia.mejorar?' · Mejorar: '+esc(mia.mejorar):''}</div>` : `<div class="meta">Del 1 al 5, ¿cómo ha ido? Qué fue bien y qué mejorar. Solo lo ve el equipo.</div>`}
+    ${esAdmin() && otros.length ? otros.map(([n,x])=>`<div class="meta" style="margin-top:4px"><b>${esc(n)}</b> <span style="color:var(--gold)">${est(x.nota)}</span>${x.bien?' · Bien: '+esc(x.bien):''}${x.mejorar?' · Mejorar: '+esc(x.mejorar):''}</div>`).join('') : ''}</div>`;
+}
+let VAL_N = 0;
+function abrirValoracion(){
+  const m = (ficha().valInterna||{})[yoNombre()] || {}; VAL_N = m.nota || 0;
+  abrirSheet(`<h3>${ic('star')} ¿Cómo ha ido el bolo?</h3>
+    <div class="estrellas" id="valE">${[1,2,3,4,5].map(n=>`<button onclick="ponerVal(${n})">${n<=VAL_N?'★':'☆'}</button>`).join('')}</div>
+    <label class="fld"><span>Qué fue bien</span><textarea id="valB" rows="2">${esc(m.bien||'')}</textarea></label>
+    <label class="fld"><span>Qué mejorar la próxima vez</span><textarea id="valM" rows="2" placeholder="Ej. faltó un alargo, llegamos justos de hora…">${esc(m.mejorar||'')}</textarea></label>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarValoracion()">Guardar</button></div>`);
+}
+function ponerVal(n){ VAL_N = n; vib(10); $('#valE').innerHTML = [1,2,3,4,5].map(i=>`<button onclick="ponerVal(${i})">${i<=n?'★':'☆'}</button>`).join(''); }
+async function guardarValoracion(){
+  if(!VAL_N){ toast('Toca las estrellas para poner nota'); return; }
+  const x = { nota: VAL_N, bien: ($('#valB').value||'').trim(), mejorar: ($('#valM').value||'').trim() };
+  const f = S.bolo.ficha; f.valInterna = f.valInterna || {}; f.valInterna[yoNombre()] = Object.assign({ h: hora() }, x); cerrarSheet(); render();
+  try{ const r = await enviar('ckValoracionInterna', S.num, x); if(r){ f.valInterna = r; guardarBoloCache(); render(); } toast('Gracias: valoración guardada'); }
+  catch(e){ toast('No se guardó: '+e.message); }
+}
+
+/* ---------- RESUMEN DEL MES POR TÉCNICO ---------- */
+function bloqueTecnicos(r){
+  if(!r || !r.mes) return '';
+  if(!S.resTec || S.resTec.mes !== r.mes){
+    if(!S.resTecCarg || S.resTecCarg !== r.mes){ S.resTecCarg = r.mes; call('ckResumenTecnicos', r.mes).then(x=>{ S.resTec = x; if(S.vista==='resumen') render(); }).catch(e=>{ S.resTec = { mes:r.mes, error: e.message }; if(S.vista==='resumen') render(); }); }
+    return `<div class="furg"><b>Por técnico</b><div class="meta" style="margin-top:8px">Calculando horas, bolos y km…</div></div>`;
+  }
+  if(S.resTec.error) return `<div class="furg"><b>Por técnico</b><div class="meta">${esc(S.resTec.error)}</div></div>`;
+  const l = S.resTec.tecnicos || [];
+  return `<div class="furg"><b>Por técnico</b>${!l.length?'<div class="meta" style="margin-top:8px">Nadie ha trabajado este mes.</div>':''}
+    ${l.map((t,i)=>`<details class="tecd" style="margin-top:10px"><summary><b>${esc(t.nombre)}</b><span class="meta">${t.bolos} bolo${t.bolos>1?'s':''} · ${String(t.horas).replace('.',',')} h · ${Math.round(t.km)} km${t.val!=null?' · ★ '+String(t.val).replace('.',','):''}</span></summary>
+      ${t.lista.map(b=>`<div class="meta" style="margin:4px 0 0 4px">${esc(b.num)} · ${esc(b.evento||'')} · ${String(b.horas).replace('.',',')} h · ${Math.round(b.km)} km${b.kmEst?' (aprox.)':''}${b.nota?' · ★ '+b.nota:''}</div>`).join('')}</details>`).join('')}
+    <div class="meta" style="margin-top:8px;font-size:12px">Horas del fichaje (o del resumen del bolo). Km: los que apunta cada uno o, si no, ida y vuelta desde el almacén (aprox.).</div>
+    ${l.length?`<button class="link" style="padding:8px 0 0;text-align:left" onclick="copiar(textoTecnicos())">Copiar resumen para pagar</button>`:''}</div>`;
+}
+function textoTecnicos(){ return (S.resTec.tecnicos||[]).map(t=>`${t.nombre}: ${t.bolos} bolos · ${String(t.horas).replace('.',',')} h · ${Math.round(t.km)} km`).join('\n'); }
+
 /* ---------- ALMACÉN: dirección guardada y botones de mapa ---------- */
 function tarjetaAlmacen(){
   const c = cfg(), a = c.almacen || '';
@@ -1441,7 +1635,7 @@ function limpiarCache(){ try{ Object.keys(localStorage).filter(k=>k.indexOf('ck_
 let COLA = []; try{ COLA = JSON.parse(localStorage.getItem('ck_cola')||'[]'); }catch(e){}
 function guardarCola(){ try{ localStorage.setItem('ck_cola', JSON.stringify(COLA)); }catch(e){ toast('Memoria llena: no se pudo guardar el cambio sin conexión'); } pintarRed(); }
 async function enviar(fn, ...args){
-  const post = ['ckSalida','ckFirma','ckFoto','ckGasto','ckFirmaRecogida','ckExtra'].includes(fn);
+  const post = ['ckSalida','ckFirma','ckFoto','ckGasto','ckFirmaRecogida','ckExtra','ckUrgente','ckExtraCliente','ckGuardarLugar','ckValoracionInterna'].includes(fn);
   if(COLA.length){ COLA.push({fn, args, post}); guardarCola(); vaciarCola(); return null; }
   try{ return post ? await callPost(fn, ...args) : await call(fn, ...args); }
   catch(e){
@@ -1503,7 +1697,7 @@ function salirSesion(){
 async function arrancar(){
   S.yo = S.yo || cacheGet('ckYo[]') || null;
   cargarLista(); cargarFurgos(); vaciarCola(); atajoInicial(); guiaPrimeraVez();
-  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); cargarStock(); cargarAdmin4(); }
+  try{ S.yo = await call('ckYo'); cacheSet('ckYo[]', S.yo); render(); cargarStock(); cargarAdmin4(); cargarFaltas(); }
   catch(e){ if(!e.red && /código|acceso/i.test(e.message)){ salirSesion(); } }
 }
 
@@ -1833,7 +2027,7 @@ function vistaResumen(){
   const body = r.cargando ? `<div class="loading"><div class="spin"></div>Calculando…</div>` : r.error ? `<div class="empty">${esc(r.error)}</div>` : `
     <div class="tiles"><div class="tile"><b>${(r.bolos||[]).length}</b><span>bolos</span></div><div class="tile"><b>${eur(r.facturado)}</b><span>presupuestado</span></div><div class="tile"><b>${eur(r.totalGastos)}</b><span>gastos</span></div><div class="tile ${(r.incidencias||[]).length?'warn':''}"><b>${(r.incidencias||[]).length}</b><span>incidencias</span></div></div>
     ${bloqueRentabilidad(r)}
-    <div class="furg"><b>Horas por persona</b><div style="margin-top:10px">${barras(r.horas, v=>v+' h')}</div></div>
+    ${bloqueTecnicos(r)}<div class="furg"><b>Horas por persona</b><div style="margin-top:10px">${barras(r.horas, v=>v+' h')}</div></div>
     <div class="furg"><b>Gastos por tipo</b><div style="margin-top:10px">${barras(r.gastos, eur)}</div></div>
     <div class="furg"><b>Material más usado</b><div style="margin-top:10px">${barras(Object.fromEntries((r.top||[]).map(x=>[x.material,x.cant])), v=>v+' uds')}</div></div>
     ${(r.incidencias||[]).length?`<div class="furg"><b>Incidencias</b>${r.incidencias.map(i=>`<div class="hrow2"><div><b>${esc(i.material)}</b><div class="meta inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''} · ${esc(i.num)}</div></div></div>`).join('')}</div>`:''}
@@ -1986,6 +2180,10 @@ async function verFactura(){
   if(S.vista==='factura') render();
 }
 const eur2 = n => (Number(n)||0).toLocaleString('es-ES', { style:'currency', currency:'EUR' });
+function bloqueExtrasFactura(){
+  const l = ((S.bolo||{}).ficha||{}).extrasCli || []; if(!l.length) return '';
+  return `<div class="furg" style="border:1.5px solid var(--gold)"><b>➕ Extras pedidos en el lugar (firmados)</b>${l.map(x=>`<div class="grow"><div style="flex:1;min-width:0"><b>${esc(x.cant)} × ${esc(x.concepto)}</b><div class="meta">${x.precio!=null?eur2(x.precio)+' / ud · ':'Sin precio · '}firma ${esc(x.nombre)} · ${esc(x.h)}</div></div></div>`).join('')}<div class="meta" style="margin-top:6px">No están en la base del presupuesto: súmalos a la factura.</div></div>`;
+}
 function textoFactura(f){
   return `Cliente: ${f.cliente}\nCIF: ${f.cif}\nPresupuesto: ${f.num}\nEvento: ${f.evento} ${f.fecha}\n\n` + f.lineas.map(l=>`${l.cant} x ${l.material}${l.a3?' ['+l.a3+']':''}${l.precio?' · '+eur2(l.precio)+' = '+eur2(l.importe):''}`).join('\n') + `\n\nBase: ${eur2(f.base)}\nIVA 21%: ${eur2(f.iva)}\nTotal: ${eur2(f.total)}`;
 }
@@ -1994,7 +2192,7 @@ function vistaFactura(){
   const body = !f ? `<div class="loading"><div class="spin"></div>Preparando…</div>` : f.error ? `<div class="empty">${esc(f.error)}</div>` : `
     <div class="furg"><dl class="kv" style="margin:0"><dt>Cliente</dt><dd>${esc(f.cliente)}</dd><dt>CIF</dt><dd class="sel">${esc(f.cif||'—')}</dd>${f.poblacion?`<dt>Población</dt><dd>${esc(f.poblacion)}</dd>`:''}<dt>Evento</dt><dd>${esc(f.evento)} · ${esc(f.fecha)}</dd></dl></div>
     <div class="furg"><b>Conceptos</b>${f.lineas.map(l=>`<div class="grow"><div style="flex:1;min-width:0"><b>${esc(l.cant)} × ${esc(l.material)}</b><div class="meta">${esc(l.a3?'A3: '+l.a3:l.codigo)}${l.precio?' · '+eur2(l.precio)+' / ud':' · sin precio en catálogo'}</div></div><div class="gimp"><b>${l.precio?eur2(l.importe):'—'}</b></div></div>`).join('')}</div>
-    <div class="furg tot"><div><span>Base (presupuesto)</span><b>${eur2(f.base)}</b></div><div><span>IVA 21 %</span><b>${eur2(f.iva)}</b></div><div class="big2"><span>Total</span><b>${eur2(f.total)}</b></div>
+    ${bloqueExtrasFactura()}<div class="furg tot"><div><span>Base (presupuesto)</span><b>${eur2(f.base)}</b></div><div><span>IVA 21 %</span><b>${eur2(f.iva)}</b></div><div class="big2"><span>Total</span><b>${eur2(f.total)}</b></div>
       ${Math.abs(f.sumaCatalogo-f.base)>0.5?`<div class="meta" style="margin-top:8px">Los precios de catálogo suman ${eur2(f.sumaCatalogo)}. Manda la base del presupuesto aceptado (con descuentos y servicios).</div>`:''}</div>`;
   const foot = f && !f.error ? `<div class="foot"><button class="btn" onclick="copiar(textoFactura(S.fac))">Copiar todo para A3Factura</button></div>` : '';
   return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
