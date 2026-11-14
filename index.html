@@ -584,8 +584,10 @@ function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('sho
 
 /* ---------- LISTA ---------- */
 async function cargarLista(){
-  S.vista='lista'; S.num=null; render();
-  try{ S.presus = await call('ckPresupuestos'); }catch(e){ toast('Error: '+e.message); }
+  S.vista='lista'; S.num=null;
+  if(!S.presus.length){ const c = cacheGet('ckPresupuestos[]'); if(c && c.length){ S.presus = c; S.listo = true; ocultarSplash(); } }
+  render();
+  try{ S.presus = await call('ckPresupuestos'); }catch(e){ if(!S.presus.length) toast('Error: '+e.message); }
   S.listo = true;
   if(S.vista==='lista') render();
   ocultarSplash();
@@ -680,6 +682,7 @@ async function abrir(num, refresco){
   if(COLA.length){ await vaciarCola(); }
   cargarCatalogo();
   if(!auto){ S.actualizando = true; if(S.items.length) render(); }
+  call('ckMismoDia', num).then(l=>{ (S.mismo = S.mismo || {})[num] = l || []; if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{});
   const [rm, rb, rg] = await Promise.allSettled([call('ckMaterial', num), call('ckBolo', num), call('ckGastos', num)]);
   S.actualizando = false;
   if(rg.status==='fulfilled') S.gastos = rg.value || [];
@@ -708,7 +711,7 @@ function vistaDet(){
       <div class="chk">${i[k]?ic('check'):''}</div>
       ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty" onclick="event.stopPropagation();abrirCuenta(${i.fila})" title="Contar unidades">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', txtCuenta(i), S.modo==='carga' && !i.cargado ? txtFaltaOtro(i) : '', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', txtCuenta(i), S.modo==='carga' && !i.cargado ? txtFaltaOtro(i) : '', (S.modo==='dev'||S.modo==='cargaSitio') ? txtVaDespues(i) : '', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
@@ -730,7 +733,7 @@ function vistaDet(){
       : `<div class="sec">Pendiente <span class="cnt">${pend.length}</span></div>${lst(ordenar(pend))}`;
     body = `
     ${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}
-    ${tarjetaFichaje(false, S.modo==='carga'||S.modo==='descSitio' ? 'montaje' : 'desmontaje')}
+    ${S.modo==='carga' ? tarjetaFichaje(false,'montaje','entrada') : S.modo==='dev' ? tarjetaFichaje(false,'desmontaje','salida') : ''}
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
       <div><div class="big">${vh}<span> / ${vt}</span></div><div class="pm">${soloMio()?'de lo tuyo · ':''}${KM().pm}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
     ${hechos===tot && S.modo!=='dev' ? `<button class="next" onclick="irA('${sigPaso()}')">${ic('check')}<span>${KM().todo}<small>Siguiente paso: ${nombrePaso(sigPaso())}</small></span>${ic('chev')}</button>` : ''}
@@ -740,6 +743,7 @@ function vistaDet(){
     ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='dev' ? tarjetaAlmacen() : ''}
     ${S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : ''}
+    ${tarjetaMismoDia()}
     ${tarjetaUrgencias()}
     ${S.modo==='descSitio' ? tarjetaLugar(p) : ''}
     ${S.modo==='dev' ? tarjetaValoracion() : ''}
@@ -857,7 +861,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaFichaje(false,'montaje')}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1049,7 +1053,7 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaUrgencias()}${tarjetaFichaje(false,'montaje')}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaExtrasCli()}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${tarjetaFichaje(false,'montaje','salida')}${firma}${tarjetaExtrasCli()}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1064,7 +1068,7 @@ function vistaDesmontaje(p, tot){
   const f = ficha();
   const dest = `<div class="dest"><div class="lbl">Desmontaje</div><div class="place">${esc(p.lugar||'Sin lugar')}</div><div class="when">${p.desmontaje ? 'Desmontaje '+esc(p.desmontaje) : 'Sin fecha de desmontaje en la pestaña Bolos'}</div></div>`;
   const rec = !esAdmin() ? '' : f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`;
-  const body = `${tarjetaUrgencias()}${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${tarjetaLugar(p)}${tarjetaExtrasCli()}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje','entrada')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${tarjetaMismoDia()}${tarjetaLugar(p)}${tarjetaExtrasCli()}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('cargaSitio')">Siguiente: recoger y cargar ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1424,6 +1428,88 @@ function bloqueTecnicos(r){
 }
 function textoTecnicos(){ return (S.resTec.tecnicos||[]).map(t=>`${t.nombre}: ${t.bolos} bolos · ${String(t.horas).replace('.',',')} h · ${Math.round(t.km)} km`).join('\n'); }
 
+
+/* =========================================================
+   RONDA 7: varios bolos el mismo día, informe PDF, fichaje automático
+   ========================================================= */
+function diaTxt(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3]+'/'+m[2] : ''; }
+function tarjetaMismoDia(){
+  const l = ((S.mismo||{})[S.num]) || []; if(!l.length) return '';
+  const vuelta = S.modo==='dev' || S.modo==='cargaSitio' || S.modo==='desm';
+  const sel = l.filter(x => vuelta ? x.tipo==='despues' : x.tipo!=='despues');
+  if(!sel.length) return '';
+  const fila = x => {
+    const H = horasFicha({ horario: x.horario }), h = x.tipo==='antes' ? H.desmontaje : H.montaje;
+    const txt = x.tipo==='despues' ? `Se monta el ${diaTxt(x.dia)}${h!=null?' a las '+hhmm(h):''}: lo que coincide <b>no hace falta descargarlo en el almacén</b>`
+      : x.tipo==='antes' ? `Se desmonta el mismo día${h!=null?' a las '+hhmm(h):''}: parte del material puede venir de allí`
+      : `Se monta el mismo día${h!=null?' a las '+hhmm(h):''}: comprobad que hay material para los dos y el orden de carga`;
+    return `<div style="margin-top:8px"><b>${esc(x.num)} · ${esc(x.evento||'')}</b>${x.lugar?`<div class="meta">${esc(destino(x.lugar))}</div>`:''}<div class="meta">${txt}</div>${x.comunes.length?`<div class="meta" style="margin-top:2px">En común (${x.comunes.length}): ${esc(x.comunes.slice(0,8).join(', '))}${x.comunes.length>8?'…':''}</div>`:''}</div>`;
+  };
+  return `<div class="furg" style="border:1.5px solid var(--gold)"><div class="top"><b>${ic('truck','s')} ${vuelta ? 'Este material sale después hacia otro bolo' : 'Otros bolos el mismo día'}</b></div>${sel.map(fila).join('')}</div>`;
+}
+function txtVaDespues(i){
+  const l = (((S.mismo||{})[S.num]) || []).filter(x => x.tipo==='despues' && x.comunes.includes(i.material)); if(!l.length) return '';
+  return `<span class="rtag">↪ va al bolo ${esc(l.map(x=>x.num).join(', '))}</span>`;
+}
+async function abrirInformePdf(){
+  abrirSheet(`<h3>📄 Informe final en PDF</h3><div class="meta" style="margin-bottom:12px">Evento, horarios del servicio, material instalado, extras firmados en el lugar y fotos del montaje. Sin precios.</div>
+    <label class="fld"><span>Correo del cliente</span><input id="ipMail" type="email" placeholder="Buscando…" autocomplete="off"></label>
+    <div class="row2"><button class="btn sec2" id="ipCrear" onclick="informePdf(false)">Solo crear PDF</button><button class="btn" id="ipEnv" onclick="informePdf(true)">Enviar al cliente</button></div>
+    ${ficha().informePdf?`<a class="link" href="${esc(ficha().informePdf.url)}" target="_blank" rel="noopener">Ver el último PDF (${esc(ficha().informePdf.h)})</a>`:''}`);
+  try{ const e = await call('ckEmailCliente', S.num); const i = $('#ipMail'); if(i){ i.value = e || ''; i.placeholder = 'correo@cliente.com'; } }catch(e){ const i = $('#ipMail'); if(i) i.placeholder = 'correo@cliente.com'; }
+}
+async function informePdf(enviar){
+  const mail = (($('#ipMail')||{}).value||'').trim();
+  if(enviar && !/^\S+@\S+\.\S+$/.test(mail)){ toast('Escribe el correo del cliente'); return; }
+  if(enviar && !confirm('¿Enviar el informe a '+mail+'? Te llega copia oculta.')) return;
+  ['ipCrear','ipEnv'].forEach(id=>{ const b=$('#'+id); if(b) b.disabled = true; }); const b = $(enviar?'#ipEnv':'#ipCrear'); if(b) b.textContent = 'Preparando PDF…';
+  try{
+    const r = await call('ckInformePdf', S.num, mail, !!enviar);
+    if(S.bolo){ S.bolo.ficha.informePdf = { url: r.url, h: hora(), email: r.enviado ? r.email : '' }; guardarBoloCache(); }
+    abrirSheet(`<h3>${ic('check')} ${r.enviado ? 'Informe enviado' : 'PDF creado'}</h3><div class="meta" style="margin-bottom:12px">${r.enviado ? 'Enviado a '+esc(r.email)+' (con copia para ti).' : 'Guardado en tu Drive.'}</div><a class="btn" href="${esc(r.url)}" target="_blank" rel="noopener">Abrir el PDF</a><button class="link" onclick="cerrarSheet()">Cerrar</button>`);
+  }catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); abrirInformePdf(); }
+}
+/* ---------- FICHAJE AUTOMÁTICO: si estás en el almacén o en el lugar, la app te pregunta ---------- */
+function distM(a, b){ const R = 6371000, t = x => x*Math.PI/180, dLa = t(b.lat-a.lat), dLo = t(b.lon-a.lon); const h = Math.sin(dLa/2)**2 + Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function hoyISO(){ const d = new Date(), z = n => String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function esHoy(txt, ts){ const d = new Date(); if(ts){ const x = new Date(ts); if(x.toDateString() === d.toDateString()) return true; } const m = String(txt||'').match(/(\d{1,2})\/(\d{1,2})/); return !!m && +m[1]===d.getDate() && +m[2]===d.getMonth()+1; }
+async function vigilarFichaje(){
+  try{
+    if(document.hidden || !S.yo || $('#sheet').classList.contains('open') || !navigator.geolocation) return;
+    if(navigator.permissions){ const st = await navigator.permissions.query({ name:'geolocation' }).catch(()=>null); if(st && st.state !== 'granted') return; }
+    const yo = yoNombre(), mios = (S.presus||[]).filter(p => !p.cerrado && (esAdmin() || (p.tecnicos||[]).includes(yo)));
+    const cand = [];
+    mios.forEach(p => { if(esHoy(p.montaje, p.ts)) cand.push([p,'montaje']); if(p.desmontaje && esHoy(p.desmontaje)) cand.push([p,'desmontaje']); });
+    if(!cand.length) return;
+    const g = await ubicacion(); if(!g) return;
+    const al = cfg().almacenGeo;
+    for(const [p, fase] of cand){
+      const clave = 'ck_af_'+p.num+'_'+fase+'_'+hoyISO();
+      try{ if(localStorage.getItem(clave)) continue; }catch(e){}
+      let donde = '';
+      if(fase==='montaje' && al && distM(g, al) < 250) donde = 'en el almacén';
+      if(!donde && p.lugar){ const d = await geocodificar(p.lugar); if(d && distM(g, d) < 350) donde = 'en '+destino(p.lugar).split(',')[0]; }
+      if(!donde) continue;
+      const fc = (cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {}, l = ((fc.fichajes||{})[yo]) || [], ab = l.length && !l[l.length-1].s;
+      if(ab) continue;
+      try{ localStorage.setItem(clave, '1'); }catch(e){}
+      abrirSheet(`<h3>${ic('clock')} ¿Fichas la entrada?</h3><div class="meta" style="margin-bottom:12px">Estás ${esc(donde)}. Hoy tienes el ${fase} de <b>${esc(p.evento||p.num)}</b>.</div>
+        <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Ahora no</button><button class="btn okb" onclick="cerrarSheet();ficharDesdeAviso('${esc(p.num)}','${fase}')">Fichar entrada</button></div>`);
+      vib([40,30,40]);
+      return;
+    }
+  }catch(e){}
+}
+async function ficharDesdeAviso(num, fase){
+  if(S.num !== num || S.vista !== 'det'){ await abrir(num); let n = 0; while(!S.bolo && n++ < 30) await new Promise(r=>setTimeout(r,300)); }
+  if(!S.bolo){ toast('No se pudo abrir el bolo'); return; }
+  if(fichaAbierta()){ toast('Ya estabas fichado'); return; }
+  S.modo = fase==='desmontaje' ? 'desm' : 'carga'; render();
+  fichar('entro', fase);
+}
+setInterval(vigilarFichaje, 120000); setTimeout(vigilarFichaje, 15000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) setTimeout(vigilarFichaje, 3000); });
+
 /* ---------- ALMACÉN: dirección guardada y botones de mapa ---------- */
 function tarjetaAlmacen(){
   const c = cfg(), a = c.almacen || '';
@@ -1660,12 +1746,20 @@ async function vaciarCola(){
     if(!COLA.length){ if(S.offline) toast('Conexión recuperada: todo guardado'); S.offline = false; }
   } finally { vaciando = false; pintarRed(); }
 }
+const NOMBRE_ACCION = { ckMarcar:'Marcar material', ckMarcarTodo:'Marcar todo', ckIncidencia:'Incidencia', ckGuardarFicha:'Ficha del bolo', ckHito:'Hora (llegada / fin)', ckSalida:'Correo de salida', ckVuelta:'Resumen de vuelta', ckFirma:'Firma del albarán', ckFirmaRecogida:'Firma de recogida', ckFoto:'Foto', ckGasto:'Gasto', ckExtra:'Material extra', ckFase:'Descarga / recogida en el lugar', ckFaseTodo:'Marcar todo (lugar)', ckCuenta:'Unidades contadas', ckUrgente:'🚨 Aviso urgente', ckExtraCliente:'Extra del cliente', ckGuardarLugar:'Ficha del lugar', ckValoracionInterna:'Valoración', ckNota:'Nota', ckConfirmar:'Confirmación', ckCheck:'Checklist' };
+function verCola(){
+  if(!COLA.length){ vaciarCola(); return; }
+  abrirSheet(`<h3>📶 Pendiente de enviar</h3><div class="meta" style="margin-bottom:10px">Está guardado en el móvil y se envía solo en cuanto haya cobertura. No cierres sesión.</div>
+    ${COLA.map((t,i)=>`<div class="grow"><div style="flex:1;min-width:0"><b>${esc(NOMBRE_ACCION[t.fn]||t.fn)}</b><div class="meta">${esc((t.args||[]).filter(a=>typeof a==='string'||typeof a==='number').slice(0,3).join(' · ').slice(0,90))}</div></div><button class="more" onclick="quitarCola(${i})" aria-label="Descartar">${ic('x','s')}</button></div>`).join('')}
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cerrar</button><button class="btn" onclick="cerrarSheet();vaciarCola().then(()=>toast(COLA.length?'Sigue sin cobertura':'Todo enviado'))">Reintentar ahora</button></div>`);
+}
+function quitarCola(i){ if(!confirm('¿Descartar este cambio? No se enviará.')) return; COLA.splice(i,1); guardarCola(); pintarRed(); verCola(); }
 function pintarRed(){
   let b = $('#redbar');
   const txt = COLA.length ? `Sin conexión · ${COLA.length} cambio${COLA.length>1?'s':''} pendiente${COLA.length>1?'s':''} de enviar` : (S.offline ? 'Sin conexión · mostrando los últimos datos guardados' : '');
   if(!txt){ if(b) b.remove(); return; }
-  if(!b){ b = document.createElement('div'); b.id='redbar'; b.className='redbar'; b.onclick = vaciarCola; document.body.appendChild(b); }
-  b.textContent = txt;
+  if(!b){ b = document.createElement('div'); b.id='redbar'; b.className='redbar'; b.onclick = verCola; document.body.appendChild(b); }
+  b.textContent = txt + (COLA.length ? ' · ver' : '');
 }
 window.addEventListener('online', ()=>{ S.offline=false; vaciarCola(); });
 setInterval(()=>{ if(COLA.length) vaciarCola(); }, 20000);
@@ -2079,6 +2173,7 @@ function abrirMas(){
     ${esAdmin()? it('clip','Copiar de otro bolo','abrirCopiar()','Material y equipo de un bolo anterior'):''}
     ${esAdmin()? it('qr','Hoja de QR del bolo','cerrarSheet();verQrBolo()','Para imprimir y llevar en la carga'):''}
     ${esAdmin()? it('book','Enviar informe al cliente','enviarInforme()','Fotos del montaje, horarios y equipo'):''}
+    ${esAdmin()? it('receipt','Informe final en PDF','cerrarSheet();abrirInformePdf()','Horarios, material, extras firmados y fotos'):''}
     ${!esAdmin() ? '' : `${it('plus','Añadir material','abrirExtra()','Escaneando el QR o desde el inventario')}
     ${it('info','Ficha del bolo','cerrarSheet();abrirFicha()','Contacto, horarios, acceso y técnicos')}
     ${it('link','Enlace para el cliente','enlaceCliente()','Ve el estado de su evento y descarga el albarán')}
@@ -3037,13 +3132,28 @@ function misFichajes(fase){ const l = ((ficha().fichajes)||{})[yoNombre()] || []
 function fichaAbierta(){ const l = misFichajes(); return l.length && !l[l.length-1].s ? l[l.length-1] : null; }
 function faseFichaje(){ const a = fichaAbierta(); if(a) return a.f||'montaje'; return S.modo==='desm' || S.modo==='cargaSitio' || ficha().finMontaje ? 'desmontaje' : 'montaje'; }
 function durTxt(ms){ const m = Math.max(0, Math.round(ms/60000)); return m < 60 ? m+' min' : Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min'; }
-function tarjetaFichaje(oscuro, fase){
+function tarjetaFichaje(oscuro, fase, rol){
   if(!S.bolo) return '';
   fase = fase || faseFichaje();
+  if(rol){
+    const a = fichaAbierta(), F = fase==='desmontaje' ? 'desmontaje' : 'montaje';
+    if(rol==='entrada' && a){
+      const af = a.f||'montaje';
+      return `<div class="furg fich dentro"><div class="ft"><span class="pulso"></span><div><b>Fichado desde las ${esc(String(a.e).slice(-5))}</b><div class="meta">${af!==F ? 'Sigues dentro desde el '+af+' (te quedaste en el evento): no hace falta volver a fichar' : 'La salida se ficha al final del '+(F==='montaje'?'montaje':'desmontaje, en el almacén')}</div></div></div></div>`;
+    }
+    if(rol==='salida' && !a){
+      if(F==='desmontaje') return '';
+      return `<div class="furg fich"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>¿Vas directo al lugar?</b><div class="meta">Si no has pasado por el almacén, ficha aquí la entrada</div></div></div><button class="btn entro" onclick="fichar('entro','montaje')">Entrada</button></div>`;
+    }
+    if(rol==='salida' && a){
+      const af = a.f||'montaje';
+      return `<div class="furg fich dentro"><div class="ft"><span class="pulso"></span><div><b>Dentro desde las ${esc(String(a.e).slice(-5))}</b><div class="meta" id="fichT" data-em="${a.em}">${F==='montaje' ? 'Opcional: si te quedas de técnico en el evento, no fiches la salida' : 'Al dejar el material en el almacén, ficha la salida'} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo','${af}')">Salida</button></div>`;
+    }
+  }
   const a = fichaAbierta(), l = misFichajes(fase), tot = l.reduce((s,x)=>s+(x.h||0),0), F = fase==='desmontaje' ? 'desmontaje' : 'montaje';
   const cls = oscuro ? 'fich osc' : 'furg fich';
   if(a){ const af = a.f||'montaje'; return `<div class="${cls} dentro"><div class="ft"><span class="pulso"></span><div><b>Dentro del ${af}</b><div class="meta" id="fichT" data-em="${a.em}">Desde ${esc(String(a.e).slice(-5))}${a.ge?' · 📍':''} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo','${af}')">Salida ${af}</button></div>`; }
-  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje de ${F}</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h de ${F} en este bolo` : (S.modo==='carga' ? 'Ficha al llegar al almacén: desde aquí cuentan tus horas' : 'Pulsa al empezar y al terminar: se guardan las horas y la ubicación')}</div></div></div><button class="btn entro" onclick="fichar('entro','${F}')">Entrada ${F}</button></div>`;
+  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje de ${F}</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h de ${F} en este bolo` : (S.modo==='carga' ? 'Ficha al llegar al almacén: desde aquí cuentan tus horas' : S.modo==='desm' ? 'Ficha al empezar el desmontaje; la salida, al dejar el material en el almacén' : 'Pulsa al empezar y al terminar: se guardan las horas y la ubicación')}</div></div></div><button class="btn entro" onclick="fichar('entro','${F}')">Entrada</button></div>`;
 }
 setInterval(()=>{ const e = $('#fichT'); if(e) e.textContent = e.textContent.replace(/·.*$/, '· ' + durTxt(Date.now() - +e.dataset.em)); }, 30000);
 async function fichar(tipo, fase){
@@ -3524,6 +3634,9 @@ setInterval(() => {
   else if(S.vista==='det' && S.num){ const p0 = S.num; call('ckPresupuestos').then(l => { S.presus = l; }).catch(()=>{}); abrir(p0, 'auto'); }
 }, 30000);
 if('serviceWorker' in navigator){
+  const avisoVersion = () => { if($('#nuevaVer')) return; const d = document.createElement('button'); d.id='nuevaVer'; d.className='redbar'; d.style.background='#1f6f4a'; d.textContent='✨ Hay una versión nueva de la app · toca para actualizar'; d.onclick=()=>location.reload(); document.body.appendChild(d); };
+  navigator.serviceWorker.addEventListener('message', e => { if(e.data && e.data.tipo==='nueva-version') avisoVersion(); });
+  let yaControlado = !!navigator.serviceWorker.controller; navigator.serviceWorker.addEventListener('controllerchange', () => { if(yaControlado) avisoVersion(); yaControlado = true; });
   navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg => { reg.update().catch(()=>{}); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{});
   let recargado = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if(recargado || COLA.length) return; recargado = true; location.reload(); });
 }
