@@ -143,6 +143,8 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 /* Pasos */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .steps .ln{display:none}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.hgrid label{display:flex;flex-direction:column;gap:4px}.hgrid small{font-size:12px;color:var(--mut,#7a8699);font-weight:600}.hgrid input{width:100%;min-height:44px;font-size:17px;text-align:center}
+.plst{display:flex;flex-direction:column;gap:8px;margin-top:6px}.plrow{display:flex;gap:12px;align-items:flex-start}.plrow b{font-size:20px;min-width:62px;font-variant-numeric:tabular-nums}.plrow span{display:flex;flex-direction:column;font-weight:600}.plrow small{font-weight:500;opacity:.7;font-size:12.5px}
 .steps.many .step{font-size:10.5px;letter-spacing:-.01em}.steps.many .step .t{white-space:nowrap;overflow:hidden}
 .ida{display:grid;grid-template-columns:4fr 3fr;gap:6px;margin-top:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8ea0bb;font-weight:700}.ida span+span{border-left:1px solid rgba(255,255,255,.18);padding-left:6px}
 .step{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:0;color:#8ea0bb;font-weight:650;font-size:12.5px;text-align:left}
@@ -732,6 +734,8 @@ function vistaDet(){
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${segMio(k)}
     ${tarjetaConfirmar()}
+    ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
+    ${S.modo==='dev' ? tarjetaAlmacen() : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
     ${tarjetaQuien()}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
@@ -846,7 +850,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaQuien()}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1053,7 +1057,7 @@ function vistaDesmontaje(p, tot){
   const f = ficha();
   const dest = `<div class="dest"><div class="lbl">Desmontaje</div><div class="place">${esc(p.lugar||'Sin lugar')}</div><div class="when">${p.desmontaje ? 'Desmontaje '+esc(p.desmontaje) : 'Sin fecha de desmontaje en la pestaña Bolos'}</div></div>`;
   const rec = !esAdmin() ? '' : f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`;
-  const body = `${dest}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('cargaSitio')">Siguiente: recoger y cargar ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1115,14 +1119,102 @@ function abrirFicha(){
   const campo = (id, t, ph, tipo) => `<label class="fld"><span>${t}</span><input id="b_${id}" type="${tipo||'text'}" value="${esc(f[id])}" placeholder="${ph}" autocomplete="off"></label>`;
   abrirSheet(`<h3>ℹ Ficha del bolo</h3><div class="meta" style="margin-bottom:12px">${esc(S.bolo.cliente||'')}</div>
     <div class="row2">${campo('contacto','Contacto en el lugar','Nombre')}${campo('telefono','Teléfono','600 000 000','tel')}</div>
-    ${campo('horario','Horarios','Ej. Carga 9:00 · Prueba 17:00 · Evento 20:30')}
+    ${selectorHoras(f)}
     <label class="fld"><span>Acceso</span><textarea id="b_acceso" rows="2" placeholder="Ej. Entrada por la calle de atrás, montacargas hasta las 18h">${esc(f.acceso)}</textarea></label>
     <label class="fld"><span>Notas</span><textarea id="b_notas" rows="2">${esc(f.notas)}</textarea></label>
     <div class="fld"><span>Técnicos que van</span><div class="chips" style="margin:6px 0 0">${eq.length? eq.map(t=>`<button class="chip tec ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}</button>`).join('') : '<span class="meta">Añade personas en la pestaña Equipo.</span>'}</div></div>
     <div class="row2" style="margin-top:14px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarFichaUI()">Guardar</button></div>`);
 }
+/* ---------- HORARIOS con selector (rueda) y PLAN DEL DÍA ---------- */
+const HORAS_ETQ = [['carga','Carga en almacén'],['montaje','Montaje en el lugar'],['evento','Evento'],['desmontaje','Desmontaje']];
+function horasFicha(f){
+  const o = { otros: [] };
+  String((f||{}).horario||'').split(/\s*[·|;\n]\s*/).filter(Boolean).forEach(x => {
+    const m = x.match(/(\d{1,2})[:.h](\d{2})/), et = x.replace(/(\d{1,2})[:.h](\d{2})/, '').trim().toLowerCase();
+    const k = /^desmont/.test(et) ? 'desmontaje' : /^(montaje|llegada|monta)/.test(et) ? 'montaje' : /^carga/.test(et) ? 'carga' : /^(evento|inicio)/.test(et) ? 'evento' : '';
+    if(m && k && o[k] == null) o[k] = (+m[1])*60 + (+m[2]); else o.otros.push(x);
+  });
+  return o;
+}
+const hhmm = v => v == null ? '' : String(Math.floor(((v%1440)+1440)%1440/60)).padStart(2,'0') + ':' + String(((v%1440)+1440)%1440%60).padStart(2,'0');
+function selectorHoras(f){
+  const H = horasFicha(f);
+  return `<div class="fld"><span>Horarios</span><div class="hgrid">${HORAS_ETQ.map(([k,t])=>`<label><small>${t}</small><input type="time" id="hr_${k}" value="${hhmm(H[k])}" step="300"></label>`).join('')}</div></div>
+    <label class="fld"><span>Otros horarios (opcional)</span><input id="hr_otros" value="${esc(H.otros.join(' · '))}" placeholder="Ej. Prueba de sonido 17:00" autocomplete="off"></label>`;
+}
+function horarioDeSelector(){
+  const l = HORAS_ETQ.map(([k]) => { const v = ($('#hr_'+k)||{}).value; return v ? ({ carga:'Carga', montaje:'Montaje', evento:'Evento', desmontaje:'Desmontaje' })[k] + ' ' + v : ''; }).filter(Boolean);
+  const o = (($('#hr_otros')||{}).value||'').trim(); if(o) l.push(o);
+  return l.join(' · ');
+}
+const PLAN = {};
+function margenTrafico(min, salida){
+  const h = Math.floor((((salida%1440)+1440)%1440)/60), punta = (h>=7 && h<10) || (h>=17 && h<20);
+  return Math.max(10, Math.round(min * (punta ? 0.4 : 0.2) / 5) * 5);
+}
+function tarjetaPlan(tipo){
+  if(!S.bolo) return '';
+  setTimeout(() => pintarPlan(tipo), 0);
+  return `<div class="furg plan" id="plan_${tipo}"><div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b></div><div class="meta">Calculando horas…</div></div>`;
+}
+async function pintarPlan(tipo){
+  const el = $('#plan_'+tipo); if(!el) return;
+  const p = S.presus.find(x=>x.num===S.num) || {}, f = ficha(), H = horasFicha(f), al = cfg().almacenGeo, n = (S.items||[]).length;
+  const clave = [S.num, tipo, f.horario, cfg().almacen, p.lugar, n].join('|');
+  if(PLAN[clave]){ el.innerHTML = PLAN[clave]; return; }
+  const cab = `<div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b>${esAdmin()?'<button class="edit" onclick="abrirFicha()">Horas</button>':''}</div>`;
+  const llegada = tipo==='desmontaje' ? H.desmontaje : H.montaje;
+  if(llegada == null){ el.innerHTML = cab + `<div class="meta">${esAdmin() ? 'Pon la hora de '+tipo+' en la ficha del bolo (botón «Horas») y calculo a qué hora salir.' : 'Aún no hay hora de '+tipo+' en la ficha del bolo.'}</div>`; return; }
+  if(!al){ el.innerHTML = cab + `<div class="meta">${tipo==='desmontaje'?'Desmontaje':'Montaje'} a las <b>${hhmm(llegada)}</b>.${esAdmin()?' Guarda la dirección del almacén (paso Almacén) para calcular la salida.':''}</div>`; return; }
+  const dest = await geocodificar(p.lugar), min = dest ? await minutosRuta(al, dest) : null;
+  if(!$('#plan_'+tipo)) return;
+  if(min == null){ el.innerHTML = cab + `<div class="meta">${tipo==='desmontaje'?'Desmontaje':'Montaje'} a las <b>${hhmm(llegada)}</b>. No he podido calcular el trayecto hasta ${esc(destino(p.lugar)||'el lugar')}.</div>`; return; }
+  let marg = margenTrafico(min, llegada - min); marg = margenTrafico(min, llegada - min - marg);
+  const salida = llegada - min - marg;
+  const filas = [];
+  if(tipo==='montaje'){
+    const dur = Math.max(20, Math.round((10 + 2*n)/5)*5);
+    const ini = H.carga != null && H.carga < salida ? H.carga : salida - dur;
+    filas.push(['Estar en el almacén', ini, H.carga != null && H.carga < salida ? 'hora de carga de la ficha' : `unos ${dur} min para cargar ${n} artículos`]);
+  }
+  filas.push([tipo==='desmontaje' ? 'Salir del almacén hacia el lugar' : 'Salir hacia el lugar', salida, `${min} min de trayecto + ${marg} de margen por tráfico`]);
+  filas.push([tipo==='desmontaje' ? 'Llegada para desmontar' : 'Llegada y montaje', llegada, esc(destino(p.lugar)||'')]);
+  if(tipo==='montaje' && H.evento != null) filas.push(['Empieza el evento', H.evento, '']);
+  if(tipo==='desmontaje') filas.push(['Vuelta al almacén (aprox.)', null, `${min} min de trayecto + lo que dure el desmontaje`]);
+  const html = cab + `<div class="plst">${filas.map(([t,h,sub])=>`<div class="plrow"><b>${h==null?'—':hhmm(h)}</b><span>${t}${sub?`<small>${sub}</small>`:''}</span></div>`).join('')}</div>
+    <button class="link" style="padding:8px 0 0;text-align:left" onclick="desdeAqui(${tipo==='montaje' ? (H.carga != null && H.carga < salida ? H.carga : salida - Math.max(20, Math.round((10 + 2*n)/5)*5)) : salida}, this)">${ic('nav','s')} ¿A qué hora salgo de donde estoy hacia el almacén?</button>
+    <div class="meta" style="font-size:12px">El margen por tráfico es una estimación según la franja horaria (más en hora punta).</div>`;
+  PLAN[clave] = html; el.innerHTML = html;
+}
+async function desdeAqui(horaAlmacen, btn){
+  const al = cfg().almacenGeo; if(!al){ toast('Falta la dirección del almacén'); return; }
+  btn.textContent = 'Buscando tu ubicación…';
+  const g = await ubicacion(); if(!g){ btn.textContent = 'No puedo ver tu ubicación: activa la localización'; return; }
+  const min = await minutosRuta(g, al); if(min == null){ btn.textContent = 'No he podido calcular el trayecto'; return; }
+  const marg = margenTrafico(min, horaAlmacen - min), s = horaAlmacen - min - marg;
+  btn.outerHTML = `<div class="plrow" style="margin-top:8px"><b>${hhmm(s)}</b><span>Sal de donde estás hacia el almacén<small>${min} min + ${marg} de margen · para estar allí a las ${hhmm(horaAlmacen)}</small></span></div>`;
+}
+/* ---------- ALMACÉN: dirección guardada y botones de mapa ---------- */
+function tarjetaAlmacen(){
+  const c = cfg(), a = c.almacen || '';
+  if(!a) return esAdmin() ? `<div class="furg"><div class="top"><b>${ic('home','s')} Dirección del almacén</b></div><div class="meta" style="margin-bottom:8px">Guárdala una vez y saldrá siempre aquí, con la ruta y el cálculo de horas.</div><input id="almIn" class="msearch" style="width:100%" placeholder="Calle, número y población" autocomplete="off"><button class="btn" style="margin-top:10px;width:100%" onclick="guardarAlmacen()">Guardar dirección</button></div>` : '';
+  const q = encodeURIComponent(a);
+  return `<div class="dest"><div class="lbl">Almacén</div><div class="place">${esc(a)}</div>${esAdmin()?`<button class="link" style="padding:4px 0 0;text-align:left" onclick="abrirAjustes()">Cambiar dirección</button>`:''}</div>
+    <div class="maps"><a class="mapbtn main" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Ir al almacén<span class="go">${ic('chev','s')}</span></a>
+    <a class="mapbtn" href="https://www.google.com/maps/dir/?api=1&destination=${q}&travelmode=driving" target="_blank" rel="noopener"><span class="ic">${ic('pin')}</span>Google<span class="go">›</span></a>
+    <a class="mapbtn" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a></div>`;
+}
+async function guardarAlmacen(){
+  const a = (($('#almIn')||{}).value||'').trim(); if(!a){ toast('Escribe la dirección'); return; }
+  toast('Buscando la dirección…');
+  const g = await geocodificar(a);
+  if(!g){ toast('No encuentro esa dirección: prueba con calle, número y población'); return; }
+  try{ const c = await call('ckGuardarExtras', { almacen: a, almacenGeo: g, fotoObligatoria: !!cfg().fotoObligatoria }); S.yo.config = c; cacheSet('ckYo[]', S.yo); toast('Dirección del almacén guardada'); render(); }
+  catch(e){ toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+}
 async function guardarFichaUI(){
-  const patch = {}; ['contacto','telefono','horario','acceso','notas'].forEach(c=> patch[c] = ($('#b_'+c).value||'').trim());
+  const patch = {}; ['contacto','telefono','acceso','notas'].forEach(c=> patch[c] = ($('#b_'+c).value||'').trim());
+  patch.horario = horarioDeSelector();
   patch.tecnicos = [...document.querySelectorAll('.chip.tec.on')].map(b=>b.dataset.n);
   const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render();
   guardarBoloCache();
@@ -2782,7 +2874,7 @@ async function pintarWidget(p){
   if(al){
     const min = await minutosRuta(al, c.g);
     let f = S.bolo && S.num===p.num ? ficha() : ((cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {});
-    const h = horaDe(f.horario);
+    const HF = horasFicha(f), h = HF.montaje != null ? HF.montaje : horaDe(f.horario);
     if(min != null){
       const margen = Math.round(min*0.25) + 15;
       salida = h != null ? (()=>{ const s = h - min - margen, hh = ((s%1440)+1440)%1440; return `<div class="wsal">${ic('truck','s')} Sal del almacén a las <b>${String(Math.floor(hh/60)).padStart(2,'0')}:${String(hh%60).padStart(2,'0')}</b><small>${min} min de trayecto + ${margen} de margen por tráfico</small></div>`; })()
