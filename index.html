@@ -1188,7 +1188,8 @@ function tarjetaPlan(tipo){
 async function pintarPlan(tipo){
   const el = $('#plan_'+tipo); if(!el) return;
   const p = S.presus.find(x=>x.num===S.num) || {}, f = ficha(), H = horasFicha(f), al = cfg().almacenGeo, n = (S.items||[]).length;
-  const clave = [S.num, tipo, f.horario, cfg().almacen, p.lugar, f.direccion, n].join('|');
+  await cargarLugar(p); if(!$('#plan_'+tipo)) return;
+  const clave = [S.num, tipo, f.horario, cfg().almacen, p.lugar, dirBolo(p), n].join('|');
   if(PLAN[clave]){ el.innerHTML = PLAN[clave]; return; }
   const cab = `<div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b>${esAdmin()?'<button class="edit" onclick="abrirFicha()">Horas</button>':''}</div>`;
   const llegada = tipo==='desmontaje' ? H.desmontaje : H.montaje;
@@ -1261,7 +1262,7 @@ function tarjetaFaltan(){
    RONDA 6: lugar, urgente, extras del cliente, faltas, valoración, resumen por técnico
    ========================================================= */
 /* ---------- FICHA TÉCNICA DEL LUGAR ---------- */
-const LUGAR_CAMPOS = [['acceso','Acceso','Por dónde se entra, montacargas, escaleras…'],['carga','Carga y descarga','Dónde aparcar la furgoneta, distancia, carro…'],['electricidad','Electricidad','Enchufes, potencia, cuadro, alargos necesarios'],['muelle','Horario del muelle','Ej. 8:00–14:00'],['contacto','Contacto del lugar','Nombre'],['telefono','Teléfono del lugar','600 000 000'],['notas','Notas','Lo que conviene saber la próxima vez']];
+const LUGAR_CAMPOS = [['direccion','Dirección exacta (GPS)','Calle, número y población: para el mapa y la hora de salida'],['acceso','Acceso','Por dónde se entra, montacargas, escaleras…'],['carga','Carga y descarga','Dónde aparcar la furgoneta, distancia, carro…'],['electricidad','Electricidad','Enchufes, potencia, cuadro, alargos necesarios'],['muelle','Horario del muelle','Ej. 8:00–14:00'],['contacto','Contacto del lugar','Nombre'],['telefono','Teléfono del lugar','600 000 000'],['notas','Notas','Lo que conviene saber la próxima vez']];
 S.lugares = {};
 function tarjetaLugar(p){
   p = p || S.presus.find(x=>x.num===S.num) || {};
@@ -1282,7 +1283,7 @@ function abrirLugar(){
 async function guardarLugar(){
   const p = S.presus.find(x=>x.num===S.num) || {}, datos = {};
   LUGAR_CAMPOS.forEach(([k]) => datos[k] = ($('#lg_'+k).value||'').trim());
-  const prev = S.lugares[p.lugar]; S.lugares[p.lugar] = Object.assign({ act: hora(), por: yoNombre() }, datos); cerrarSheet(); render();
+  const prev = S.lugares[p.lugar]; S.lugares[p.lugar] = Object.assign({ act: hora(), por: yoNombre() }, datos); if(datos.direccion !== String((prev||{}).direccion||'')) S.presus.forEach(x=>{ if(x.lugar===p.lugar) delete CLIMA[x.num]; }); cerrarSheet(); render();
   try{ const r = await enviar('ckGuardarLugar', p.lugar, datos); if(r){ S.lugares[p.lugar] = r; render(); } toast('Ficha del lugar guardada en el Drive'); }
   catch(e){ S.lugares[p.lugar] = prev; render(); toast('No se guardó: '+e.message); }
 }
@@ -3357,11 +3358,13 @@ function geocodificar(lugar){
 const WMO = { 0:['☀️','Despejado'],1:['🌤️','Casi despejado'],2:['⛅','Nubes y claros'],3:['☁️','Nublado'],45:['🌫️','Niebla'],48:['🌫️','Niebla'],51:['🌦️','Llovizna'],53:['🌦️','Llovizna'],55:['🌧️','Llovizna fuerte'],61:['🌧️','Lluvia débil'],63:['🌧️','Lluvia'],65:['🌧️','Lluvia fuerte'],71:['🌨️','Nieve'],73:['🌨️','Nieve'],75:['❄️','Nevada'],80:['🌦️','Chubascos'],81:['🌧️','Chubascos'],82:['⛈️','Chubascos fuertes'],95:['⛈️','Tormenta'],96:['⛈️','Tormenta con granizo'],99:['⛈️','Tormenta con granizo'] };
 const CLIMA = {};
 const MAX_RUTA = 180; // más de 3 h de trayecto: seguramente la dirección no se ha encontrado bien
-function dirBolo(p){ const f = p.num===S.num && S.bolo ? ficha() : ((cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {}); return String(f.direccion||'').trim(); }
+function dirBolo(p){ const f = p.num===S.num && S.bolo ? ficha() : ((cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {}); return String(f.direccion||'').trim() || String((((S.lugares||{})[p.lugar])||{}).direccion||'').trim(); }
+async function cargarLugar(p){ if(!p || !p.lugar || !S.lugares || S.lugares[p.lugar] !== undefined) return; try{ const r = await call('ckLugar', p.lugar); S.lugares[p.lugar] = r || null; }catch(e){} }
 function geoBolo(p){ const d = dirBolo(p); return geocodificar(d || p.lugar); }
 function avisoRuta(p, min, g){ return `<div class="aviso" style="margin:8px 0 0;display:block">⚠ No encuentro bien «${esc(dirBolo(p)||destino(p.lugar))}»: me sale ${g&&g.n?'en '+esc(g.n)+', ':''}a ${Math.floor(min/60)} h ${min%60} min del almacén, así que no calculo horas.${esAdmin()?` <button class="link" style="display:block;padding:8px 0 0;text-align:left;width:auto" onclick="abrirDireccion()">Poner la dirección exacta ›</button>`:''}</div>`; }
 async function climaDe(p){
   if(CLIMA[p.num]) return CLIMA[p.num];
+  await cargarLugar(p);
   const g = await geoBolo(p); if(!g) return null;
   const d = new Date(p.ts), z = n=>String(n).padStart(2,'0'), f = d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
   try{
