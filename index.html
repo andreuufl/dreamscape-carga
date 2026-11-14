@@ -567,20 +567,73 @@ const BRAND = `<div class="brand" aria-label="Dreamscape Events & Productions"><
 
 
 const API = 'https://script.google.com/macros/s/AKfycbwEQlNLMpsPbUDbgc3p12dKbyeVm17cIY_-XH3YmIzadhPqSUu12ZoHwxZ4xAfff45-/exec';
-async function call(fn, ...args){
-  S.pend++; dot();
+/* Escrituras en serie: dos cambios del mismo móvil nunca pisan la ficha del bolo a la vez */
+const SERIE = ['ckConfirmar','ckConfirmarPor','ckCheck','ckFichar','ckGuardarFicha','ckHito','ckFase','ckFaseTodo','ckNota','ckSalida','ckVuelta','ckFirma','ckFirmaRecogida','ckGuardarLugar','ckValoracionInterna','ckUrgente','ckExtraCliente','ckIncidencia','ckGasto','ckExtra'];
+const ESCRIBE = SERIE.concat(['ckMarcar','ckMarcarTodo','ckCuenta','ckFoto']);
+let CADENA = Promise.resolve(), VUELO = 0, ESCR_T = 0;
+function enSerie(fn, run){
+  if(!ESCRIBE.includes(fn)) return run();
+  VUELO++; ESCR_T = Date.now();
+  const p = SERIE.includes(fn) ? CADENA.then(run, run) : run();
+  if(SERIE.includes(fn)) CADENA = p.catch(()=>{});
+  return p.finally(()=>{ VUELO--; ESCR_T = Date.now(); });
+}
+/* Marcas propias (voy / material revisado / checklist): se guardan en el móvil hasta que el servidor las confirma */
+let MARCAS = {}; try{ MARCAS = JSON.parse(localStorage.getItem('ck_marcas')||'{}') || {}; }catch(e){}
+function guardarMarcas(){ try{ localStorage.setItem('ck_marcas', JSON.stringify(MARCAS)); }catch(e){} }
+function apuntarMarca(num, clave, dato){ if(!num) return; (MARCAS[num] = MARCAS[num] || {})[clave] = Object.assign({ t: Date.now() }, dato); guardarMarcas(); }
+function marcaOk(num, clave){ const m = (MARCAS[num]||{})[clave]; if(m){ m.ok = Date.now(); guardarMarcas(); } }
+function estadoMarca(f, clave){
+  const [tipo, a, b] = clave.split('|');
+  if(tipo==='conf'){ const c = ((f.conf||{})[a]) || {}; if(b==='leido') return !!c.leido; return c.voy ? !!c.voy.si : null; }
+  if(tipo==='check') return !!((f.checks||{})[a]);
+}
+function ponerMarca(f, clave, m){
+  const [tipo, a, b] = clave.split('|');
+  if(tipo==='conf'){ f.conf = f.conf || {}; const c = f.conf[a] = f.conf[a] || {};
+    if(b==='leido'){ if(m.v) c.leido = m.h || hora(); else delete c.leido; }
+    else { if(m.v===null) delete c.voy; else c.voy = Object.assign({ si: !!m.v, h: m.h || hora(), nota: m.nota || '' }, m.por ? { por: m.por, nota: 'Marcado por '+m.por } : {}); } }
+  if(tipo==='check'){ f.checks = f.checks || {}; if(m.v) f.checks[a] = m.h || hora(); else delete f.checks[a]; }
+}
+function reenviarMarca(num, clave){
+  const m = (MARCAS[num]||{})[clave]; if(!m || Date.now() - (m.env||0) < 30000) return;
+  m.env = Date.now(); delete m.ok; guardarMarcas();
+  const [tipo, a, b] = clave.split('|');
+  const fin = () => marcaOk(num, clave);
+  if(tipo==='conf'){ if(m.por) call('ckConfirmarPor', num, a, m.v).then(fin).catch(()=>{}); else enviar('ckConfirmar', num, b, m.v, m.nota||'').then(r=>{ if(r) fin(); }).catch(()=>{}); }
+  if(tipo==='check') enviar('ckCheck', num, a, m.v).then(r=>{ if(r!==null) fin(); }).catch(()=>{});
+}
+function aplicarMarcas(num, bolo, t0, reenviar){
+  const ms = MARCAS[num]; if(!ms || !bolo) return bolo;
+  const f = bolo.ficha = bolo.ficha || {}; let cambio = false;
+  Object.keys(ms).forEach(k => {
+    const m = ms[k];
+    if(Date.now() - m.t > 5*864e5){ delete ms[k]; cambio = true; return; }
+    if(estadoMarca(f, k) === m.v){ if(m.ok && t0 > m.ok + 1500){ delete ms[k]; cambio = true; } return; }
+    ponerMarca(f, k, m);
+    if(reenviar) setTimeout(()=>reenviarMarca(num, k), 50);
+  });
+  if(!Object.keys(ms).length) delete MARCAS[num];
+  if(cambio) guardarMarcas();
+  return bolo;
+}
+function call(fn, ...args){ return enSerie(fn, () => _call(fn, ...args)); }
+async function _call(fn, ...args){
+  S.pend++; dot(); const t0 = Date.now();
   try{
     const u = API + '?k=' + encodeURIComponent(KEY) + '&a=' + fn + '&p=' + encodeURIComponent(JSON.stringify(args)) + '&t=' + Date.now();
     let j;
     try{ const r = await fetch(u, { credentials: 'omit', cache: 'no-store' }); j = await r.json(); }
-    catch(e){ const ck = LECT.includes(fn) ? cacheGet(fn+JSON.stringify(args)) : undefined; if(ck !== undefined){ S.offline = true; pintarRed(); return ck; } const er = new Error('Sin conexión'); er.red = true; throw er; }
+    catch(e){ const ck = LECT.includes(fn) ? cacheGet(fn+JSON.stringify(args)) : undefined; if(ck !== undefined){ if(fn==='ckBolo') aplicarMarcas(args[0], ck, 0, false); S.offline = true; pintarRed(); return ck; } const er = new Error('Sin conexión'); er.red = true; throw er; }
     if(!j.ok) throw new Error(j.e || 'Error');
+    if(fn==='ckBolo') aplicarMarcas(args[0], j.r, t0, true);
     if(LECT.includes(fn)) cacheSet(fn+JSON.stringify(args), j.r);
     if(S.offline){ S.offline = false; pintarRed(); }
     return j.r;
   }finally{ S.pend--; dot(); }
 }
-async function callPost(fn, ...args){
+function callPost(fn, ...args){ return enSerie(fn, () => _callPost(fn, ...args)); }
+async function _callPost(fn, ...args){
   S.pend++; dot();
   try{
     let j;
@@ -695,11 +748,14 @@ async function abrir(num, refresco){
   cargarCatalogo();
   if(!auto){ S.actualizando = true; if(S.items.length) render(); }
   call('ckMismoDia', num).then(l=>{ (S.mismo = S.mismo || {})[num] = l || []; if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{});
+  const tPet = Date.now();
   const [rm, rb, rg] = await Promise.allSettled([call('ckMaterial', num), call('ckBolo', num), call('ckGastos', num)]);
   S.actualizando = false;
+  const viejo = VUELO > 0 || ESCR_T > tPet; // mientras viajaba la petición se marcó algo: no pisar lo marcado con datos de antes
+  if(viejo && S.num===num){ clearTimeout(abrir.re); abrir.re = setTimeout(()=>{ if(S.vista==='det' && S.num===num && !VUELO) abrir(num, 'auto'); }, 4000); }
   if(rg.status==='fulfilled') S.gastos = rg.value || [];
-  if(rm.status==='fulfilled'){ if(!COLA.length){ S.items=rm.value.items; S.opciones=rm.value.opciones; } actualizarResumen(); if(!auto) cargarFotosMat(); } else if(!S.items.length) toast('Error: '+rm.reason.message);
-  if(rb.status==='fulfilled'){
+  if(rm.status==='fulfilled'){ if(!COLA.length && !(viejo && S.items.length)){ S.items=rm.value.items; S.opciones=rm.value.opciones; } actualizarResumen(); if(!auto) cargarFotosMat(); } else if(!S.items.length) toast('Error: '+rm.reason.message);
+  if(rb.status==='fulfilled' && !(viejo && S.bolo)){
     S.bolo = rb.value; S.furgos = rb.value.furgonetas || [];
     const f = S.bolo.ficha||{};
     if(nuevo && !S.tocado && S.num===num) S.modo = modoInicial(p);
@@ -904,9 +960,10 @@ async function confirmarPor(n, valor){
   const f = S.bolo.ficha, prev = JSON.stringify(f.conf||{});
   f.conf = f.conf || {}; const c = f.conf[n] = f.conf[n] || {};
   if(valor===null) delete c.voy; else c.voy = { si: !!valor, h: hora(), nota: 'Marcado por '+yoNombre(), por: yoNombre() };
+  const num = S.num, clave = 'conf|'+n+'|voy'; apuntarMarca(num, clave, { v: valor===null ? null : !!valor, h: hora(), por: yoNombre() });
   cerrarSheet(); vib(20); guardarBoloCache(); render();
-  try{ const r = await call('ckConfirmarPor', S.num, n, valor); if(r){ f.conf = r; guardarBoloCache(); render(); } toast(valor===null ? 'Confirmación quitada' : valor ? n+' va: guardado' : n+' no va: guardado'); }
-  catch(e){ f.conf = JSON.parse(prev); render(); toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
+  try{ const r = await call('ckConfirmarPor', num, n, valor); if(r){ const fb = (S.num===num && S.bolo) ? S.bolo.ficha : f; fb.conf = r; aplicarMarcas(num, { ficha: fb }, 0, false); marcaOk(num, clave); guardarBoloCache(); render(); } toast(valor===null ? 'Confirmación quitada' : valor ? n+' va: guardado' : n+' no va: guardado'); }
+  catch(e){ if(MARCAS[num]){ delete MARCAS[num][clave]; guardarMarcas(); } f.conf = JSON.parse(prev); render(); toast(e.red ? 'Necesitas conexión' : 'Error: '+e.message); }
 }
 function miConf(){ const u = ((S.yo||{}).usuario||{}).nombre || ''; return ((ficha().conf)||{})[u] || {}; }
 function tarjetaConfirmar(){
@@ -933,10 +990,12 @@ async function confirmar(tipo, valor, nota){
   const prev = JSON.stringify(f.conf); const yo = f.conf[u] = f.conf[u] || {};
   if(tipo==='voy'){ if(valor===null) delete yo.voy; else yo.voy = { si: !!valor, h: hora(), nota: nota||'' }; }
   else { if(valor) yo.leido = hora(); else delete yo.leido; }
+  const num = S.num, clave = 'conf|'+u+'|'+tipo;
+  apuntarMarca(num, clave, tipo==='voy' ? { v: valor===null ? null : !!valor, h: hora(), nota: nota||'' } : { v: !!valor, h: hora() });
   cerrarSheet(); vib(25); guardarBoloCache(); render();
-  try{ const r = await enviar('ckConfirmar', S.num, tipo, valor, nota||''); if(r){ f.conf = r; guardarBoloCache(); render(); }
+  try{ const r = await enviar('ckConfirmar', num, tipo, valor, nota||''); if(r){ const fb = (S.num===num && S.bolo) ? S.bolo.ficha : f; fb.conf = r; aplicarMarcas(num, { ficha: fb }, 0, false); marcaOk(num, clave); guardarBoloCache(); render(); }
     if(r!==null && valor!==null) toast(tipo==='leido' ? (valor?'Marcado como leído':'Desmarcado') : (valor?'¡Confirmado! Dreamscape ya lo sabe':'Aviso enviado a Dreamscape')); }
-  catch(e){ f.conf = JSON.parse(prev); render(); toast('No se guardó: '+e.message); }
+  catch(e){ if(MARCAS[num]){ delete MARCAS[num][clave]; guardarMarcas(); } f.conf = JSON.parse(prev); render(); toast('No se guardó: '+e.message); }
 }
 function abrirQuien(){
   if(!S.bolo){ toast('Cargando…'); return; }
@@ -1953,9 +2012,10 @@ async function marcarCheck(i){
   const t = S.yo.config.checklist[i]; if(!S.bolo) return;
   const ch = S.bolo.ficha.checks = S.bolo.ficha.checks || {};
   const v = !ch[t]; if(v) ch[t] = hora() + ' · ' + ((S.yo.usuario||{}).nombre||''); else delete ch[t];
+  const num = S.num, clave = 'check|'+t; apuntarMarca(num, clave, { v, h: ch[t] });
   vib(15); guardarBoloCache(); render();
-  try{ const r = await enviar('ckCheck', S.num, t, v); if(r && v){ ch[t] = r; guardarBoloCache(); render(); } }
-  catch(e){ if(v) delete ch[t]; else ch[t] = '✓'; render(); toast('No se guardó: '+e.message); }
+  try{ const r = await enviar('ckCheck', num, t, v); if(r!==null) marcaOk(num, clave); if(r && v){ const cc = (S.num===num && S.bolo) ? (S.bolo.ficha.checks = S.bolo.ficha.checks || {}) : ch; cc[t] = r; if(MARCAS[num] && MARCAS[num][clave]){ MARCAS[num][clave].h = r; guardarMarcas(); } guardarBoloCache(); render(); } }
+  catch(e){ if(MARCAS[num]){ delete MARCAS[num][clave]; guardarMarcas(); } if(v) delete ch[t]; else ch[t] = '✓'; render(); toast('No se guardó: '+e.message); }
 }
 function editarChecklist(){
   const l = ((S.yo||{}).config||{}).checklist || [];
