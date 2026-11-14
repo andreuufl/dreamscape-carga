@@ -350,6 +350,18 @@ button.pcard{display:block;width:100%;text-align:left}.pcard.tarde{box-shadow:0 
 .fich .ft .ic{width:40px;height:40px;border-radius:12px;background:var(--card2);display:grid;place-items:center;flex:none}
 .fich .btn{width:auto;padding:13px 20px;flex:none}.fich .btn.entro{background:var(--ok)}.fich .btn.salgo{background:var(--bad)}
 .fich.dentro{box-shadow:0 0 0 2px var(--ok)}
+.tecbig{background:var(--card);border-radius:var(--r);padding:18px 16px 16px;margin-bottom:12px;box-shadow:var(--sh);text-align:center}
+.tecbig.dentro{box-shadow:0 0 0 2px var(--ok),var(--sh)}
+.tecbig .tlbl{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:15px}
+.tecbig .treloj{font-size:44px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+.tecbig .tsub{color:var(--mut,#7a8699);font-size:13px;margin-bottom:14px}
+.tecbig .btn.entro{background:var(--ok)}.tecbig .btn.salgo,.hoy .btn.salgo{background:var(--bad)}
+.tdia{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.tdia:first-of-type{border-top:0}
+.tdia.thoy .tdn b{color:var(--ok)}.tdia.pas{opacity:.75}
+.tdn b{display:block;font-size:14px}.tdn small{font-size:12px;color:var(--mut,#7a8699)}
+.tds{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:13px;font-variant-numeric:tabular-nums}
+.tdh{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
 .pulso{width:12px;height:12px;border-radius:50%;background:var(--ok);flex:none;box-shadow:0 0 0 0 rgba(21,147,90,.6);animation:pulso 1.6s infinite}
 @keyframes pulso{70%{box-shadow:0 0 0 10px rgba(21,147,90,0)}100%{box-shadow:0 0 0 0 rgba(21,147,90,0)}}
 .fich.osc{background:rgba(255,255,255,.07);border-radius:20px;padding:14px 16px;margin:0 0 16px;color:#fff}.fich.osc .meta{color:#a9b6ca}.fich.osc .ft .ic{background:rgba(255,255,255,.12)}
@@ -635,7 +647,7 @@ function vistaHoy(){
   let fecha = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' }); fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1);
   const hoy0 = diaDe(Date.now());
   const heroes = tarjetasHoy();
-  const prox = (S.presus||[]).filter(p => p.ts && diaDe(p.ts) > hoy0 + 864e5 && !p.cerrado).sort((a,b)=>a.ts-b.ts);
+  const man0 = diaDe(hoy0 + 36*36e5), prox = (S.presus||[]).filter(p => !p.cerrado && rangoBolo(p)[0] != null && rangoBolo(p)[0] > man0 && !enRango(p, hoy0)).sort((a,b)=>rangoBolo(a)[0]-rangoBolo(b)[0]);
   let hero = heroes, resto = prox;
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
@@ -715,7 +727,9 @@ function vistaDet(){
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
-  if(!tot) body = (p.archivado || (!S.actualizando && S.bolo)) ? `<div class="empty">${ic('box')}<div>${p.archivado ? 'Bolo terminado: su material ya no está en la pestaña Carga.' : 'Este bolo no tiene material en la pestaña Carga.'}</div></div>${tarjetaQuien()}` : `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
+  const soloT = esSoloTec(p);
+  if(soloT){ body = S.bolo ? vistaTecnico(p) : `<div class="loading"><div class="spin"></div>Cargando el bolo…</div>`; foot0 = ''; }
+  else if(!tot) body = (p.archivado || (!S.actualizando && S.bolo)) ? `<div class="empty">${ic('box')}<div>${p.archivado ? 'Bolo terminado: su material ya no está en la pestaña Carga.' : 'Este bolo no tiene material en la pestaña Carga.'}</div></div>${tarjetaQuien()}` : `<div class="loading"><div class="spin"></div>Cargando material…</div>`;
   else if(S.modo==='ruta'){ const r = vistaRuta(p, tot); body = r.body; foot0 = r.foot; }
   else if(S.modo==='montaje'){ const r = vistaMontaje(p, tot); body = r.body; foot0 = r.foot; }
   else if(S.modo==='desm'){ const r = vistaDesmontaje(p, tot); body = r.body; foot0 = r.foot; }
@@ -773,7 +787,7 @@ function vistaDet(){
       <div style="flex:1;min-width:0"><h1>${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1><div class="sub">${esc(p.num)}${p.montaje?' · '+esc(p.montaje):''}</div></div>
       <button class="ref urg" onclick="abrirUrgente()" aria-label="Problema urgente">${ic('alert')}</button><button class="ref" onclick="abrirMas()" aria-label="Más opciones del bolo">${ic('more')}</button>
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">${ic('refresh')}</button></div>
-    ${tot ? stepper(tot) : ''}
+    ${tot && !soloT ? stepper(tot) : ''}
   </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
 }
 function stepper(tot){
@@ -1130,6 +1144,8 @@ function abrirFicha(){
   const campo = (id, t, ph, tipo) => `<label class="fld"><span>${t}</span><input id="b_${id}" type="${tipo||'text'}" value="${esc(f[id])}" placeholder="${ph}" autocomplete="off"></label>`;
   abrirSheet(`<h3>ℹ Ficha del bolo</h3><div class="meta" style="margin-bottom:12px">${esc(S.bolo.cliente||'')}</div>
     <div class="row2">${campo('contacto','Contacto en el lugar','Nombre')}${campo('telefono','Teléfono','600 000 000','tel')}</div>
+    ${esAdmin() ? `<div class="fld"><span>Tipo de bolo</span><div class="seg mini" id="b_tipo" style="margin:6px 0 0">${[['','Automático'],['si','Solo técnico'],['no','Con material']].map(([v,t])=>`<button type="button" data-v="${v}" class="${String(f.soloTecnico||'')===v||(v==='si'&&f.soloTecnico==='true')?'on':''}" onclick="[...this.parentNode.children].forEach(b=>b.classList.remove('on'));this.classList.add('on')">${t}</button>`).join('')}</div><div class="meta" style="margin-top:4px">Automático: si no tiene material, sale como «Solo técnico» (fichar por días).</div></div>
+    <div class="row2"><label class="fld"><span>Primer día</span><input type="date" id="b_dIni" value="${(String(f.dias||'').split('|')[0])||''}"></label><label class="fld"><span>Último día</span><input type="date" id="b_dFin" value="${(String(f.dias||'').split('|')[1])||''}"></label></div>` : ''}
     ${selectorHoras(f)}
     <label class="fld"><span>Acceso</span><textarea id="b_acceso" rows="2" placeholder="Ej. Entrada por la calle de atrás, montacargas hasta las 18h">${esc(f.acceso)}</textarea></label>
     <label class="fld"><span>Notas</span><textarea id="b_notas" rows="2">${esc(f.notas)}</textarea></label>
@@ -1479,7 +1495,7 @@ async function vigilarFichaje(){
     if(navigator.permissions){ const st = await navigator.permissions.query({ name:'geolocation' }).catch(()=>null); if(st && st.state !== 'granted') return; }
     const yo = yoNombre(), mios = (S.presus||[]).filter(p => !p.cerrado && (esAdmin() || (p.tecnicos||[]).includes(yo)));
     const cand = [];
-    mios.forEach(p => { if(esHoy(p.montaje, p.ts)) cand.push([p,'montaje']); if(p.desmontaje && esHoy(p.desmontaje)) cand.push([p,'desmontaje']); });
+    mios.forEach(p => { if(esSoloTec(p)){ if(enRango(p, diaDe(Date.now()))) cand.push([p,'tecnico']); return; } if(esHoy(p.montaje, p.ts)) cand.push([p,'montaje']); if(p.desmontaje && esHoy(p.desmontaje)) cand.push([p,'desmontaje']); });
     if(!cand.length) return;
     const g = await ubicacion(); if(!g) return;
     const al = cfg().almacenGeo;
@@ -1493,7 +1509,7 @@ async function vigilarFichaje(){
       const fc = (cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {}, l = ((fc.fichajes||{})[yo]) || [], ab = l.length && !l[l.length-1].s;
       if(ab) continue;
       try{ localStorage.setItem(clave, '1'); }catch(e){}
-      abrirSheet(`<h3>${ic('clock')} ¿Fichas la entrada?</h3><div class="meta" style="margin-bottom:12px">Estás ${esc(donde)}. Hoy tienes el ${fase} de <b>${esc(p.evento||p.num)}</b>.</div>
+      abrirSheet(`<h3>${ic('clock')} ¿Fichas la entrada?</h3><div class="meta" style="margin-bottom:12px">Estás ${esc(donde)}. Hoy ${fase==='tecnico' ? 'haces de técnico en' : 'tienes el '+fase+' de'} <b>${esc(p.evento||p.num)}</b>.</div>
         <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Ahora no</button><button class="btn okb" onclick="cerrarSheet();ficharDesdeAviso('${esc(p.num)}','${fase}')">Fichar entrada</button></div>`);
       vib([40,30,40]);
       return;
@@ -1504,6 +1520,7 @@ async function ficharDesdeAviso(num, fase){
   if(S.num !== num || S.vista !== 'det'){ await abrir(num); let n = 0; while(!S.bolo && n++ < 30) await new Promise(r=>setTimeout(r,300)); }
   if(!S.bolo){ toast('No se pudo abrir el bolo'); return; }
   if(fichaAbierta()){ toast('Ya estabas fichado'); return; }
+  if(fase==='tecnico'){ render(); ficharTec('entrada'); return; }
   S.modo = fase==='desmontaje' ? 'desm' : 'carga'; render();
   fichar('entro', fase);
 }
@@ -1532,6 +1549,8 @@ async function guardarFichaUI(){
   const patch = {}; ['contacto','telefono','acceso','notas'].forEach(c=> patch[c] = ($('#b_'+c).value||'').trim());
   patch.horario = horarioDeSelector();
   patch.tecnicos = [...document.querySelectorAll('.chip.tec.on')].map(b=>b.dataset.n);
+  const tb = document.querySelector('#b_tipo button.on'); if(tb) patch.soloTecnico = tb.dataset.v;
+  if($('#b_dIni')){ let a = $('#b_dIni').value, b = $('#b_dFin').value || a; if(a && b < a){ const t = a; a = b; b = t; } patch.dias = a ? a+'|'+b : ''; }
   const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render();
   guardarBoloCache();
   try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(r!==null) toast('Ficha guardada'); }
@@ -1851,6 +1870,7 @@ function heroBolo(p, lbl, cls){
   const pc = p.total ? p.cargados/p.total*100 : 0, pd = p.total ? p.devueltos/p.total*100 : 0;
   const paso = !p.total ? 'Ver el bolo' : p.cargados < p.total ? (p.cargados ? 'Seguir cargando' : 'Empezar a cargar') : p.devueltos === 0 ? (esAdmin() ? 'Ir al evento' : 'Marcar la descarga') : p.devueltos < p.total ? 'Terminar la vuelta' : 'Ver el bolo';
   const pt = portada(p.num);
+  if(esSoloTec(p)) return heroTecnico(p, lbl, cls, pt);
  return `<div class="hoy ${cls||''} hd-${estadoBolo(p)[0]} ${pt?'conpt':''}" ${pt?`style="--pt:url(${pt})"`:''}><div class="lbl">${lbl} · ${esc(p.montaje)}</div><div class="hev">${esc(p.evento)}</div>
     ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
     <div class="hst"><div><span>Carga</span><b>${p.cargados}/${p.total}</b><div class="track"><div class="fill" style="width:${pc}%"></div></div></div><div><span>Vuelta</span><b>${p.devueltos}/${p.total}</b><div class="track"><div class="fill dev" style="width:${pd}%"></div></div></div></div>
@@ -1859,9 +1879,18 @@ function heroBolo(p, lbl, cls){
     <button class="btn" onclick="abrir('${esc(p.num)}')">${paso} ${ic('chev','s')}</button>${lbl==='HOY'?`<button class="btn rutab" onclick="abrirEnRuta('${esc(p.num)}')">${ic('nav','s')} Modo en ruta</button>`:''}</div>`;
 }
 function tarjetasHoy(){
-  const hoy = diaDe(Date.now()), man = hoy + 864e5;
-  const l = (S.presus||[]).filter(p => p.ts && (diaDe(p.ts) === hoy || diaDe(p.ts) === man) && !p.cerrado).sort((a,b)=>a.ts-b.ts);
-  return l.map(p => { const esHoy = diaDe(p.ts) === hoy; return heroBolo(p, esHoy?'HOY':'MAÑANA', esHoy?'':'man'); }).join('');
+  const hoy = diaDe(Date.now()), man = diaDe(hoy + 36*36e5);
+  const l = (S.presus||[]).filter(p => !p.cerrado && (enRango(p, hoy) || enRango(p, man))).sort((a,b)=>rangoBolo(a)[0]-rangoBolo(b)[0]);
+  return l.map(p => { const esHoy = enRango(p, hoy); return heroBolo(p, esHoy?'HOY':'MAÑANA', esHoy?'':'man'); }).join('');
+}
+function heroTecnico(p, lbl, cls, pt){
+  const f = fichaDe(p.num), hoy = diaDe(Date.now()), d = diasLista(p), n = d.indexOf(hoy) + 1;
+  const l = ((f.fichajes||{})[yoNombre()]) || [], a = l.length && !l[l.length-1].s ? l[l.length-1] : null, hh = segsDia(l, hoy).reduce((s,x)=>s+horasSeg(x),0);
+  const tot = l.reduce((s,x)=>s+horasSeg(x),0);
+  return `<div class="hoy ${cls||''} hd-${estadoBolo(p)[0]} ${pt?'conpt':''}" ${pt?`style="--pt:url(${pt})"`:''}><div class="lbl">${lbl} · ${esc(rangoTxt(p))}</div><div class="hev">${esc(p.evento)}</div>
+    ${p.lugar?`<div class="hlug">${ic('pin','xs')}<span>${esc(p.lugar)}</span></div>`:''}
+    <div class="hst"><div><span>${n ? (d.length>1 ? 'Día '+n+' de '+d.length : 'Hoy') : 'Solo técnico'}</span><b>${a ? 'Trabajando' : n ? fmtH(hh) : d.length+(d.length>1?' días':' día')}</b></div><div><span>Total del bolo</span><b>${fmtH(tot)}</b></div></div>
+    <button class="btn ${a?'salgo':''}" onclick="abrir('${esc(p.num)}')">${ic('clock','s')} ${a ? 'Fichar salida o pausa' : lbl==='HOY' ? 'Fichar entrada' : 'Ver el bolo'} ${ic('chev','s')}</button></div>`;
 }
 
 /* =========================================================
@@ -2756,7 +2785,7 @@ async function quitarFotoMat(n){
 function semana(){
   const hoy = diaDe(Date.now()), dias = [];
   for(let d=0; d<14; d++){ const t = hoy + d*864e5, dt = new Date(t); dias.push({ t: diaDe(dt.getTime()), dt }); }
-  const de = t => (S.presus||[]).filter(p => p.ts && diaDe(p.ts) === t && !p.cerrado);
+  const de = t => (S.presus||[]).filter(p => !p.cerrado && enRango(p, t));
   const L = ['D','L','M','X','J','V','S'];
   const strip = `<div class="semana">${dias.map(({t,dt})=>{ const n = de(t).length; return `<button class="dia ${S.diaSel===t?'on':''} ${t===hoy?'dhoy':''} ${n?'con':''}" onclick="selDia(${t})"><span>${t===hoy?'Hoy':L[dt.getDay()]}</span><b>${dt.getDate()}</b><i>${n?'●'.repeat(Math.min(3,n)):''}</i></button>`; }).join('')}</div>`;
   if(S.diaSel == null) return strip;
@@ -3170,6 +3199,119 @@ async function fichar(tipo, fase){
   }catch(e){ toast(e.red ? 'Necesitas conexión para fichar' : 'Error: '+e.message); }
 }
 
+/* ---------- SOLO TÉCNICO: bolos sin material, de uno o varios días ---------- */
+let RANGO_MEMO = {}, RANGO_T = 0;
+function fichaDe(num){ if(num===S.num && S.bolo) return ficha(); return ((cacheGet('ckBolo'+JSON.stringify([num]))||{}).ficha) || {}; }
+function esSoloTec(p){
+  p = p || S.presus.find(x=>x.num===S.num) || { num:S.num };
+  const v = String(fichaDe(p.num).soloTecnico||'');
+  if(v==='si' || v==='true') return true;
+  if(v==='no') return false;
+  const tot = (p.num===S.num && S.items && S.items.length) || p.total || 0;
+  if(p.num===S.num && !tot && !S.bolo) return false;
+  return !tot;
+}
+function tsIso(s){ const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? new Date(+m[1], +m[2]-1, +m[3]).getTime() : null; }
+function isoDe(t){ const d = new Date(t), z = n => String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function rangoBolo(p){
+  if(Date.now() - RANGO_T > 1500){ RANGO_MEMO = {}; RANGO_T = Date.now(); }
+  if(p.num !== S.num && RANGO_MEMO[p.num]) return RANGO_MEMO[p.num];
+  const [a, b] = String(fichaDe(p.num).dias||'').split('|');
+  let i = tsIso(a), j = tsIso(b);
+  if(i == null) i = p.ts ? diaDe(p.ts) : null;
+  if(i == null) return [null, null];
+  if(j == null || j < i) j = i;
+  return RANGO_MEMO[p.num] = [i, j];
+}
+function enRango(p, t){ const [i, j] = rangoBolo(p); return i != null && t >= i && t <= j; }
+function diasLista(p){ const [i, j] = rangoBolo(p), l = []; if(i == null) return [diaDe(Date.now())]; for(let t = i; t <= j && l.length < 62; t = diaDe(t + 36*36e5)) l.push(t); return l; }
+function horasSeg(x, ahora){ if(x.s && !x.sm) return x.h || 0; return Math.max(0, ((x.sm || ahora || Date.now()) - x.em) / 36e5); }
+function segsDia(l, t){ return l.filter(x => diaDe(x.em) === t); }
+function fmtH(h){ const m = Math.round((h||0)*60); return Math.floor(m/60)+' h '+String(m%60).padStart(2,'0'); }
+function hm(ms){ const d = new Date(ms); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function fDia(t, largo){ let s = new Date(t).toLocaleDateString('es-ES', largo ? { weekday:'long', day:'numeric', month:'long' } : { weekday:'short', day:'numeric', month:'short' }); s = s.replace(/\./g,''); return s.charAt(0).toUpperCase()+s.slice(1); }
+function finDiaKey(num, t){ return 'ck_findia_'+num+'_'+isoDe(t); }
+function diaCerrado(num, t){ try{ return !!localStorage.getItem(finDiaKey(num, t)); }catch(e){ return false; } }
+function rangoTxt(p){ const d = diasLista(p); return d.length > 1 ? `${fDia(d[0])} → ${fDia(d[d.length-1])} · ${d.length} días` : fDia(d[0], true); }
+
+function vistaTecnico(p){
+  const f = ficha(), H = horasFicha(f), hoy = diaDe(Date.now()), ahora = Date.now();
+  const dias = diasLista(p), l = misFichajes(), a = fichaAbierta();
+  const todos = [...new Set(dias.concat(l.map(x => diaDe(x.em))))].sort((x,y)=>x-y);
+  const n = dias.indexOf(hoy) + 1, hoyL = segsDia(l, hoy);
+  const hHoy = hoyL.reduce((s,x)=>s+horasSeg(x,ahora),0), hTot = l.reduce((s,x)=>s+horasSeg(x,ahora),0);
+  const trab = new Set(l.map(x => diaDe(x.em))).size;
+  const etq = n ? (dias.length > 1 ? `Día ${n} de ${dias.length}` : 'Hoy') : (hoy < dias[0] ? 'Empieza el '+fDia(dias[0]) : 'Fuera de las fechas del bolo');
+  let big;
+  if(a){
+    const base = hHoy - horasSeg(a, ahora);
+    big = `<div class="tecbig dentro"><div class="tlbl"><span class="pulso"></span>Trabajando desde las ${hm(a.em)}</div>
+      <div class="treloj" id="tecReloj" data-em="${a.em}" data-base="${base.toFixed(5)}">${fmtH(hHoy)}</div><div class="tsub">${etq} · horas de hoy</div>
+      <div class="row2"><button class="btn sec2" onclick="ficharTec('pausa')">Pausa</button><button class="btn salgo" onclick="ficharTec('fin')">Fin del día</button></div></div>`;
+  } else {
+    const cerrado = hoyL.length && diaCerrado(S.num, hoy), pausa = hoyL.length && !cerrado, ult = hoyL[hoyL.length-1];
+    const tit = pausa ? `En pausa desde las ${hm(ult.sm || ult.em)}` : cerrado ? `Día terminado a las ${hm(ult.sm || ult.em)}` : etq;
+    big = `<div class="tecbig"><div class="tlbl">${ic('clock','s')} ${esc(tit)}</div>
+      <div class="treloj">${fmtH(hHoy)}</div><div class="tsub">${hHoy ? 'horas de hoy' : (H.montaje != null ? 'Entrada prevista a las '+hhmm(H.montaje) : 'Ficha al llegar al evento')}</div>
+      <button class="btn entro" onclick="ficharTec('entrada')">${pausa ? 'Volver de la pausa' : cerrado ? 'Volver a fichar' : 'Fichar entrada'}</button></div>`;
+  }
+  const filas = todos.map(t => {
+    const s = segsDia(l, t), h = s.reduce((x,y)=>x+horasSeg(y,ahora),0), i = dias.indexOf(t);
+    return `<div class="tdia ${t===hoy?'thoy':''} ${t<hoy?'pas':''}"><div class="tdn"><b>${fDia(t)}</b><small>${i>=0 ? 'Día '+(i+1) : 'Fuera de fechas'}</small></div>
+      <div class="tds">${s.length ? s.map(x=>`<span>${hm(x.em)}–${x.s ? hm(x.sm||x.em) : 'ahora'}</span>`).join('') : `<span class="meta">${t > hoy ? 'Pendiente' : t === hoy ? 'Sin fichar aún' : 'Sin fichar'}</span>`}</div>
+      <b class="tdh">${h ? fmtH(h) : '—'}</b></div>`;
+  }).join('');
+  const cab = `<div class="furg tecinfo"><div class="top"><b>${ic('sliders','s')} Solo técnico audiovisual</b>${esAdmin()?`<button class="edit" onclick="abrirDias()">Días</button>`:''}</div>
+    <div class="meta">${esc(rangoTxt(p))}${H.montaje != null ? ' · entrada '+hhmm(H.montaje) : ''}${H.evento != null ? ' · evento '+hhmm(H.evento) : ''}</div>
+    ${dias.length < 2 && esAdmin() ? `<button class="link" style="padding:8px 0 0" onclick="abrirDias()">¿Dura varios días? Pon las fechas ›</button>` : ''}</div>`;
+  const resumen = `<div class="furg"><div class="top"><b>${ic('today','s')} Horas por día</b><span class="meta">Total ${fmtH(hTot)} · ${trab} ${trab===1?'día':'días'}</span></div>${filas}</div>`;
+  const mat = esAdmin() ? `<button class="link" onclick="ponerTipoBolo('no')">Este bolo sí lleva material › ver la carga</button>` : '';
+  return `${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}${cab}${big}${tarjetaUrgencias()}${resumen}${tarjetaLugar(p)}${tarjetaNotas()}${tarjetaFicha()}${mat}
+    ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
+}
+setInterval(()=>{ const e = $('#tecReloj'); if(e) e.textContent = fmtH(+e.dataset.base + (Date.now() - +e.dataset.em)/36e5); }, 20000);
+
+async function ficharTec(que){
+  if(!S.bolo) return;
+  const hoy = diaDe(Date.now());
+  if(que==='fin' && !confirm('¿Terminas por hoy? Se apuntan tus horas de hoy.')) return;
+  vib(20); toast(que==='entrada' ? 'Fichando con tu ubicación…' : 'Guardando…');
+  try{
+    const geo = await ubicacion();
+    const r = await call('ckFichar', S.num, que==='entrada' ? 'entro' : 'salgo', 'tecnico', geo);
+    S.bolo.ficha.fichajes = r.fichajes; guardarBoloCache();
+    try{ if(que==='fin') localStorage.setItem(finDiaKey(S.num, hoy), '1'); if(que==='entrada') localStorage.removeItem(finDiaKey(S.num, hoy)); }catch(e){}
+    if(que==='entrada') toast('Entrada apuntada'+(geo?' con ubicación':''));
+    else { toast(que==='pausa' ? 'Pausa: pulsa «Volver de la pausa» al seguir' : (r.horas ? `${String(r.horas).replace('.',',')} h apuntadas` : 'Fin del día apuntado')); call('ckGastos', S.num).then(g=>{ S.gastos = g || []; }).catch(()=>{}); }
+    render();
+  }catch(e){ toast(e.red ? 'Necesitas conexión para fichar' : 'Error: '+e.message); }
+}
+function abrirDias(){
+  if(!S.bolo){ toast('Cargando ficha…'); return; }
+  const p = S.presus.find(x=>x.num===S.num) || {}, [i, j] = rangoBolo(p), H = horasFicha(ficha());
+  abrirSheet(`<h3>${ic('today')} Días del bolo</h3><div class="meta" style="margin-bottom:12px">Para eventos de varios días seguidos: cada día fichas entrada y salida.</div>
+    <div class="row2"><label class="fld"><span>Primer día</span><input type="date" id="dIni" value="${i!=null?isoDe(i):''}"></label><label class="fld"><span>Último día</span><input type="date" id="dFin" value="${j!=null?isoDe(j):''}"></label></div>
+    <div class="row2"><label class="fld"><span>Entrada cada día</span><input type="time" id="dEnt" value="${hhmm(H.montaje)}" step="300"></label><label class="fld"><span>Evento</span><input type="time" id="dEvt" value="${hhmm(H.evento)}" step="300"></label></div>
+    <div class="row2" style="margin-top:14px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarDias()">Guardar</button></div>`);
+}
+async function guardarDias(){
+  let a = $('#dIni').value, b = $('#dFin').value || a;
+  if(!a){ toast('Pon al menos el primer día'); return; }
+  if(b < a){ const t = a; a = b; b = t; }
+  const H = horasFicha(ficha()), ent = $('#dEnt').value, evt = $('#dEvt').value;
+  const l = []; if(H.carga != null) l.push('Carga '+hhmm(H.carga)); if(ent) l.push('Montaje '+ent); if(evt) l.push('Evento '+evt); if(H.desmontaje != null) l.push('Desmontaje '+hhmm(H.desmontaje)); H.otros.forEach(x=>l.push(x));
+  const patch = { dias: a+'|'+b, horario: l.join(' · ') };
+  const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render(); guardarBoloCache();
+  try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(r!==null) toast('Días guardados'); }
+  catch(e){ S.bolo.ficha = prev; render(); toast('No se guardó: '+e.message); }
+}
+async function ponerTipoBolo(v){
+  if(!S.bolo) return;
+  if(v==='no' && !confirm('¿Ver este bolo con carga de material (pasos Carga, Descarga, Montaje…)?')) return;
+  const prev = S.bolo.ficha.soloTecnico; S.bolo.ficha.soloTecnico = v; S.modo = modoInicial(S.presus.find(x=>x.num===S.num)); render(); guardarBoloCache();
+  try{ await enviar('ckGuardarFicha', S.num, { soloTecnico: v }); }catch(e){ S.bolo.ficha.soloTecnico = prev; render(); toast('No se guardó: '+e.message); }
+}
+
 /* ---------- 6. FOTO OBLIGATORIA AL TERMINAR EL MONTAJE ---------- */
 async function faltaFotoMontaje(){
   if(!cfg().fotoObligatoria) return false;
@@ -3339,7 +3481,7 @@ function moverCal(d){ const [y,m] = S.calMes, x = new Date(y, m+d, 1); S.calMes 
 function vistaCalendario(){
   const [y, m] = S.calMes, l = S.cal || S.presus || [];
   const ini = new Date(y, m, 1), dias = new Date(y, m+1, 0).getDate(), off = (ini.getDay()+6)%7, hoy = diaDe(Date.now());
-  const de = t => l.filter(p => p.ts && diaDe(p.ts) === t);
+  const de = t => l.filter(p => enRango(p, t));
   const ocup = {}; l.filter(p=>{ const d = new Date(p.ts||0); return d.getFullYear()===y && d.getMonth()===m; }).forEach(p=>(p.tecnicos||[]).forEach(t=>{ ocup[t] = (ocup[t]||0) + 1; }));
   let celdas = ''; for(let i=0;i<off;i++) celdas += '<div class="cd vac"></div>';
   for(let d=1; d<=dias; d++){ const t = new Date(y, m, d).getTime(), b = de(t);
