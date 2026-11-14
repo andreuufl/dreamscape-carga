@@ -735,6 +735,7 @@ function vistaDet(){
     ${hechos===tot && S.modo!=='dev' ? `<button class="next" onclick="irA('${sigPaso()}')">${ic('check')}<span>${KM().todo}<small>Siguiente paso: ${nombrePaso(sigPaso())}</small></span>${ic('chev')}</button>` : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${segMio(k)}
+    ${tarjetaFichaje(false, S.modo==='carga'||S.modo==='descSitio' ? 'montaje' : 'desmontaje')}
     ${tarjetaConfirmar()}
     ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='dev' ? tarjetaAlmacen() : ''}
@@ -856,7 +857,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaFichaje(false,'montaje')}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
