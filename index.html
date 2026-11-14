@@ -143,6 +143,7 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 /* Pasos */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .steps .ln{display:none}
+.cnt2{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.cnt2 small{display:block;font-size:12.5px;opacity:.7;font-weight:500}.stp{display:flex;align-items:center;gap:6px}.stp button{width:44px;height:44px;border-radius:12px;border:0;background:var(--line);font-size:22px;font-weight:700;color:inherit}.stp input{width:64px;height:44px;text-align:center;font-size:20px;font-weight:700;border-radius:12px;border:1px solid var(--line)}.qty,.gq{cursor:pointer}.ctag{color:var(--ok);font-weight:600}
 .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.hgrid label{display:flex;flex-direction:column;gap:4px}.hgrid small{font-size:12px;color:var(--mut,#7a8699);font-weight:600}.hgrid input{width:100%;min-height:44px;font-size:17px;text-align:center}
 .plst{display:flex;flex-direction:column;gap:8px;margin-top:6px}.plrow{display:flex;gap:12px;align-items:flex-start}.plrow b{font-size:20px;min-width:62px;font-variant-numeric:tabular-nums}.plrow span{display:flex;flex-direction:column;font-weight:600}.plrow small{font-weight:500;opacity:.7;font-size:12.5px}
 .steps.many .step{font-size:10.5px;letter-spacing:-.01em}.steps.many .step .t{white-space:nowrap;overflow:hidden}
@@ -704,9 +705,9 @@ function vistaDet(){
   let foot0 = null;
   const fila = i => `<div class="swipe"><div class="under l">${ic('check','s')} ${i[k]?'Desmarcar':KM().hecho}</div><div class="under">${ic('alert','s')} Incidencia</div><div class="item ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" id="it${i.fila}" data-f="${i.fila}" onclick="if(!SW.moved)toggle(${i.fila})">
       <div class="chk">${i[k]?ic('check'):''}</div>
-      ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty">${esc(i.cant)}</div>
+      ${fotoMat(i.material)?`<img class="mthumb" src="${fotoMat(i.material)}" alt="" onclick="event.stopPropagation();verFotoMat(this.dataset.n)" data-n="${esc(i.material)}">`:icoMat(i.material)?`<span class="micon">${ic(icoMat(i.material))}</span>`:''}<div class="qty" onclick="event.stopPropagation();abrirCuenta(${i.fila})" title="Contar unidades">${esc(i.cant)}</div>
       <div class="info"><div class="mat">${esc(i.material)}</div>
-        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
+        <div class="meta">${[zonaDe(i.material)&&!(agrupacion()==='zona'&&hayZonas())?`<span class="ztag">${ic('pin','xs')} ${esc(zonaDe(i.material))}</span>`:'', repDe(i)&&!soloMio()?`<span class="rtag">${ic('user','xs')} ${esc(repDe(i))}</span>`:'', i[k]&&i[hk]?KM().hecho+' '+esc(i[hk]):'', S.modo==='dev'&&!i.cargado?'No marcado en carga':'', i.incidencia?`<span class="inc">⚠ ${esc(i.incidencia)}${i.nota?': '+esc(i.nota):''}</span>`:'', txtCuenta(i), i.stock && S.modo==='carga' && !i.cargado?`<span class="inc">⚠ Stock: ${i.stock.usado} de ${i.stock.stock}${i.stock.otros.length?' · también en '+esc(i.stock.otros.join(', ')):''}</span>`:''].filter(Boolean).join(' · ')}</div></div>
       <button class="more" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${ic('alert','s')}</button>
     </div></div>`;
   let body;
@@ -736,6 +737,7 @@ function vistaDet(){
     ${tarjetaConfirmar()}
     ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='dev' ? tarjetaAlmacen() : ''}
+    ${S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
     ${tarjetaQuien()}
     ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
@@ -1194,6 +1196,39 @@ async function desdeAqui(horaAlmacen, btn){
   const marg = margenTrafico(min, horaAlmacen - min), s = horaAlmacen - min - marg;
   btn.outerHTML = `<div class="plrow" style="margin-top:8px"><b>${hhmm(s)}</b><span>Sal de donde estás hacia el almacén<small>${min} min + ${marg} de margen · para estar allí a las ${hhmm(horaAlmacen)}</small></span></div>`;
 }
+/* ---------- UNIDADES: cuántas se llevan al bolo y cuántas vuelven ---------- */
+function numDe(c){ const m = String(c||'').replace(',', '.').match(/\d+(\.\d+)?/); return m ? +m[0] : 0; }
+function cuentaDe(i){ return ((ficha().cuentas)||{})[i.material] || {}; }
+function txtCuenta(i){
+  const c = cuentaDe(i); if(c.ida == null && c.vuelta == null) return '';
+  const ida = c.ida != null ? c.ida : numDe(i.cant), falta = c.vuelta != null ? ida - c.vuelta : 0;
+  return `<span class="${falta>0?'inc':'ctag'}">🔢 Llevadas ${ida}${c.vuelta!=null?' · Devueltas '+c.vuelta:''}${falta>0?' · faltan '+falta:''}</span>`;
+}
+function abrirCuenta(fila){
+  const it = S.items.find(i=>i.fila===fila); if(!it || !S.bolo){ toast('Espera a que cargue el bolo'); return; }
+  const c = cuentaDe(it), def = numDe(it.cant), ida = c.ida != null ? c.ida : def, vuelta = c.vuelta != null ? c.vuelta : '';
+  const vueltaPrimero = S.modo==='dev' || S.modo==='cargaSitio';
+  const fila2 = (id, t, sub, v) => `<div class="cnt2"><div><b>${t}</b><small>${sub}</small></div><div class="stp"><button onclick="sumar('${id}',-1)">−</button><input id="${id}" inputmode="numeric" value="${v}" placeholder="—"><button onclick="sumar('${id}',1)">+</button></div></div>`;
+  abrirSheet(`<h3>🔢 ${esc(it.material)}</h3><div class="meta" style="margin-bottom:12px">En el albarán: ${esc(it.cant)}. Apunta cuántas unidades salen y cuántas vuelven: se guarda en el Drive.</div>
+    ${vueltaPrimero ? fila2('cuV','Devueltas al almacén','Las que han vuelto', vuelta === '' ? ida : vuelta) + fila2('cuI','Llevadas al bolo','Las que salieron', ida) : fila2('cuI','Llevadas al bolo','Las que cargas en la furgoneta', ida) + fila2('cuV','Devueltas al almacén','Se rellena a la vuelta', vuelta)}
+    <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarCuenta(${fila})">Guardar</button></div>`);
+}
+function sumar(id, d){ const e = $('#'+id); const v = Math.max(0, (parseInt(e.value,10) || 0) + d); e.value = v; vib(8); }
+async function guardarCuenta(fila){
+  const it = S.items.find(i=>i.fila===fila); if(!it) return;
+  const rd = id => { const v = ($('#'+id).value||'').trim(); return v === '' ? null : Math.max(0, parseInt(v,10) || 0); };
+  const ida = rd('cuI'), vuelta = rd('cuV'), f = S.bolo.ficha, prev = JSON.stringify(f.cuentas||{});
+  f.cuentas = f.cuentas || {}; f.cuentas[it.material] = { ida, vuelta }; cerrarSheet(); vib(20); guardarBoloCache(); render();
+  try{ const r = await enviar('ckCuenta', S.num, it.material, ida, vuelta); if(r){ f.cuentas[it.material] = r; guardarBoloCache(); render(); }
+    toast(vuelta != null && ida != null && vuelta < ida ? `Guardado: faltan ${ida - vuelta}` : 'Unidades guardadas'); }
+  catch(e){ f.cuentas = JSON.parse(prev); render(); toast('No se guardó: '+e.message); }
+}
+function tarjetaFaltan(){
+  const l = (S.items||[]).map(i => { const c = cuentaDe(i), ida = c.ida != null ? c.ida : numDe(i.cant); return { i, ida, v: c.vuelta, f: c.vuelta != null ? ida - c.vuelta : 0 }; }).filter(x => x.f > 0);
+  const contados = (S.items||[]).filter(i => cuentaDe(i).vuelta != null).length;
+  if(!l.length) return contados ? `<div class="done-banner dev">${ic('check','s')} Unidades contadas: no falta nada (${contados} artículos)</div>` : '';
+  return `<div class="furg" style="border:1.5px solid var(--bad)"><div class="top"><b>${ic('alert','s')} Faltan unidades</b><span class="pill warn">${l.reduce((s,x)=>s+x.f,0)}</span></div>${l.map(x=>`<div class="cfrow" onclick="abrirCuenta(${x.i.fila})" style="cursor:pointer"><b>${esc(x.i.material)}</b><span class="meta">${x.v} de ${x.ida} · faltan ${x.f}</span></div>`).join('')}</div>`;
+}
 /* ---------- ALMACÉN: dirección guardada y botones de mapa ---------- */
 function tarjetaAlmacen(){
   const c = cfg(), a = c.almacen || '';
@@ -1371,6 +1406,7 @@ function abrirInc(fila){
   const it = S.items.find(i=>i.fila===fila); if(!it) return;
   incFila=fila; incSel=it.incidencia||'';
   $('#sheet').innerHTML = `<h3>${esc(it.material)}</h3><div class="meta">Cantidad: ${esc(it.cant)}</div>
+    <button class="link" style="padding:6px 0 4px;text-align:left" onclick="abrirCuenta(${it.fila})">🔢 Contar unidades llevadas y devueltas${txtCuenta(it)?' · '+txtCuenta(it).replace(/<[^>]+>/g,''):''}</button>
     <div class="chips">${S.opciones.map(o=>`<button class="chip ${o===incSel?'on':''}" onclick="selInc(this,'${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</button>`).join('')}</div>
     <div class="micwrap"><textarea id="nota" placeholder="Nota (qué ha pasado, cuántas unidades…)">${esc(it.nota)}</textarea>${micBtn('nota')}</div>
     <div id="incFotos"></div>
@@ -2947,7 +2983,7 @@ function ponerGrid(v){ try{ localStorage.setItem('ck_grid', v ? '1' : '0'); }cat
 function celda(i, k){
   const f = fotoMat(i.material), ico = icoMat(i.material) || 'box';
   return `<div class="gcell ${i[k]?'on':''} ${i.incidencia?'has-inc':''} ${i.fila===S.ultimo?'pop':''}" onclick="toggle(${i.fila})">
-    <div class="gimg">${f ? `<img src="${f}" alt="">` : ic(ico)}<span class="gq">${esc(i.cant)}</span>${i[k]?`<span class="gok">${ic('check','s')}</span>`:''}</div>
+    <div class="gimg">${f ? `<img src="${f}" alt="">` : ic(ico)}<span class="gq" onclick="event.stopPropagation();abrirCuenta(${i.fila})">${esc(i.cant)}</span>${i[k]?`<span class="gok">${ic('check','s')}</span>`:''}</div>
     <div class="gname">${esc(i.material)}</div>
     <button class="ginc" onclick="event.stopPropagation();abrirInc(${i.fila})" aria-label="Incidencia">${i.incidencia?'⚠':'⋯'}</button></div>`;
 }
