@@ -730,12 +730,12 @@ function vistaDet(){
       : `<div class="sec">Pendiente <span class="cnt">${pend.length}</span></div>${lst(ordenar(pend))}`;
     body = `
     ${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}
+    ${tarjetaFichaje(false, S.modo==='carga'||S.modo==='descSitio' ? 'montaje' : 'desmontaje')}
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
       <div><div class="big">${vh}<span> / ${vt}</span></div><div class="pm">${soloMio()?'de lo tuyo · ':''}${KM().pm}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
     ${hechos===tot && S.modo!=='dev' ? `<button class="next" onclick="irA('${sigPaso()}')">${ic('check')}<span>${KM().todo}<small>Siguiente paso: ${nombrePaso(sigPaso())}</small></span>${ic('chev')}</button>` : ''}
     ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
     ${segMio(k)}
-    ${tarjetaFichaje(false, S.modo==='carga'||S.modo==='descSitio' ? 'montaje' : 'desmontaje')}
     ${tarjetaConfirmar()}
     ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='dev' ? tarjetaAlmacen() : ''}
@@ -3043,7 +3043,7 @@ function tarjetaFichaje(oscuro, fase){
   const a = fichaAbierta(), l = misFichajes(fase), tot = l.reduce((s,x)=>s+(x.h||0),0), F = fase==='desmontaje' ? 'desmontaje' : 'montaje';
   const cls = oscuro ? 'fich osc' : 'furg fich';
   if(a){ const af = a.f||'montaje'; return `<div class="${cls} dentro"><div class="ft"><span class="pulso"></span><div><b>Dentro del ${af}</b><div class="meta" id="fichT" data-em="${a.em}">Desde ${esc(String(a.e).slice(-5))}${a.ge?' · 📍':''} · ${durTxt(Date.now()-a.em)}</div></div></div><button class="btn salgo" onclick="fichar('salgo','${af}')">Salida ${af}</button></div>`; }
-  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje de ${F}</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h de ${F} en este bolo` : 'Pulsa al empezar y al terminar: se guardan las horas y la ubicación'}</div></div></div><button class="btn entro" onclick="fichar('entro','${F}')">Entrada ${F}</button></div>`;
+  return `<div class="${cls}"><div class="ft"><span class="ic">${ic('clock','s')}</span><div><b>Fichaje de ${F}</b><div class="meta">${tot ? `Llevas ${String(tot).replace('.',',')} h de ${F} en este bolo` : (S.modo==='carga' ? 'Ficha al llegar al almacén: desde aquí cuentan tus horas' : 'Pulsa al empezar y al terminar: se guardan las horas y la ubicación')}</div></div></div><button class="btn entro" onclick="fichar('entro','${F}')">Entrada ${F}</button></div>`;
 }
 setInterval(()=>{ const e = $('#fichT'); if(e) e.textContent = e.textContent.replace(/·.*$/, '· ' + durTxt(Date.now() - +e.dataset.em)); }, 30000);
 async function fichar(tipo, fase){
