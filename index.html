@@ -832,7 +832,8 @@ function vistaDet(){
     ${ok.length?`<div class="sec">${KM().donde} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${KM().como}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
     ${esFase() ? '' : bloqueExtras()}
-    ${plegado(tarjetaQuien() + tarjetaNotas() + tarjetaMismoDia() + (S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : '') + (S.modo==='dev' ? tarjetaValoracion() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''))}
+    ${S.modo==='carga' ? tarjetaQuien() : ''}
+    ${plegado((S.modo==='carga' ? '' : tarjetaQuien()) + tarjetaNotas() + tarjetaMismoDia() + (S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : '') + (S.modo==='dev' ? tarjetaValoracion() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''))}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
   }
   const faltan = tot - hechos;
@@ -982,7 +983,7 @@ function abrirAsist(n){
   const v = (((ficha().conf)||{})[n]||{}).voy;
   abrirSheet(`<h3>${ic('user')} ${esc(n)}</h3><div class="meta" style="margin-bottom:12px">${v ? (v.si?'Va':'No va')+' · '+esc(v.h)+(v.nota?' · '+esc(v.nota):'') : 'Aún no ha confirmado'}. Puedes confirmarlo tú por él.</div>
     <div class="row2"><button class="btn okb" onclick="confirmarPor(this.dataset.n,true)" data-n="${esc(n)}">${ic('check','s')} Va</button><button class="btn sec2" onclick="confirmarPor(this.dataset.n,false)" data-n="${esc(n)}">No va</button></div>
-    ${v?`<button class="link" onclick="confirmarPor(this.dataset.n,null)" data-n="${esc(n)}">Quitar confirmación</button>`:''}<button class="link" onclick="cerrarSheet()">Cancelar</button>`);
+    ${v?`<button class="link" onclick="confirmarPor(this.dataset.n,null)" data-n="${esc(n)}">Quitar confirmación</button>`:''}<button class="btn sec2" style="margin-top:8px;color:var(--bad)" onclick="quitarDelBolo(this.dataset.n)" data-n="${esc(n)}">${ic('x','s')} Quitar del bolo (ya no va)</button><button class="link" onclick="cerrarSheet()">Cancelar</button>`);
 }
 async function confirmarPor(n, valor){
   const f = S.bolo.ficha, prev = JSON.stringify(f.conf||{});
@@ -998,7 +999,7 @@ function tarjetaConfirmar(){
   if(esAdmin() || !S.bolo) return '';
   const c = miConf(), v = c.voy, pend = !v || !c.leido;
   if(v && v.si){
-    if(c.leido) return ''; // ya ha confirmado que va y ha revisado el material: no se vuelve a preguntar
+    return ''; // ya consta que va (lo haya marcado él o el administrador): no se vuelve a pedir confirmación
     return `<button class="ck" style="border:0;background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--sh)" onclick="confirmar('leido',true)"><span class="cb"></span><span><b>He revisado todo el material y lo tengo claro</b><small>Ya has confirmado que vas · ${esc(v.h)}</small></span></button>`;
   }
   const voy = !v
@@ -1032,6 +1033,13 @@ function abrirQuien(){
     <div class="chips">${eq.length ? eq.map(t=>`<button class="chip tec qv ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}${pq.ts && noDispDe(t.nombre, pq.ts)?' <span class="ndtag">no puede</span>':''}</button>`).join('') : '<span class="meta">Aún no hay nadie en el equipo.</span>'}</div>
     <button class="link" onclick="cerrarSheet();verAccesos().then(nuevaPersona)">${ic('plus','s')} Crear una persona nueva</button>
     <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarQuien()">Guardar</button></div>`);
+}
+async function quitarDelBolo(n){
+  if(!S.bolo || !confirm(`¿Quitar a ${n} de este bolo? Dejará de verlo en su app.`)) return;
+  const prev = (ficha().tecnicos || []).slice(), t = prev.filter(x => x !== n);
+  S.bolo.ficha.tecnicos = t; cerrarSheet(); render(); guardarBoloCache(); vib(20);
+  try{ const r = await enviar('ckGuardarFicha', S.num, { tecnicos:t }); if(r!==null) toast(n+' ya no va a este bolo'); }
+  catch(e){ S.bolo.ficha.tecnicos = prev; render(); toast('No se guardó: '+e.message); }
 }
 async function guardarQuien(){
   const t = [...document.querySelectorAll('.chip.qv.on')].map(b=>b.dataset.n);
