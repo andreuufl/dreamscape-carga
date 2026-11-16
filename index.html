@@ -172,6 +172,14 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 .mapbtn .go{margin-left:auto;opacity:.6;display:flex}
 .aviso{background:var(--warnbg);color:var(--warn);padding:12px 14px;border-radius:14px;font-weight:650;font-size:14.5px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
 .furg{background:var(--card);border-radius:var(--r);padding:15px 16px;margin-bottom:12px;box-shadow:var(--sh)}
+.masinfo{margin:6px 0 14px}
+.masinfo>summary{list-style:none;display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--r);padding:13px 16px;box-shadow:var(--sh);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.masinfo>summary::-webkit-details-marker{display:none}
+.masinfo>summary .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.masinfo>summary .tx small{color:var(--mut,#6b7686);font-size:12.5px;font-weight:400}
+.masinfo>summary .go{transition:transform .2s;opacity:.6}
+.masinfo[open]>summary .go{transform:rotate(90deg)}
+.masinfo[open]>summary{margin-bottom:12px}
 .furg .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
 .furg .top>b{display:flex;align-items:center;gap:8px;font-size:16.5px}
 .furg .mat{font-size:20px;font-weight:800;letter-spacing:.06em;color:var(--txt)!important}
@@ -807,35 +815,31 @@ function vistaDet(){
     <div class="prog"><div class="ring"><svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="${CIR}" stroke-dashoffset="${CIR*(1-pct)}"/></svg><b>${Math.round(pct*100)}%</b></div>
       <div><div class="big">${vh}<span> / ${vt}</span></div><div class="pm">${soloMio()?'de lo tuyo · ':''}${KM().pm}${nInc?` · <span class="inc">${nInc} con incidencia</span>`:''}</div></div></div>
     ${hechos===tot && S.modo!=='dev' ? `<button class="next" onclick="irA('${sigPaso()}')">${ic('check')}<span>${KM().todo}<small>Siguiente paso: ${nombrePaso(sigPaso())}</small></span>${ic('chev')}</button>` : ''}
-    ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar y enviar» para mandar el resumen</small></span></div>` : ''}
+    ${hechos===tot && S.modo==='dev' && !f.vuelta ? `<div class="next dev">${ic('check')}<span>Todo devuelto al almacén<small>Pulsa «Terminar bolo»: te llega un único correo con el resumen</small></span></div>` : ''}
     ${segMio(k)}
     ${tarjetaConfirmar()}
-    ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
-    ${S.modo==='dev' ? tarjetaAlmacen() : ''}
-    ${S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : ''}
-    ${tarjetaMismoDia()}
     ${tarjetaUrgencias()}
+    ${S.modo==='carga' && hechos<tot ? tarjetaPlan('montaje') : ''}
     ${S.modo==='descSitio' ? tarjetaLugar(p) : ''}
-    ${S.modo==='dev' ? tarjetaValoracion() : ''}
+    ${S.modo==='dev' ? tarjetaAlmacen() : ''}
     ${hechos<tot ? `<button class="scan" onclick="abrirScan()">${ic('qr')}Escanear QR del material</button>` : ''}
-    ${tarjetaQuien()}
-    ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Resumen de vuelta enviado ${esc(f.vuelta)}</div>`:''}
+    ${S.modo==='dev' && f.vuelta?`<div class="done-banner dev" style="font-weight:600">Bolo terminado ${esc(f.vuelta)}</div>`:''}
     ${S.modo==='dev' && f.cerrado?`<div class="cerrado"><b>✅ Listo para facturar</b><div class="meta">Firmado y todo devuelto · ${esc(f.cerrado)}</div><div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn" onclick="verFactura()">${ic('receipt','s')} Factura</button>`:''}<button class="btn sec2" onclick="pedirValoracion()">${ic('star','s')} Valoración</button></div></div>`:''}
     ${S.modo==='dev' && esAdmin() ? (f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`) : ''}
-    ${tarjetaNotas()}
-    ${S.modo==='dev' ? tarjetaChecklistVuelta() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''}
+    ${S.modo==='dev' ? tarjetaChecklistVuelta() : ''}
     ${herr}
     ${listaPend}
     ${ok.length?`<div class="sec">${KM().donde} <span class="cnt">${ok.length}</span></div>${lst(ok)}`:''}
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${KM().como}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
     ${esFase() ? '' : bloqueExtras()}
+    ${plegado(tarjetaQuien() + tarjetaNotas() + tarjetaMismoDia() + (S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : '') + (S.modo==='dev' ? tarjetaValoracion() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''))}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
   }
   const faltan = tot - hechos;
   const sinInc = pend.filter(i=>!i.incidencia).length;
   const foot = foot0 !== null ? foot0 : !tot ? '' : S.modo!=='dev'
     ? `<div class="foot"><button class="btn ${hechos===tot?'okb':''}" onclick="irA('${sigPaso()}', ${faltan})">${hechos===tot?'Siguiente: '+nombrePaso(sigPaso()):'Siguiente · faltan '+faltan} ${ic('chev','s')}</button></div>`
-    : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('send','s')+' Terminar y enviar'))}</button></div>`;
+    : `<div class="foot"><button class="btn ${sinInc && !ficha().vuelta ? 'soft' : ''}" ${S.enviando?'disabled':''} onclick="vuelta()">${S.enviando?'Enviando…':(ficha().vuelta?'Reenviar resumen':(sinInc?'Terminar · faltan '+sinInc:ic('check','s')+' Terminar bolo'))}</button></div>`;
   const ptd = portada(S.num);
   return `<header class="${claseEstado(S.num)} ${ptd?'conpt':''}" ${ptd?`style="--pt:url(${ptd})"`:''}>
     <div class="brand" aria-label="Dreamscape Events & Productions"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
@@ -856,6 +860,11 @@ function stepper(tot){
 function irA(m, faltan){
   if(faltan && !confirm(`Faltan ${faltan} artículos sin marcar como ${KM().comos}. ¿Seguir igualmente?`)) return;
   S.modo = m; S.tocado = true; render(); window.scrollTo(0,0); animarPaso();
+}
+/* ---------- MÁS DEL BOLO: lo secundario va plegado; cada paso enseña solo lo esencial ---------- */
+function plegado(html, tit, sub){
+  html = String(html||'').trim(); if(!html) return '';
+  return `<details class="masinfo" ${S.masAbierto?'open':''} ontoggle="S.masAbierto=this.open"><summary><span class="ic">${ic('more','s')}</span><span class="tx"><b>${tit||'Más del bolo'}</b><small>${sub||'Equipo, notas y otros detalles'}</small></span><span class="go">${ic('chev','s')}</span></summary><div class="masin">${html}</div></details>`;
 }
 /* ---------- FASES: ida (carga almacén → descarga en el lugar) y vuelta (carga en el lugar → descarga en el almacén) ---------- */
 const MODOS = {
@@ -931,14 +940,14 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${dest}${tarjetaPlan('montaje')}${tarjetaQuien()}${tarjetaFurg()}${tarjetaUrgencias()}${tarjetaLugar(p)}${tarjetaFoto()}${btnSalida(p)}${mapas}<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${aviso}${tarjetaUrgencias()}${dest}${mapas}${btnSalida(p)}${tarjetaFurg()}${tarjetaPlan('montaje')}${tarjetaLugar(p)}${plegado(`<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>` + tarjetaQuien() + tarjetaFoto() + tarjetaNotas() + tarjetaFicha())}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
 function btnSalida(p){
   const h = SALIDAS[p.num] || ficha().salida;
-  if(S.enviando) return `<button class="salida" disabled>Enviando correo…</button>`;
-  if(h) return `<button class="salida sent" onclick="salida(true)">${ic('check','s')} Salida avisada ${esc(h)} · Reenviar</button>`;
+  if(S.enviando) return `<button class="salida" disabled>Guardando…</button>`;
+  if(h) return `<button class="salida sent" onclick="salida(true)">${ic('check','s')} Salida apuntada ${esc(h)}</button>`;
   return `<button class="salida" onclick="salida()">${ic('send')} Me dirijo al lugar</button>`;
 }
 
@@ -1094,11 +1103,11 @@ function quitarFoto(){ delete FOTOS[S.num]; guardarFotos(); render(); }
 function guardarSalida(num, h){ SALIDAS[num]=h; try{ localStorage.setItem('ck_salidas', JSON.stringify(SALIDAS)); }catch(e){} }
 async function salida(reenviar){
   if(S.enviando) return;
-  if(reenviar && !confirm('¿Reenviar el correo de salida?')) return;
+  if(reenviar){ toast('Salida ya apuntada'); return; }
   if((S.furgos||[]).length>1 && !furgoActual()){ toast('Elige primero la furgoneta'); return; }
   const num = S.num; S.enviando = true; render();
-  try{ const h = await enviar('ckSalida', num, FOTOS[num]||''); const hh = h || hora().slice(6); guardarSalida(num, hh); if(S.bolo){ S.bolo.ficha.salida = hh; guardarBoloCache(); } vib(30); if(h) toast('Correo de salida enviado'); }
-  catch(e){ toast('No se envió el correo: '+e.message); }
+  try{ const h = await enviar('ckSalida', num, FOTOS[num]||''); const hh = h || hora().slice(6); guardarSalida(num, hh); if(S.bolo){ S.bolo.ficha.salida = hh; guardarBoloCache(); } vib(30); if(h) toast('Salida apuntada'); }
+  catch(e){ toast('No se guardó: '+e.message); }
   S.enviando = false; render();
 }
 function salidaAuto(){
@@ -1113,9 +1122,9 @@ async function vuelta(){
   if(S.enviando) return;
   const falt = S.items.filter(i=>!i.devuelto).length, chv = ficha().checksVuelta || {}, nv = listaVuelta().filter(x=>!chv[x]).length;
   if(nv && !confirm(`Quedan ${nv} pasos de «Antes de guardar» sin marcar. ¿Seguir igualmente?`)) return;
-  if(!confirm(falt ? `Faltan ${falt} artículos por devolver. ¿Enviar el resumen igualmente?` : '¿Enviar el resumen de vuelta?')) return;
+  if(!confirm(falt ? `Faltan ${falt} artículos por devolver. ¿Terminar el bolo igualmente? Te llegará un único correo con el resumen y las incidencias.` : '¿Terminar el bolo? Te llegará un único correo con el resumen y las incidencias.')) return;
   S.enviando = true; render();
-  try{ const h = await enviar('ckVuelta', S.num); if(S.bolo){ S.bolo.ficha.vuelta = h || hora().slice(6); guardarBoloCache(); } vib(30); if(h) toast('Resumen de vuelta enviado'); S.enviando = false; render(); if(!((ficha().resumen||{})[yoNombre()])) setTimeout(abrirResumenBolo, 400); return; }
+  try{ const h = await enviar('ckVuelta', S.num); if(S.bolo){ S.bolo.ficha.vuelta = h || hora().slice(6); guardarBoloCache(); } vib(30); if(h) toast('Bolo terminado · resumen enviado a tu correo'); S.enviando = false; render(); if(!((ficha().resumen||{})[yoNombre()])) setTimeout(abrirResumenBolo, 400); return; }
   catch(e){ toast('No se envió: '+e.message); }
   S.enviando = false; render();
 }
@@ -1126,7 +1135,7 @@ function vistaMontaje(p, tot){
   const firma = f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaUrgencias()}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaEstadoLugar('lugar-llegada')}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${tarjetaFichaje(false,'montaje','salida')}${firma}${tarjetaExtrasCli()}${esAdmin()?tarjetaGastos():''}${tarjetaRentabilidad()}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaFichaje(false,'montaje','salida')}${plegado(tarjetaExtrasCli() + tarjetaEstadoLugar('lugar-llegada') + (esAdmin()?tarjetaGastos():'') + tarjetaRentabilidad() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, gastos, notas y ficha')}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1141,7 +1150,7 @@ function vistaDesmontaje(p, tot){
   const f = ficha();
   const dest = `<div class="dest"><div class="lbl">Desmontaje</div><div class="place">${esc(p.lugar||'Sin lugar')}</div><div class="when">${p.desmontaje ? 'Desmontaje '+esc(p.desmontaje) : 'Sin fecha de desmontaje en la pestaña Bolos'}</div></div>`;
   const rec = !esAdmin() ? '' : f.recogida ? `<div class="done-banner">${ic('sign','s')} Recogida firmada por ${esc(f.recogida.nombre)} · ${esc(f.recogida.hora)}</div>` : `<button class="salida firma" onclick="abrirFirma('recogida')">${ic('sign')} Firma de recogida del cliente</button>`;
-  const body = `${tarjetaUrgencias()}${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje','entrada')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${tarjetaMismoDia()}${tarjetaLugar(p)}${tarjetaExtrasCli()}${rec}${tarjetaNotas()}${tarjetaFicha()}`;
+  const body = `${tarjetaUrgencias()}${dest}${tarjetaPlan('desmontaje')}${tarjetaFichaje(false,'desmontaje','entrada')}${hitoBtn('llegadaDesm','He llegado al desmontaje',ic('pin'))}${hitoBtn('finDesmontaje','Desmontaje terminado',ic('sliders'))}${rec}${tarjetaLugar(p)}${plegado(tarjetaExtrasCli() + tarjetaMismoDia() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, notas y ficha')}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('cargaSitio')">Siguiente: recoger y cargar ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1162,12 +1171,12 @@ let FIRMA_TIPO = 'entrega';
 function abrirFirma(tipo){
   FIRMA_TIPO = tipo === 'recogida' ? 'recogida' : 'entrega';
   const rec = FIRMA_TIPO === 'recogida';
-  abrirSheet(`<h3>✍ ${rec?'Firma de recogida':'Firma del cliente'}</h3><div class="meta" style="margin-bottom:10px">${rec?'El cliente confirma que se recoge el material y en qué estado (las incidencias salen en el albarán). Te llega en PDF por correo.':'Se genera un albarán en PDF con el material montado y te llega por correo.'}</div>
+  abrirSheet(`<h3>✍ ${rec?'Firma de recogida':'Firma del cliente'}</h3><div class="meta" style="margin-bottom:10px">${rec?'El cliente confirma que se recoge el material y en qué estado (las incidencias salen en el albarán). Se guarda en PDF en el Drive.':'Se genera un albarán en PDF con el material montado y se guarda en el Drive.'}</div>
     <div class="row2"><label class="fld"><span>Nombre</span><input id="fNom" autocomplete="off" value="${esc(ficha().contacto||'')}"></label><label class="fld"><span>DNI (opcional)</span><input id="fDni" autocomplete="off"></label></div>
     ${rec?'<label class="fld"><span>Observaciones (opcional)</span><input id="fObs" autocomplete="off" placeholder="Ej. Falta recoger una tarima, se pasa el lunes"></label>':''}
     <div class="pad"><canvas id="pad"></canvas><span class="padhint">Firma aquí con el dedo</span></div>
     <button class="link" onclick="limpiarFirma()" style="padding:8px">Borrar firma</button>
-    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="btnFirmar" onclick="enviarFirma()">Firmar y enviar</button></div>`);
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="btnFirmar" onclick="enviarFirma()">Firmar</button></div>`);
   setTimeout(initPad, 260);
 }
 function initPad(){
@@ -1191,9 +1200,9 @@ async function enviarFirma(){
   let png = ''; for(const q of [.6,.45,.3]){ const s2 = document.createElement('canvas'); const r2 = Math.min(1, 700/w.width); s2.width = Math.round(w.width*r2); s2.height = Math.round(w.height*r2); s2.getContext('2d').drawImage(w,0,0,s2.width,s2.height); png = s2.toDataURL('image/jpeg', q); if(png.length < 45000) break; }
   const b = $('#btnFirmar'); b.disabled = true; b.textContent = 'Enviando…';
   try{
-    if(FIRMA_TIPO === 'recogida'){ const obs = (($('#fObs')||{}).value||'').trim(); const h = await enviar('ckFirmaRecogida', S.num, nom, dni, obs, png); if(S.bolo){ S.bolo.ficha.recogida = { nombre:nom, hora: h || hora() }; guardarBoloCache(); } cerrarSheet(); vib(30); toast('Recogida firmada y enviada'); render(); return; }
-    const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado y enviado'); render(); }
-  catch(e){ b.disabled = false; b.textContent = 'Firmar y enviar'; toast('No se envió: '+e.message); }
+    if(FIRMA_TIPO === 'recogida'){ const obs = (($('#fObs')||{}).value||'').trim(); const h = await enviar('ckFirmaRecogida', S.num, nom, dni, obs, png); if(S.bolo){ S.bolo.ficha.recogida = { nombre:nom, hora: h || hora() }; guardarBoloCache(); } cerrarSheet(); vib(30); toast('Recogida firmada'); render(); return; }
+    const h = await enviar('ckFirma', S.num, nom, dni, png); if(S.bolo){ S.bolo.ficha.firma = nom; S.bolo.ficha.firmaHora = h || hora(); guardarBoloCache(); } cerrarSheet(); vib(30); toast('Albarán firmado'); render(); }
+  catch(e){ b.disabled = false; b.textContent = 'Firmar'; toast('No se guardó: '+e.message); }
 }
 
 /* ---------- FICHA DEL BOLO ---------- */
@@ -3345,7 +3354,7 @@ function vistaTecnico(p){
     ${dias.length < 2 && esAdmin() ? `<button class="link" style="padding:8px 0 0" onclick="abrirDias()">¿Dura varios días? Pon las fechas ›</button>` : ''}</div>`;
   const resumen = `<div class="furg"><div class="top"><b>${ic('today','s')} Horas por día</b><span class="meta">Total ${fmtH(hTot)} · ${trab} ${trab===1?'día':'días'}</span></div>${filas}</div>`;
   const mat = esAdmin() ? `<button class="link" onclick="ponerTipoBolo('no')">Este bolo sí lleva material › ver la carga</button>` : '';
-  return `${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}${cab}${big}${tarjetaUrgencias()}${resumen}${tarjetaLugar(p)}${tarjetaNotas()}${tarjetaFicha()}${mat}
+  return `${S.actualizando?`<div class="upd"><div class="spin"></div>Actualizando…</div>`:''}${cab}${big}${tarjetaUrgencias()}${tarjetaLugar(p)}${plegado(resumen + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Horas por día, notas y ficha')}${mat}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
 }
 setInterval(()=>{ const e = $('#tecReloj'); if(e) e.textContent = fmtH(+e.dataset.base + (Date.now() - +e.dataset.em)/36e5); }, 20000);
