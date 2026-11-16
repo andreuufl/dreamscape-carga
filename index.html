@@ -853,13 +853,32 @@ function vistaDet(){
 function stepper(tot){
   aplicarFases();
   const n = k => S.items.filter(i=>i[k]).length, f = ficha();
-  const ok = { carga: n('cargado')===tot, ruta: !!(SALIDAS[S.num] || f.salida), descSitio: n('descSitio')===tot, montaje: !!(f.finMontaje || f.firma), desm: !!f.finDesmontaje, cargaSitio: n('cargaSitio')===tot, dev: n('devuelto')===tot };
+  const ok = { carga: n('cargado')===tot, ruta: !!(S.bolo ? f.salida : SALIDAS[S.num]), descSitio: n('descSitio')===tot, montaje: !!(f.finMontaje || f.firma), desm: !!f.finDesmontaje, cargaSitio: n('cargaSitio')===tot, dev: n('devuelto')===tot };
   const pasos = PASOS().map((x,i)=>[x[0], String(i+1), x[1]]);
   return `<div class="ida" style="grid-template-columns:${esAdmin()?'4fr 3fr':'1fr 1fr'}"><span>Ida</span><span>Vuelta</span></div><div class="steps many" style="grid-template-columns:repeat(${pasos.length},1fr)">${pasos.map(([m,n,t])=>`<button class="step ${S.modo===m?'on':''} ${ok[m]?'ok':''}" onclick="irA('${m}')"><span class="n">${ok[m]?'✓':n}</span><span class="t">${t}</span></button>`).join('<span class="ln"></span>')}</div>`;
 }
 function irA(m, faltan){
   if(faltan && !confirm(`Faltan ${faltan} artículos sin marcar como ${KM().comos}. ¿Seguir igualmente?`)) return;
   S.modo = m; S.tocado = true; render(); window.scrollTo(0,0); animarPaso();
+}
+/* ---------- NO ACTIVAR UN BOLO POR ERROR antes de su día: doble verificación ---------- */
+const DIA_OK = {};
+function fueraDeDia(num){
+  const p = (S.presus||[]).find(x=>x.num===num); if(!p) return false;
+  const d = diasLista(p); if(!d.length) return false;
+  return diaDe(Date.now()) < d[0];
+}
+function okDia(num, que){
+  if(!num || !fueraDeDia(num) || DIA_OK[num]) return true;
+  const p = S.presus.find(x=>x.num===num) || {}, d = diasLista(p);
+  const ok = confirm(`⚠️ Hoy no es el día de este bolo (es el ${fDia(d[0], true)}).\n\n¿Seguro que quieres ${que||'empezar'} ahora?`);
+  if(ok) DIA_OK[num] = true;
+  return ok;
+}
+async function quitarSalida(){
+  const num = S.num; delete SALIDAS[num]; try{ localStorage.setItem('ck_salidas', JSON.stringify(SALIDAS)); }catch(e){}
+  if(S.bolo){ S.bolo.ficha.salida = ''; guardarBoloCache(); } render();
+  try{ await enviar('ckHito', num, 'salida', true, null); toast('Salida quitada'); }catch(e){ toast('No se guardó: '+e.message); }
 }
 /* ---------- MÁS DEL BOLO: lo secundario va plegado; cada paso enseña solo lo esencial ---------- */
 function plegado(html, tit, sub){
@@ -945,7 +964,7 @@ function vistaRuta(p, tot){
   return { body, foot };
 }
 function btnSalida(p){
-  const h = SALIDAS[p.num] || ficha().salida;
+  const h = S.bolo ? ficha().salida : SALIDAS[p.num];
   if(S.enviando) return `<button class="salida" disabled>Guardando…</button>`;
   if(h) return `<button class="salida sent" onclick="salida(true)">${ic('check','s')} Salida apuntada ${esc(h)}</button>`;
   return `<button class="salida" onclick="salida()">${ic('send')} Me dirijo al lugar</button>`;
@@ -1103,7 +1122,8 @@ function quitarFoto(){ delete FOTOS[S.num]; guardarFotos(); render(); }
 function guardarSalida(num, h){ SALIDAS[num]=h; try{ localStorage.setItem('ck_salidas', JSON.stringify(SALIDAS)); }catch(e){} }
 async function salida(reenviar){
   if(S.enviando) return;
-  if(reenviar){ toast('Salida ya apuntada'); return; }
+  if(reenviar){ if(confirm('¿Quitar la hora de salida? (por si se marcó por error)')) quitarSalida(); return; }
+  if(!okDia(S.num, 'apuntar la salida')) return;
   if((S.furgos||[]).length>1 && !furgoActual()){ toast('Elige primero la furgoneta'); return; }
   const num = S.num; S.enviando = true; render();
   try{ const h = await enviar('ckSalida', num, FOTOS[num]||''); const hh = h || hora().slice(6); guardarSalida(num, hh); if(S.bolo){ S.bolo.ficha.salida = hh; guardarBoloCache(); } vib(30); if(h) toast('Salida apuntada'); }
@@ -1111,7 +1131,7 @@ async function salida(reenviar){
   S.enviando = false; render();
 }
 function salidaAuto(){
-  if(SALIDAS[S.num] || ficha().salida || S.enviando) return;
+  if(SALIDAS[S.num] || ficha().salida || S.enviando || fueraDeDia(S.num)) return;
   const num = S.num, now = new Date(), z=n=>String(n).padStart(2,'0');
   guardarSalida(num, z(now.getHours())+':'+z(now.getMinutes()));
   if(COLA.length || S.offline){ COLA.push({ fn:'ckSalida', args:[num, FOTOS[num]||''], post:true }); guardarCola(); }
@@ -1156,6 +1176,7 @@ function vistaDesmontaje(p, tot){
 }
 async function hito(campo, borrar){
   if(!S.bolo) return;
+  if(!borrar && !okDia(S.num, 'apuntar esto')) return;
   if(campo==='finMontaje' && !borrar && await faltaFotoMontaje()){ toast('Antes de terminar, sube al menos una foto del montaje'); const i = $('#fmIn'); if(i){ i.scrollIntoView({ block:'center', behavior:'smooth' }); setTimeout(()=>i.click(), 500); } return; }
   if(campo==='finMontaje' && !borrar){ const l=((S.yo||{}).config||{}).checklist||[], ch=S.bolo.ficha.checks||{}, f=l.filter(x=>!ch[x]).length; if(f && !confirm(`Quedan ${f} pasos de la checklist sin marcar. ¿Terminar el montaje igualmente?`)) return; }
   if(borrar && !confirm('¿Borrar esta hora?')) return;
@@ -1169,6 +1190,7 @@ async function hito(campo, borrar){
 let firmaTrazo = false;
 let FIRMA_TIPO = 'entrega';
 function abrirFirma(tipo){
+  if(!okDia(S.num, 'firmar')) return;
   FIRMA_TIPO = tipo === 'recogida' ? 'recogida' : 'entrega';
   const rec = FIRMA_TIPO === 'recogida';
   abrirSheet(`<h3>✍ ${rec?'Firma de recogida':'Firma del cliente'}</h3><div class="meta" style="margin-bottom:10px">${rec?'El cliente confirma que se recoge el material y en qué estado (las incidencias salen en el albarán). Se guarda en PDF en el Drive.':'Se genera un albarán en PDF con el material montado y se guarda en el Drive.'}</div>
@@ -1588,6 +1610,7 @@ async function vigilarFichaje(){
   }catch(e){}
 }
 async function ficharDesdeAviso(num, fase){
+  if(!okDia(num, 'fichar')) return;
   if(S.num !== num || S.vista !== 'det'){ await abrir(num); let n = 0; while(!S.bolo && n++ < 30) await new Promise(r=>setTimeout(r,300)); }
   if(!S.bolo){ toast('No se pudo abrir el bolo'); return; }
   if(fichaAbierta()){ toast('Ya estabas fichado'); return; }
@@ -1757,6 +1780,7 @@ function hora(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${z
 async function toggle(fila, soloMarcar, sinUndo){
   const it = S.items.find(i=>i.fila===fila); if(!it) return;
   if(soloMarcar && it[KM().k]) return;
+  if(!it[KM().k] && !okDia(S.num, 'marcar material')) return;
   const modo = S.modo, k = KM(modo).k, hk = KM(modo).hk;
   const prev = [it[k], it[hk]];
   if(esFase(modo) && !S.bolo){ toast('Espera un momento: cargando el bolo'); return; }
@@ -1774,6 +1798,7 @@ async function toggle(fila, soloMarcar, sinUndo){
   catch(e){ it[k]=prev[0]; it[hk]=prev[1]; if(esFase(modo)){ faseLocal(modo, it.material, prev[0] ? prev[1] : ''); guardarBoloCache(); } actualizarResumen(); render(); toast('No se guardó: '+e.message); }
 }
 async function todo(valor){
+  if(valor && !okDia(S.num, 'marcar material')) return;
   const modo=S.modo, k = KM(modo).k, hk = KM(modo).hk;
   if(!confirm(valor ? `¿Marcar los ${S.items.length} artículos como ${KM(modo).comos}?` : '¿Desmarcar todos?')) return;
   const prev = S.items.map(i=>[i[k],i[hk]]);
@@ -2018,6 +2043,7 @@ function tarjetaChecklist(){
     ${lista.map((x,i)=>`<button class="ck ${ch[x]?'on':''}" onclick="marcarCheck(${i})"><span class="cb">${ch[x]?'✓':''}</span><span><b>${esc(x)}</b>${ch[x]?`<small>${esc(ch[x])}</small>`:''}</span></button>`).join('')}</div>`;
 }
 async function marcarCheck(i){
+  if(!okDia(S.num, 'marcar la checklist')) return;
   const t = S.yo.config.checklist[i]; if(!S.bolo) return;
   const ch = S.bolo.ficha.checks = S.bolo.ficha.checks || {};
   const v = !ch[t]; if(v) ch[t] = hora() + ' · ' + ((S.yo.usuario||{}).nombre||''); else delete ch[t];
@@ -2533,12 +2559,14 @@ function bloqueExtras(){
     ${siempre.length?`<div class="sec sl"><span>Siempre llevar <span class="cnt">${hs}/${siempre.length}</span></span>${hs<siempre.length?`<button onclick="todoExtra('siempre',true)">Marcar todo</button>`:''}</div>${siempre.map(filaExtra).join('')}`:''}`;
 }
 async function marcarExtra(tipo, nombre){
+  if(!okDia(S.num, 'marcar material')) return;
   const f = S.bolo.ficha, c = S.modo==='dev' ? 'd' : 'c', v = (()=>{ if(tipo==='siempre'){ f.siempre = f.siempre||{}; const o = f.siempre[nombre] = f.siempre[nombre]||{}; if(o[c]){ delete o[c]; return false; } o[c] = hora(); return true; } const o = (f.extra||[]).find(e=>e.nombre===nombre); if(!o) return false; if(o[c]){ delete o[c]; return false; } o[c] = hora(); return true; })();
   vib(v?15:[8,40,8]); guardarBoloCache(); render();
   try{ const r = await enviar('ckExtra', S.num, 'marcar', { tipo, nombre, modo:S.modo, valor:v }); if(r){ f.siempre = r.siempre; f.extra = r.extra; guardarBoloCache(); render(); } }
   catch(e){ toast('No se guardó: '+e.message); abrir(S.num, true); }
 }
 async function todoExtra(tipo, valor){
+  if(valor && !okDia(S.num, 'marcar material')) return;
   const f = S.bolo.ficha, c = S.modo==='dev' ? 'd' : 'c', h = hora();
   if(tipo==='siempre'){ f.siempre = f.siempre||{}; ((S.yo.config||{}).siempre||[]).forEach(s=>{ const o = f.siempre[s.nombre] = f.siempre[s.nombre]||{}; if(valor) o[c] = o[c]||h; else delete o[c]; }); }
   guardarBoloCache(); render();
@@ -3274,6 +3302,7 @@ function tarjetaFichaje(oscuro, fase, rol){
 }
 setInterval(()=>{ const e = $('#fichT'); if(e) e.textContent = e.textContent.replace(/·.*$/, '· ' + durTxt(Date.now() - +e.dataset.em)); }, 30000);
 async function fichar(tipo, fase){
+  if(!okDia(S.num, 'fichar')) return;
   fase = fase || faseFichaje();
   if(tipo==='salgo' && !confirm(`¿Terminas el ${fase}? Se apuntarán tus horas en el Drive.`)) return;
   vib(20); toast('Guardando con tu ubicación…');
@@ -3361,6 +3390,7 @@ setInterval(()=>{ const e = $('#tecReloj'); if(e) e.textContent = fmtH(+e.datase
 
 async function ficharTec(que){
   if(!S.bolo) return;
+  if(!okDia(S.num, 'fichar')) return;
   const hoy = diaDe(Date.now());
   if(que==='fin' && !confirm('¿Terminas por hoy? Se apuntan tus horas de hoy.')) return;
   vib(20); toast(que==='entrada' ? 'Fichando con tu ubicación…' : 'Guardando…');
@@ -3758,6 +3788,7 @@ function tarjetaChecklistVuelta(){
     ${l.map((x,i)=>`<button class="ck ${ch[x]?'on':''}" onclick="marcarVuelta(${i})"><span class="cb">${ch[x]?'✓':''}</span><span><b>${esc(x)}</b>${ch[x]?`<small>${esc(ch[x])}</small>`:''}</span></button>`).join('')}</div>`;
 }
 async function marcarVuelta(i){
+  if(!okDia(S.num, 'marcar la vuelta')) return;
   const x = listaVuelta()[i], f = S.bolo.ficha; f.checksVuelta = f.checksVuelta || {};
   const val = !f.checksVuelta[x], prev = f.checksVuelta[x];
   if(val) f.checksVuelta[x] = yoNombre() + ' · ' + hora(); else delete f.checksVuelta[x];
