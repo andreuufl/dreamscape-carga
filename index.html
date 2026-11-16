@@ -998,7 +998,7 @@ function tarjetaConfirmar(){
   if(esAdmin() || !S.bolo) return '';
   const c = miConf(), v = c.voy, pend = !v || !c.leido;
   if(v && v.si){
-    if(c.leido) return `<div class="cfst" style="margin:0 0 12px">${ic('check','s')}<span>Confirmado que vas · material revisado<small>${esc(v.h)}</small></span><button onclick="confirmar('voy',null)">Cambiar</button></div>`;
+    if(c.leido) return ''; // ya ha confirmado que va y ha revisado el material: no se vuelve a preguntar
     return `<button class="ck" style="border:0;background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--sh)" onclick="confirmar('leido',true)"><span class="cb"></span><span><b>He revisado todo el material y lo tengo claro</b><small>Ya has confirmado que vas · ${esc(v.h)}</small></span></button>`;
   }
   const voy = !v
