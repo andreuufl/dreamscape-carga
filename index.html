@@ -556,6 +556,23 @@ main .sec{position:sticky;top:var(--hdr,0px);z-index:3;background:var(--bg);marg
 .tabbar button.on svg{background:rgba(201,166,107,.2)}
 .tabbar button:active svg{transform:scale(.92)}
 .tabbar .bdg{left:calc(50% + 8px)}
+/* ---------- AJUSTE MÓVIL (iPhone / Safari): nada se sale de la pantalla ---------- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
+.row2>*,.hgrid>*,.hgrid label,.fld,.grow>*{min-width:0}
+input,select,textarea{max-width:100%}
+.fld input,.hgrid input,.inp{min-width:0}
+input[type=date],input[type=time],input[type=datetime-local],input[type=month]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;min-height:48px;line-height:1.2}
+input[type=date]::-webkit-date-and-time-value,input[type=datetime-local]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=time]::-webkit-date-and-time-value{text-align:center;margin:0}
+.sheet{width:100%;max-height:90vh;max-height:calc(var(--vvh,100dvh) * .92);overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+.sheet img,.sheet canvas,.sheet table,.sheet video,.sheet iframe{max-width:100%}
+.sheet .seg.mini{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.sheet .seg.mini button{flex:1 1 auto;min-width:0}
+.sheet .chips{max-width:100%}
+.sheet .row2 .btn{min-width:0}
+.toast{max-width:calc(100vw - 32px);text-align:center}
+@media (max-width:360px){.row2{gap:8px}.sheet{padding-left:14px;padding-right:14px}}
 </style>
 </head>
 <body>
@@ -3501,6 +3518,10 @@ function geocodificar(lugar){
   const q = destino(lugar); if(!q) return Promise.resolve(null);
   if(GEO[q] !== undefined) return Promise.resolve(GEO[q]);
   const intentos = [q]; const partes = String(lugar).split('|').map(s=>s.trim()).filter(Boolean); if(partes.length > 1) intentos.push(partes.slice(1).join(', '));
+  /* Direcciones con planta, edificio, s/n…: se prueba quitando lo que el mapa no entiende */
+  const limpia = t => String(t).replace(/\b(\d+\s*[ªºa]?\s*(planta|piso|pl\.?)|planta\s+\w+|edif(icio)?\.?\s+[\wÁÉÍÓÚáéíóúñÑ]+|local\s+\w+|nave\s+\w+|puerta\s+\w+|s\/n)\b,?/gi, '').replace(/\s*,\s*,+/g, ',').replace(/^[\s,]+|[\s,]+$/g, '').replace(/\s{2,}/g, ' ');
+  intentos.slice().forEach(t => { const c = limpia(t); if(c && intentos.indexOf(c) < 0) intentos.push(c); const tr = c.split(',').map(x=>x.trim()).filter(Boolean); for(let i = 1; i < tr.length - 1; i++){ const u = tr.slice(i).join(', '); if(intentos.indexOf(u) < 0) intentos.push(u); } });
+  const cp = String(q).match(/\b(0[1-9]|[1-4]\d|5[0-2])\d{3}\b/); if(cp && intentos.indexOf(cp[0]+' España') < 0) intentos.push(cp[0]+' España');
   const al = (((S.yo||{}).config)||{}).almacenGeo, zona = al ? '&bounded=1&viewbox=' + [al.lon-1.6, al.lat+1.3, al.lon+1.6, al.lat-1.3].map(n=>n.toFixed(3)).join(',') : '';
   const una = (t, z) => fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es,ad,fr,pt&accept-language=es' + (z||'') + '&q=' + encodeURIComponent(t)).then(r=>r.json()).then(j=>j && j[0] ? { lat:+j[0].lat, lon:+j[0].lon, n: String(j[0].display_name||'').split(',').slice(0,3).join(',').trim() } : null);
   const pruebas = []; if(zona) intentos.forEach(t => pruebas.push([t, zona])); intentos.forEach(t => pruebas.push([t, '']));
@@ -3952,6 +3973,11 @@ function tarjetaRentabilidad(){
 
 /* ---------- RENDER ---------- */
 function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); centrarPaso(); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
+/* Altura real visible en el iPhone (barra de Safari y teclado): las ventanas nunca quedan cortadas */
+(function(){ const vv = window.visualViewport; const fijar = () => { try{ document.documentElement.style.setProperty('--vvh', Math.round(vv ? vv.height : window.innerHeight) + 'px'); }catch(e){} };
+  fijar(); if(vv){ vv.addEventListener('resize', fijar); vv.addEventListener('scroll', fijar); } window.addEventListener('orientationchange', () => setTimeout(fijar, 300));
+  document.addEventListener('focusin', e => { const t = e.target; if(t && t.closest && t.closest('.sheet') && /INPUT|TEXTAREA|SELECT/.test(t.tagName)) setTimeout(() => { try{ t.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(x){} }, 320); });
+})();
 function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
