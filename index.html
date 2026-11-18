@@ -3513,6 +3513,8 @@ async function faltaFotoMontaje(){
 
 /* ---------- 7 y 8. GEOGRAFÍA: mapa, tiempo y hora de salida ---------- */
 let GEO = {}; try{ localStorage.removeItem('ck_geo'); GEO = JSON.parse(localStorage.getItem('ck_geo2')||'{}') || {}; }catch(e){}
+/* Las direcciones que no se encontraron se vuelven a buscar al abrir la app (por si se ha corregido la dirección o mejorado la búsqueda) */
+Object.keys(GEO).forEach(k => { if(GEO[k] === null) delete GEO[k]; });
 let geoCola = Promise.resolve();
 function geocodificar(lugar){
   const q = destino(lugar); if(!q) return Promise.resolve(null);
