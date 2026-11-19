@@ -556,6 +556,23 @@ main .sec{position:sticky;top:var(--hdr,0px);z-index:3;background:var(--bg);marg
 .tabbar button.on svg{background:rgba(201,166,107,.2)}
 .tabbar button:active svg{transform:scale(.92)}
 .tabbar .bdg{left:calc(50% + 8px)}
+/* ---------- MENOS CARGA EN PANTALLA: bloques plegables ---------- */
+details.sldet>summary,details.pldet>summary{list-style:none;cursor:pointer}
+details.sldet>summary::-webkit-details-marker,details.pldet>summary::-webkit-details-marker{display:none}
+.slver{font-size:12px;font-weight:700;color:var(--gold,#c9a66b);margin-left:6px;text-transform:none;letter-spacing:0}
+details.pldet{margin-top:8px}
+details.pldet>summary{font-size:13.5px;font-weight:700;color:var(--gold,#c9a66b);padding:4px 0}
+details.pldet>summary::after{content:" ▾"}
+details.pldet[open]>summary::after{content:" ▴"}
+/* ---------- INFO PRÁCTICA y DICTADO ---------- */
+.ipr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.ipi{display:flex;gap:8px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 11px;box-shadow:var(--sh);font-size:14.5px;line-height:1.3;min-width:0;word-break:break-word}
+.ipi small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:1px}
+.ipe{font-size:18px;line-height:1.2}
+.ipcall{display:inline-block;margin-left:4px;font-weight:700;color:var(--gold,#c9a66b)}
+.mic{display:inline-flex;align-items:center;gap:6px;margin:-6px 0 12px;padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--mut);font:inherit;font-size:13.5px;font-weight:650}
+.mic.on{border-color:#ef4444;color:#ef4444;animation:micp 1.2s ease-in-out infinite}
+@keyframes micp{50%{opacity:.55}}
 /* ---------- AJUSTE MÓVIL (iPhone / Safari): nada se sale de la pantalla ---------- */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{max-width:100%;overflow-x:hidden}
@@ -913,7 +930,7 @@ function vistaDet(){
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">${ic('refresh')}</button></div>
     <h1 class="htit">${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1>
     ${tot && !soloT ? stepper(tot) : ''}
-  </header><main class="${S.modo==='dev'?'mode-dev':''}">${body}</main>${foot}`;
+  </header><main class="${S.modo==='dev'?'mode-dev':''}">${tarjetaInfoPractica()}${body}</main>${foot}`;
 }
 function centrarPaso(){ try{ const h = document.querySelector('#app > header'); document.documentElement.style.setProperty('--hdr', (h ? h.offsetHeight : 0)+'px'); }catch(e){} try{ const c = $('#pasos2'), o = c && c.querySelector('.paso.on'); if(o) c.scrollLeft = o.offsetLeft - (c.clientWidth - o.offsetWidth)/2; }catch(e){} }
 function stepper(tot){
@@ -1307,6 +1324,7 @@ function abrirFicha(){
   const f = ficha(), eq = S.bolo.equipo||[], sel = new Set(f.tecnicos||[]);
   const campo = (id, t, ph, tipo) => `<label class="fld"><span>${t}</span><input id="b_${id}" type="${tipo||'text'}" value="${esc(f[id])}" placeholder="${ph}" autocomplete="off"></label>`;
   abrirSheet(`<h3>ℹ Ficha del bolo</h3><div class="meta" style="margin-bottom:12px">${esc(S.bolo.cliente||'')}</div>
+    ${esAdmin() ? campo('titulo','Título del bolo (el de la casilla K16 del Drive)','Ej. CANDLELIGHT - BCN') : ''}
     <div class="row2">${campo('contacto','Contacto en el lugar','Nombre')}${campo('telefono','Teléfono','600 000 000','tel')}</div>
     ${esAdmin() ? `<div class="fld"><span>Tipo de bolo</span><div class="seg mini" id="b_tipo" style="margin:6px 0 0">${[['','Automático'],['si','Solo técnico'],['no','Con material']].map(([v,t])=>`<button type="button" data-v="${v}" class="${String(f.soloTecnico||'')===v||(v==='si'&&f.soloTecnico==='true')?'on':''}" onclick="[...this.parentNode.children].forEach(b=>b.classList.remove('on'));this.classList.add('on')">${t}</button>`).join('')}</div><div class="meta" style="margin-top:4px">Automático: si no tiene material, sale como «Solo técnico» (fichar por días).</div></div>
     <div class="row2"><label class="fld"><span>Primer día</span><input type="date" id="b_dIni" value="${(String(f.dias||'').split('|')[0])||''}"></label><label class="fld"><span>Último día</span><input type="date" id="b_dFin" value="${(String(f.dias||'').split('|')[1])||''}"></label></div>` : ''}
@@ -1314,6 +1332,9 @@ function abrirFicha(){
     ${selectorHoras(f)}
     <label class="fld"><span>Acceso</span><textarea id="b_acceso" rows="2" placeholder="Ej. Entrada por la calle de atrás, montacargas hasta las 18h">${esc(f.acceso)}</textarea></label>
     <label class="fld"><span>Notas</span><textarea id="b_notas" rows="2">${esc(f.notas)}</textarea></label>
+    <div class="fld"><span>Info práctica para el equipo</span></div>
+    <div class="row2">${campo('ropa','Ropa','Ej. todo de negro')}${campo('comida','Comida','Ej. catering a las 14h')}</div>
+    <div class="row2">${campo('aparcar','Dónde aparcar','Ej. parking del muelle')}${campo('emergencia','Contacto de emergencia','Nombre y teléfono')}</div>
     <div class="fld"><span>Técnicos que van</span><div class="chips" style="margin:6px 0 0">${eq.length? eq.map(t=>`<button class="chip tec ${sel.has(t.nombre)?'on':''}" data-n="${esc(t.nombre)}" onclick="this.classList.toggle('on')">${esc(t.nombre)}</button>`).join('') : '<span class="meta">Añade personas en la pestaña Equipo.</span>'}</div></div>
     <div class="row2" style="margin-top:14px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarFichaUI()">Guardar</button></div>`);
 }
@@ -1335,7 +1356,9 @@ function selectorHoras(f){
     <label class="fld"><span>Otros horarios (opcional)</span><input id="hr_otros" value="${esc(H.otros.join(' · '))}" placeholder="Ej. Prueba de sonido 17:00" autocomplete="off"></label>`;
 }
 function horarioDeSelector(){
-  const l = HORAS_ETQ.map(([k]) => { const v = ($('#hr_'+k)||{}).value; return v ? ({ carga:'Carga', montaje:'Montaje', evento:'Evento', desmontaje:'Desmontaje' })[k] + ' ' + v : ''; }).filter(Boolean);
+  /* Si el montaje ya tenía hora de fin (p. ej. «Montaje 17:00 – 19:00» del Drive) y no cambias la de inicio, se conserva */
+  const pm = String((ficha()||{}).horario||'').match(/(?:^|·)\s*Montaje\s+(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/i);
+  const l = HORAS_ETQ.map(([k]) => { const v = ($('#hr_'+k)||{}).value; if(!v) return ''; let t = ({ carga:'Carga', montaje:'Montaje', evento:'Evento', desmontaje:'Desmontaje' })[k] + ' ' + v; if(k==='montaje' && pm && pm[1].padStart(5,'0')===v) t += ' – ' + pm[2]; return t; }).filter(Boolean);
   const o = (($('#hr_otros')||{}).value||'').trim(); if(o) l.push(o);
   return l.join(' · ');
 }
@@ -1375,9 +1398,10 @@ async function pintarPlan(tipo){
   filas.push([tipo==='desmontaje' ? 'Llegada para desmontar' : 'Llegada y montaje', llegada, esc(dirBolo(p) || (dest.n ? dest.n : destino(p.lugar)) || '')]);
   if(tipo==='montaje' && H.evento != null) filas.push(['Empieza el evento', H.evento, '']);
   if(tipo==='desmontaje') filas.push(['Vuelta al almacén (aprox.)', null, `${min} min de trayecto + lo que dure el desmontaje`]);
-  const html = cab + `<div class="plst">${filas.map(([t,h,sub])=>`<div class="plrow"><b>${h==null?'—':hhmm(h)}</b><span>${t}${sub?`<small>${sub}</small>`:''}</span></div>`).join('')}</div>
+  const html = cab + `<div class="plst">${filas.map(([t,h])=>`<div class="plrow"><b>${h==null?'—':hhmm(h)}</b><span>${t}</span></div>`).join('')}</div>
+    <details class="pldet"><summary>Detalles del plan</summary><div class="plst">${filas.filter(x=>x[2]).map(([t,h,sub])=>`<div class="plrow"><b>${h==null?'—':hhmm(h)}</b><span>${t}<small>${sub}</small></span></div>`).join('')}</div>
     <button class="link" style="padding:8px 0 0;text-align:left" onclick="desdeAqui(${tipo==='montaje' ? (H.carga != null && H.carga < salida ? H.carga : salida - Math.max(20, Math.round((10 + 2*n)/5)*5)) : salida}, this)">${ic('nav','s')} ¿A qué hora salgo de donde estoy hacia el almacén?</button>
-    <div class="meta" style="font-size:12px">El margen por tráfico es una estimación según la franja horaria (más en hora punta).</div>`;
+    <div class="meta" style="font-size:12px">El margen por tráfico es una estimación según la franja horaria (más en hora punta).</div></details>`;
   PLAN[clave] = html; el.innerHTML = html;
 }
 async function desdeAqui(horaAlmacen, btn){
@@ -1434,9 +1458,13 @@ function tarjetaLugar(p){
   if(!(L in S.lugares)){ S.lugares[L] = undefined; call('ckLugar', L).then(r=>{ S.lugares[L] = r || null; if(S.vista==='det' && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{ S.lugares[L] = null; }); }
   const d = S.lugares[L];
   if(d === undefined) return `<div class="furg"><div class="top"><b>${ic('pin','s')} Ficha del lugar</b></div><div class="meta">Cargando…</div></div>`;
-  const filas = d ? LUGAR_CAMPOS.filter(([k])=>d[k]).map(([k,t])=>`<dt>${t}</dt><dd>${k==='telefono'?`<a href="tel:${esc(tel(d[k]))}">${esc(d[k])}</a>`:esc(d[k])}</dd>`).join('') : '';
+  const fila = ([k,t]) => `<dt>${t}</dt><dd>${k==='telefono'?`<a href="tel:${esc(tel(d[k]))}">${esc(d[k])}</a>`:esc(d[k])}</dd>`;
+  const PRIM = ['acceso','carga','contacto','telefono'];
+  const prim = d ? LUGAR_CAMPOS.filter(([k])=>d[k] && PRIM.includes(k)).map(fila).join('') : '';
+  const resto = d ? LUGAR_CAMPOS.filter(([k])=>d[k] && !PRIM.includes(k)).map(fila).join('') : '';
+  const filas = prim + resto;
   return `<div class="furg"><div class="top"><b>${ic('pin','s')} Ficha del lugar</b><button class="edit" onclick="abrirLugar()">${d?'Editar':'Rellenar'}</button></div>
-    ${filas ? `<dl class="kv" style="margin:6px 0 0">${filas}</dl><div class="meta" style="margin-top:6px;font-size:12px">Actualizado ${esc(d.act||'')}${d.por?' por '+esc(d.por):''} · sirve para todos los bolos en ${esc(destino(L).split(',')[0])}</div>` : `<div class="meta">Aún no hay datos de ${esc(destino(L).split(',')[0])}: acceso, carga, electricidad… Rellénalo una vez y saldrá en los próximos bolos aquí.</div>`}</div>`;
+    ${filas ? `${prim?`<dl class="kv" style="margin:6px 0 0">${prim}</dl>`:''}${resto?`<details class="pldet"${prim?'':' open'}><summary>Más del lugar (dirección, electricidad, muelle…)</summary><dl class="kv" style="margin:6px 0 0">${resto}</dl></details>`:''}<div class="meta" style="margin-top:6px;font-size:12px">Actualizado ${esc(d.act||'')}${d.por?' por '+esc(d.por):''} · sirve para todos los bolos en ${esc(destino(L).split(',')[0])}</div>` : `<div class="meta">Aún no hay datos de ${esc(destino(L).split(',')[0])}: acceso, carga, electricidad… Rellénalo una vez y saldrá en los próximos bolos aquí.</div>`}</div>`;
 }
 function abrirLugar(){
   const p = S.presus.find(x=>x.num===S.num) || {}, d = S.lugares[p.lugar] || {};
@@ -1729,13 +1757,15 @@ async function guardarDireccion(){
   catch(e){ S.bolo.ficha.direccion = prev; render(); toast('No se guardó: '+e.message); }
 }
 async function guardarFichaUI(){
-  const patch = {}; ['contacto','telefono','acceso','notas','direccion'].forEach(c=> patch[c] = ($('#b_'+c).value||'').trim());
+  const patch = {}; ['contacto','telefono','acceso','notas','direccion','ropa','comida','aparcar','emergencia','titulo'].forEach(c=> { const el = $('#b_'+c); if(el) patch[c] = (el.value||'').trim(); });
   if(patch.direccion !== String(ficha().direccion||'')) delete CLIMA[S.num];
   patch.horario = horarioDeSelector();
   patch.tecnicos = [...document.querySelectorAll('.chip.tec.on')].map(b=>b.dataset.n);
   const tb = document.querySelector('#b_tipo button.on'); if(tb) patch.soloTecnico = tb.dataset.v;
   if($('#b_dIni')){ let a = $('#b_dIni').value, b = $('#b_dFin').value || a; if(a && b < a){ const t = a; a = b; b = t; } patch.dias = a ? a+'|'+b : ''; }
-  const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render();
+  const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet();
+  if('titulo' in patch){ const pp = S.presus.find(x=>x.num===S.num); if(pp && patch.titulo){ pp.evento = patch.titulo; pp.titulo = patch.titulo; cacheSet('ckPresupuestos[]', S.presus); } }
+  render();
   guardarBoloCache();
   try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(r!==null) toast('Ficha guardada'); }
   catch(e){ S.bolo.ficha = prev; render(); toast('No se guardó: '+e.message); }
@@ -2034,6 +2064,7 @@ function abrirMenu(){
     <button class="mitem" onclick="cambiarTema()"><span class="ic">${ic('moon')}</span><span><b>Tema: ${tema}</b><small>Toca para cambiar · Automático sigue al iPhone y pone luz roja en montajes de noche</small></span></button>
     <button class="mitem" onclick="cambiarTexto()"><span class="ic" style="font-weight:800">Aa</span><span><b>Texto grande: ${textoGrande()?'Sí':'No'}</b><small>Letras y botones más grandes, para usar con guantes o con poca luz</small></span></button>
     ${('Notification' in window) ? it('bell', Notification.permission==='granted' ? 'Avisos en el móvil: activados' : 'Activar avisos en el móvil','activarNotis()', Notification.permission==='granted' ? 'Toca para enviarte un aviso de prueba' : 'Bolo de mañana, notas del equipo y cambios, aunque la app esté cerrada') : ''}
+    ${it('clock','Mi mes','verMiMes()','Tus horas, bolos y km de este mes')}
     ${it('today','Días que no puedo','verDisponibilidad()','Para que no te asignen bolos esos días')}
     ${it('download','Preparar sin cobertura','prepararOffline(true)','Guarda en el móvil los bolos de hoy y mañana')}
     ${it('pin','Mapa de bolos','verMapa()','Dónde son los bolos de la semana')}
@@ -2630,7 +2661,7 @@ function bloqueExtras(){
   const hs = siempre.filter(x=>x.hecho).length;
   return `${extra.length?`<div class="sec">Material extra <span class="cnt">${extra.filter(x=>x.hecho).length}/${extra.length}</span></div>${extra.map(filaExtra).join('')}`:''}
     ${esAdmin()?`<button class="scan addx" onclick="abrirExtra()">${ic('plus','s')} Añadir material</button>`:''}
-    ${siempre.length?`<div class="sec sl"><span>Siempre llevar <span class="cnt">${hs}/${siempre.length}</span></span>${hs<siempre.length?`<button onclick="todoExtra('siempre',true)">Marcar todo</button>`:''}</div>${siempre.map(filaExtra).join('')}`:''}`;
+    ${siempre.length?`<details class="sldet" ${S.slAbierto?'open':''} ontoggle="S.slAbierto=this.open;const v=this.querySelector('.slver');if(v)v.textContent=this.open?'Ocultar':'Ver'"><summary class="sec sl"><span>Siempre llevar <span class="cnt">${hs}/${siempre.length}</span> <span class="slver">${S.slAbierto?'Ocultar':'Ver'}</span></span>${hs<siempre.length?`<button onclick="event.preventDefault();event.stopPropagation();todoExtra('siempre',true)">Marcar todo</button>`:''}</summary>${siempre.map(filaExtra).join('')}</details>`:''}`;
 }
 async function marcarExtra(tipo, nombre){
   if(!okDia(S.num, 'marcar material')) return;
@@ -3973,14 +4004,72 @@ function tarjetaRentabilidad(){
     <div class="meta">${x.pct}% de margen${x.horas?' · '+x.horas+' h apuntadas':''}${x.horasSinPrecio?' · hay horas sin €/hora en la pestaña Equipo':''}. Se actualiza con cada gasto, hora y fichaje.</div></div>`;
 }
 
+/* =========================================================
+   INFO PRÁCTICA · MI MES · DICTAR POR VOZ
+   ========================================================= */
+function tarjetaInfoPractica(){
+  if(!S.bolo) return '';
+  const f = ficha(), l = [];
+  if(f.ropa) l.push(['👕','Ropa',esc(f.ropa)]);
+  if(f.comida) l.push(['🍽️','Comida',esc(f.comida)]);
+  if(f.aparcar) l.push(['🅿️','Aparcar',esc(f.aparcar)]);
+  if(f.emergencia){ const t = (String(f.emergencia).match(/\+?\d[\d\s]{7,}\d/)||[''])[0]; l.push(['🆘','Emergencia', esc(f.emergencia) + (t ? ` <a class="ipcall" href="tel:${esc(tel(t))}">Llamar</a>` : '')]); }
+  if(!l.length) return '';
+  return `<div class="ipr" aria-label="Info práctica">${l.map(([e,t,v])=>`<div class="ipi"><span class="ipe" aria-hidden="true">${e}</span><span><small>${t}</small>${v}</span></div>`).join('')}</div>`;
+}
+async function verMiMes(mes){
+  S.vista = 'mimes'; S.mimes = { mes: mes || (S.mimes && S.mimes.mes) || new Date().toISOString().slice(0,7), cargando: true }; render(); window.scrollTo(0,0);
+  try{ const r = await call('ckMiMes', S.mimes.mes); S.mimes = Object.assign({ mes: S.mimes.mes }, r); }
+  catch(e){ S.mimes = { mes: S.mimes.mes, error: e.message }; }
+  if(S.vista==='mimes') render();
+}
+function moverMiMes(d){ const [y,m] = S.mimes.mes.split('-').map(Number); const x = new Date(y, m-1+d, 1); verMiMes(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')); }
+function vistaMiMes(){
+  const r = S.mimes || {}, [y,m] = (r.mes||'').split('-').map(Number);
+  let nm = y ? new Date(y, m-1, 1).toLocaleDateString('es-ES', { month:'long', year:'numeric' }) : ''; nm = nm.charAt(0).toUpperCase() + nm.slice(1);
+  const t = r.yo || {}, n = v => String(Math.round((Number(v)||0)*10)/10).replace('.',',');
+  const body = r.cargando ? `<div class="loading"><div class="spin"></div>Calculando tus horas…</div>`
+    : r.error ? `<div class="empty">${esc(r.error)}</div>`
+    : `<div class="tiles" style="grid-template-columns:repeat(3,1fr)"><div class="tile"><b>${t.bolos||0}</b><span>bolo${(t.bolos||0)===1?'':'s'}</span></div><div class="tile"><b>${n(t.horas)} h</b><span>trabajadas</span></div><div class="tile"><b>${Math.round(t.km||0)}</b><span>km</span></div></div>
+      ${(t.lista||[]).length ? `<div class="sec">Tus bolos del mes</div>${t.lista.map(b=>`<button class="card" onclick="abrir('${esc(b.num)}')"><div class="top"><span class="num">${esc(b.num)}</span><span class="date">${n(b.horas)} h</span></div><div class="ev">${esc(b.evento||'')}</div><div class="meta">${Math.round(b.km||0)} km${b.kmEst?' (aprox.)':''}${b.nota?' · ★ '+esc(b.nota):''}</div></button>`).join('')}` : `<div class="empty">${ic('clock')}<div>Este mes todavía no tienes horas fichadas.</div></div>`}
+      <div class="meta" style="margin:12px 4px">Horas del fichaje de la app (o del resumen del bolo). Si ves algo raro, avisa a Dreamscape.</div>`;
+  return `<header><div class="brand"><span class="bw">DREAMSCAPE</span><span class="bs">Events &amp; Productions</span></div>
+    <div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Mi mes</h1></div>
+    <div class="mesnav"><button onclick="moverMiMes(-1)" aria-label="Mes anterior">‹</button><b>${esc(nm)}</b><button onclick="moverMiMes(1)" aria-label="Mes siguiente">›</button></div></header><main>${body}</main>`;
+}
+/* Dictar por voz: botón de micrófono en los campos de texto de las ventanas */
+const VOZ = { rec: null, el: null };
+function vozDisponible(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function ponerMicros(root){
+  if(!root || !vozDisponible()) return;
+  root.querySelectorAll('textarea:not([data-mic])').forEach(t => {
+    t.dataset.mic = '1'; if(!t.id) t.id = 'tx' + Math.random().toString(36).slice(2,8);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mic'; b.dataset.para = t.id;
+    b.innerHTML = ic('mic','s') + '<span>Dictar</span>'; b.onclick = () => dictar(t.id, b);
+    t.insertAdjacentElement('afterend', b);
+  });
+}
+function dictar(id, b){
+  const t = document.getElementById(id); if(!t) return;
+  if(VOZ.rec){ try{ VOZ.rec.stop(); }catch(e){} return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec; try{ rec = new SR(); }catch(e){ toast('Usa el micrófono del teclado para dictar'); return; }
+  rec.lang = 'es-ES'; rec.interimResults = true; rec.continuous = false;
+  const base = t.value ? t.value.replace(/\s*$/, ' ') : '';
+  VOZ.rec = rec; b.classList.add('on'); b.querySelector('span').textContent = 'Escuchando… toca para parar'; vib(15);
+  rec.onresult = e => { let txt = ''; for(let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript; t.value = base + txt.charAt(0).toUpperCase() + txt.slice(1); t.dispatchEvent(new Event('input', { bubbles:true })); };
+  rec.onerror = e => { if(e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Permite el micrófono o usa el del teclado'); else if(e.error !== 'no-speech' && e.error !== 'aborted') toast('No se pudo dictar: usa el micrófono del teclado'); };
+  rec.onend = () => { VOZ.rec = null; b.classList.remove('on'); b.querySelector('span').textContent = 'Dictar'; };
+  try{ rec.start(); }catch(e){ VOZ.rec = null; b.classList.remove('on'); b.querySelector('span').textContent = 'Dictar'; toast('Usa el micrófono del teclado para dictar'); }
+}
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); centrarPaso(); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad, mimes:vistaMiMes }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); centrarPaso(); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
 /* Altura real visible en el iPhone (barra de Safari y teclado): las ventanas nunca quedan cortadas */
 (function(){ const vv = window.visualViewport; const fijar = () => { try{ document.documentElement.style.setProperty('--vvh', Math.round(vv ? vv.height : window.innerHeight) + 'px'); }catch(e){} };
   fijar(); if(vv){ vv.addEventListener('resize', fijar); vv.addEventListener('scroll', fijar); } window.addEventListener('orientationchange', () => setTimeout(fijar, 300));
   document.addEventListener('focusin', e => { const t = e.target; if(t && t.closest && t.closest('.sheet') && /INPUT|TEXTAREA|SELECT/.test(t.tagName)) setTimeout(() => { try{ t.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(x){} }, 320); });
 })();
-function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
+function abrirSheet(h){ const u = $('#undo'); if(u) u.classList.remove('show'); $('#sheet').innerHTML = h; try{ ponerMicros($('#sheet')); }catch(e){} $('#sbg').style.display='block'; requestAnimationFrame(()=>$('#sheet').classList.add('open')); }
 window.addEventListener('popstate', ()=>{ if(S.vista!=='lista' && S.vista!=='login'){ S.vista = S.vista==='hist' && S.num ? 'det' : 'lista'; render(); } });
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COLA.length) vaciarCola(); if(S.pend || !KEY || SCAN || !['lista','det'].includes(S.vista) || $('#sheet').classList.contains('open')) return; S.vista==='det' ? abrir(S.num,true) : cargarLista(); } });
 setInterval(() => {
