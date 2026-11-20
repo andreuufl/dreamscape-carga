@@ -496,6 +496,13 @@ main > .hrow2{background:var(--card);padding:12px 14px;border-radius:14px;margin
 .qty.sm{font-size:14px;min-width:42px;height:34px;font-weight:700}
 .btn.addfurgo{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px}
 .platein{font-weight:750;letter-spacing:.08em;font-size:20px!important;text-transform:uppercase}
+.furg.sq .sqrow{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.furg.sq .sqrow:first-of-type{border-top:0;padding-top:0}
+.furg.sq .sqrow .top{margin-bottom:4px}
+.sqque{font-size:15px;color:var(--txt);white-space:pre-wrap}
+.sqok,.sqmid,.sqpend{display:inline-block;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
+.sqok{background:#e3f5e9;color:#17803d}.sqmid{background:#fff3d6;color:#9a6200}.sqpend{background:var(--devbg);color:var(--dev)}
+.furg.sq .row2 .btn{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .scan.addx{border-style:solid;color:var(--mut);font-weight:650;margin-top:4px}
 .sec.sl{justify-content:space-between}.sec.sl button{font-size:12.5px;font-weight:700;color:var(--dev);text-transform:none;letter-spacing:0}
 a.copia{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--txt)}a.copia span{color:var(--dev);font-weight:700}
@@ -617,6 +624,7 @@ const ICO = {
   refresh:'<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>', more:'<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/>',
   check:'<path d="M20 6 9 17l-5-5"/>', checkall:'<path d="m2 12 5 5L18 6M13 15l2 2 7-7"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>', plus:'<path d="M12 5v14M5 12h14"/>',
   alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
   truck:'<path d="M10 17h4V5H2v12h3"/><path d="M14 9h4l4 4v4h-3"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>',
   home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>', nav:'<path d="m3 11 19-9-9 19-2-8-8-2z"/>',
@@ -1045,7 +1053,7 @@ function vistaRuta(p, tot){
         <a class="mapbtn" onclick="salidaAuto()" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener"><span class="ic">${ic('nav')}</span>Waze<span class="go">›</span></a>
       </div>
       <button class="link" onclick="copiar('${esc(destino(p.lugar)).replace(/'/g,"\\'")}')">Copiar dirección</button>`;
-  const body = `${aviso}${tarjetaUrgencias()}${dest}${mapas}${btnSalida(p)}${tarjetaFurg()}${tarjetaPlan('montaje')}${tarjetaLugar(p)}${plegado(`<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>` + tarjetaQuien() + tarjetaFoto() + tarjetaNotas() + tarjetaFicha())}`;
+  const body = `${aviso}${tarjetaUrgencias()}${dest}${mapas}${btnSalida(p)}${tarjetaSubalq()}${tarjetaFurg()}${tarjetaPlan('montaje')}${tarjetaLugar(p)}${plegado(`<button class="mapbtn avisa" onclick="abrirAviso()"><span class="ic">${ic('msg')}</span>Avisar al cliente de la llegada<span class="go">${ic('chev','s')}</span></button>` + tarjetaQuien() + tarjetaFoto() + tarjetaNotas() + tarjetaFicha())}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('montaje')">Siguiente: montaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -1191,6 +1199,103 @@ function guardarFurgo(i){
 function borrarFurgo(i){
   if(!confirm('¿Eliminar esta furgoneta?')) return;
   const l = S.furgos.slice(); l.splice(i,1); guardarFurgos(l, 'Furgoneta eliminada');
+}
+
+
+/* ---------- SUBALQUILER: recoger y devolver en el proveedor ---------- */
+const PROV_FURGOS = ['IBERFURGO','ENTERPRISE','Meridianarent a car'];
+function subalqs(){ return (ficha().subalq || []).slice(); }
+function provsConocidos(){ const s = new Set(PROV_FURGOS); subalqs().forEach(x=>x.prov&&s.add(x.prov)); try{ (JSON.parse(localStorage.getItem('ckProvs')||'[]')).forEach(x=>s.add(x)); }catch(e){} return [...s]; }
+function recordarProv(p){ if(!p) return; try{ const l = JSON.parse(localStorage.getItem('ckProvs')||'[]'); if(!l.includes(p)){ l.push(p); localStorage.setItem('ckProvs', JSON.stringify(l.slice(-30))); } }catch(e){} }
+function tarjetaSubalq(){
+  const l = subalqs();
+  if(!l.length) return esAdmin() ? `<button class="scan addx" onclick="editarSubalq(-1)">${ic('plus','s')} Añadir subalquiler (material o furgoneta)</button>` : '';
+  const fila = (x,i) => {
+    const q = encodeURIComponent(x.dir||x.prov||'');
+    const estado = x.devuelto ? `<span class="sqok">Devuelto · ${esc(x.devuelto)}</span>` : x.recogido ? `<span class="sqmid">Recogido · ${esc(x.recogido)}</span>` : '<span class="sqpend">Pendiente de recoger</span>';
+    const furgo = x.tipo==='furgo' ? (x.matricula ? `<div style="margin:8px 0 2px"><span class="plate sm">${esc(x.matricula)}</span> <span class="meta">${esc([x.marca,x.modelo].filter(Boolean).join(' '))}</span></div>` : '<div class="meta" style="margin-top:6px">La matrícula se pone al recogerla.</div>') : '';
+    const btn = !x.recogido ? `<button class="btn" onclick="marcarSubalq(${i},'recogido')">${ic('check','s')} ${x.tipo==='furgo'?'Furgoneta recogida':'Recogido'}</button>`
+      : !x.devuelto ? `<button class="btn" onclick="marcarSubalq(${i},'devuelto')">${ic('check','s')} ${x.tipo==='furgo'?'Furgoneta devuelta':'Devuelto'}</button>` : '';
+    return `<div class="sqrow"><div class="top"><b>${x.tipo==='furgo'?ic('truck','s'):ic('box','s')} ${esc(x.prov||'Proveedor')}</b>${esAdmin()?`<button class="edit" onclick="editarSubalq(${i})">Editar</button>`:''}</div>
+      ${x.que?`<div class="sqque">${esc(x.que)}</div>`:''}${furgo}
+      <div style="margin:6px 0 10px">${estado}</div>
+      <div class="row2">${x.dir?`<a class="btn sec2" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">${ic('nav','s')} Ir</a>`:''}${btn}${x.recogido&&esAdmin()?`<button class="btn sec2" onclick="deshacerSubalq(${i})">Deshacer</button>`:''}</div></div>`;
+  };
+  return `<div class="furg sq"><div class="top"><b>${ic('box','s')} Subalquiler</b>${esAdmin()?'<button class="edit" onclick="editarSubalq(-1)">+ Añadir</button>':''}</div>${l.map(fila).join('')}</div>`;
+}
+function editarSubalq(i){
+  const x = i>=0 ? subalqs()[i] : { tipo:'mat' };
+  abrirSheet(`<h3>${i>=0?'Editar subalquiler':'Nuevo subalquiler'}</h3>
+    <div class="chips" id="sqTipo" style="margin:0 0 12px"><button class="chip ${x.tipo!=='furgo'?'on':''}" data-v="mat" onclick="sqTipo(this)">Material</button><button class="chip ${x.tipo==='furgo'?'on':''}" data-v="furgo" onclick="sqTipo(this)">Furgoneta</button></div>
+    <label class="fld"><span>Proveedor</span><input id="sqProv" list="sqProvL" value="${esc(x.prov)}" placeholder="Ej. IBERFURGO" autocomplete="off"><datalist id="sqProvL">${provsConocidos().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></label>
+    <label class="fld"><span>Dirección de recogida y devolución</span><input id="sqDir" value="${esc(x.dir)}" placeholder="Calle, número y población" autocomplete="off"></label>
+    <label class="fld"><span>Qué se alquila</span><textarea id="sqQue" rows="2" placeholder="Ej. 2 cabezas móviles + 1 mesa de luces">${esc(x.que)}</textarea></label>
+    <div id="sqFur" ${x.tipo==='furgo'?'':'hidden'}><div class="meta" style="margin:0 0 8px">Si ya sabes la furgoneta, ponla. Si no, se pide al recogerla.</div>${camposFurgoSq(x)}</div>
+    <div class="row2" style="margin-top:12px">${i>=0?`<button class="btn sec2 danger" onclick="borrarSubalq(${i})">Eliminar</button>`:'<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>'}<button class="btn" onclick="guardarSubalq(${i})">Guardar</button></div>`);
+}
+function camposFurgoSq(x){
+  return `<label class="fld"><span>Matrícula</span><input id="sqMat" class="platein" list="sqMatL" value="${esc(x.matricula)}" placeholder="1234 ABC" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" oninput="this.value=this.value.toUpperCase();sqAutoFurgo()"><datalist id="sqMatL">${(S.furgos||[]).map(f=>`<option value="${esc(f.matricula)}">${esc([f.marca,f.modelo].filter(Boolean).join(' '))}</option>`).join('')}</datalist></label>
+    <div class="row2"><label class="fld"><span>Marca</span><input id="sqMarca" value="${esc(x.marca)}" placeholder="Ej. Renault" autocomplete="off"></label><label class="fld"><span>Modelo</span><input id="sqModelo" value="${esc(x.modelo)}" placeholder="Ej. Master" autocomplete="off"></label></div>`;
+}
+function sqTipo(b){ document.querySelectorAll('#sqTipo .chip').forEach(c=>c.classList.toggle('on', c===b)); const f=$('#sqFur'); if(f) f.hidden = b.dataset.v!=='furgo'; }
+function sqAutoFurgo(){ const m = normMatricula(($('#sqMat')||{}).value), f = (S.furgos||[]).find(x=>normMatricula(x.matricula)===m); if(f){ if($('#sqMarca')&&!$('#sqMarca').value) $('#sqMarca').value = f.marca||''; if($('#sqModelo')&&!$('#sqModelo').value) $('#sqModelo').value = f.modelo||''; } }
+function leerFurgoSq(x){ if(!$('#sqMat')) return; x.matricula = normMatricula($('#sqMat').value); x.marca = ($('#sqMarca').value||'').trim(); x.modelo = ($('#sqModelo').value||'').trim(); }
+async function guardarSubalqs(l, msg){
+  if(!S.bolo) return; const prev = S.bolo.ficha.subalq; S.bolo.ficha.subalq = l; render(); guardarBoloCache();
+  try{ const r = await enviar('ckGuardarFicha', S.num, { subalq:l }); if(r!==null) toast(msg); }
+  catch(e){ S.bolo.ficha.subalq = prev; render(); toast('No se guardó: '+e.message); }
+}
+async function furgoDeSubalq(x){
+  // Si la matrícula no está en la lista de furgonetas, la añade (alquilada) y la asigna al bolo
+  if(x.tipo!=='furgo' || !x.matricula) return;
+  let f = (S.furgos||[]).find(v=>normMatricula(v.matricula)===x.matricula);
+  if(!f){
+    f = { id:'f'+Date.now().toString(36), matricula:x.matricula, marca:x.marca||'', modelo:x.modelo||'', color:'', conductor:'', notas:'Alquilada'+(x.prov?' a '+x.prov:'') };
+    const l = (S.furgos||[]).concat([f]);
+    try{ S.furgos = await call('ckGuardarFurgonetas', l) || l; toast('Furgoneta '+x.matricula+' añadida a la lista'); }catch(e){ toast('No se pudo añadir la furgoneta a la lista: '+e.message); return; }
+    f = (S.furgos||[]).find(v=>normMatricula(v.matricula)===x.matricula) || f;
+  }
+  if(f.id && ficha().furgo !== f.id) await elegirFurgo(f.id);
+}
+function guardarSubalq(i){
+  const l = subalqs(), x = i>=0 ? Object.assign({}, l[i]) : { id:'s'+Date.now().toString(36) };
+  x.tipo = (document.querySelector('#sqTipo .chip.on')||{}).dataset.v || 'mat';
+  x.prov = ($('#sqProv').value||'').trim(); x.dir = ($('#sqDir').value||'').trim(); x.que = ($('#sqQue').value||'').trim();
+  if(x.tipo==='furgo') leerFurgoSq(x); else { delete x.matricula; delete x.marca; delete x.modelo; }
+  if(!x.prov){ toast('Pon el proveedor'); return; }
+  recordarProv(x.prov);
+  if(i>=0) l[i]=x; else l.push(x);
+  cerrarSheet(); guardarSubalqs(l, 'Subalquiler guardado').then(()=>furgoDeSubalq(x));
+}
+function borrarSubalq(i){ if(!confirm('¿Eliminar este subalquiler?')) return; const l = subalqs(); l.splice(i,1); cerrarSheet(); guardarSubalqs(l, 'Subalquiler eliminado'); }
+function marcarSubalq(i, k){
+  const x = subalqs()[i]; if(!x) return;
+  if(k==='recogido' && x.tipo==='furgo'){
+    abrirSheet(`<h3>${ic('truck')} Furgoneta recogida</h3><div class="meta" style="margin-bottom:12px">${esc(x.prov||'')} · Pon la matrícula y el modelo. Si no está en la lista de furgonetas, se añade sola y se asigna a este bolo.</div>
+      ${camposFurgoSq(x)}
+      <div class="row2" style="margin-top:12px"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="confirmarFurgoSq(${i})">Recogida</button></div>`);
+    setTimeout(()=>{ const m=$('#sqMat'); if(m && !m.value) m.focus(); }, 320);
+    return;
+  }
+  const txt = k==='recogido' ? '¿Marcar como RECOGIDO en '+(x.prov||'el proveedor')+'?' : '¿Marcar como DEVUELTO a '+(x.prov||'el proveedor')+'?';
+  if(!confirm(txt)) return;
+  ponerSubalq(i, k);
+}
+function confirmarFurgoSq(i){
+  const l = subalqs(), x = Object.assign({}, l[i]); leerFurgoSq(x);
+  if(!x.matricula || x.matricula.length<4){ toast('Pon la matrícula'); const m=$('#sqMat'); if(m) m.focus(); return; }
+  l[i] = x; S.bolo.ficha.subalq = l; cerrarSheet(); ponerSubalq(i, 'recogido');
+}
+function ponerSubalq(i, k){
+  const l = subalqs(), x = Object.assign({}, l[i]);
+  x[k] = hora() + (yoNombre() ? ' · '+yoNombre() : '');
+  l[i] = x;
+  guardarSubalqs(l, k==='recogido' ? (x.tipo==='furgo'?'Furgoneta recogida':'Recogido') : (x.tipo==='furgo'?'Furgoneta devuelta':'Devuelto')).then(()=>{ if(k==='recogido') furgoDeSubalq(x); });
+}
+function deshacerSubalq(i){
+  const l = subalqs(), x = Object.assign({}, l[i]); const k = x.devuelto ? 'devuelto' : 'recogido';
+  if(!confirm('¿Quitar la marca de '+(k==='devuelto'?'devuelto':'recogido')+'?')) return;
+  delete x[k]; l[i] = x; guardarSubalqs(l, 'Marca quitada');
 }
 
 /* ---------- FOTO DE LA FURGONETA CARGADA ---------- */
