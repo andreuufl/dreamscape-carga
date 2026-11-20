@@ -494,6 +494,8 @@ main > .hrow2{background:var(--card);padding:12px 14px;border-radius:14px;margin
 .pct.medio{color:var(--warn)}.pct.bajo{color:var(--bad)}
 .item.extra{min-height:58px}
 .qty.sm{font-size:14px;min-width:42px;height:34px;font-weight:700}
+.btn.addfurgo{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px}
+.platein{font-weight:750;letter-spacing:.08em;font-size:20px!important;text-transform:uppercase}
 .scan.addx{border-style:solid;color:var(--mut);font-weight:650;margin-top:4px}
 .sec.sl{justify-content:space-between}.sec.sl button{font-size:12.5px;font-weight:700;color:var(--dev);text-transform:none;letter-spacing:0}
 a.copia{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--txt)}a.copia span{color:var(--dev);font-weight:700}
@@ -819,8 +821,8 @@ function vistaFurgos(){
   const kv = f => [['Marca',f.marca],['Modelo',f.modelo],['Color',f.color],['Conductor',f.conductor],['Notas',f.notas]].filter(x=>x[1]).map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('');
   const body = !l.length ? `<div class="empty">${ic('truck')}<div>Aún no hay furgonetas.</div></div>`
     : l.map((f,i)=>`<div class="furg"><div class="top">${f.matricula?`<span class="plate">${esc(f.matricula)}</span>`:'<b>Furgoneta</b>'}${esAdmin()?`<button class="edit" onclick="editarFurgo(${i})">Editar</button>`:''}</div>${kv(f)?`<dl class="kv" style="margin:0">${kv(f)}</dl>`:''}</div>`).join('');
-  return `<header class="top">${BRAND}<div class="hrow"><h1>Furgonetas<span class="sync" id="dot"></span></h1><button class="ref" onclick="cargarFurgos().then(render)" aria-label="Actualizar">${ic('refresh')}</button></div></header>
-    <main>${body}${esAdmin()?`<button class="scan addx" onclick="editarFurgo(-1)">${ic('plus','s')} Añadir furgoneta</button>`:''}<button class="link" onclick="verMant()">Mantenimiento, ITV y seguros ›</button></main>`;
+  return `<header class="top">${BRAND}<div class="hrow"><h1>Furgonetas<span class="sync" id="dot"></span></h1>${esAdmin()?`<button class="ref" onclick="editarFurgo(-1)" aria-label="Añadir furgoneta">${ic('plus')}</button>`:''}<button class="ref" onclick="cargarFurgos().then(render)" aria-label="Actualizar">${ic('refresh')}</button></div></header>
+    <main>${esAdmin()?`<button class="btn addfurgo" onclick="editarFurgo(-1)">${ic('plus','s')} Añadir furgoneta con matrícula</button>`:''}${body}<button class="link" onclick="verMant()">Mantenimiento, ITV y seguros ›</button></main>`;
 }
 
 /* ---------- DETALLE ---------- */
@@ -1139,7 +1141,7 @@ function furgoActual(){
 }
 function tarjetaFurg(){
   const l = S.furgos||[], f = furgoActual();
-  if(!l.length) return `<div class="furg"><div class="top"><b>Furgoneta</b>${esAdmin()?'<button class="edit" onclick="abrirFurgos()">Añadir</button>':''}</div><div class="meta">Pon la matrícula, marca y modelo para que salgan en el correo.</div></div>`;
+  if(!l.length) return `<div class="furg"><div class="top"><b>Furgoneta</b>${esAdmin()?'<button class="edit" onclick="editarFurgo(-1)">+ Añadir</button>':''}</div><div class="meta">Pon la matrícula, marca y modelo para que salgan en el correo.</div></div>`;
   const sel = l.length>1 ? `<select class="selfurgo" id="selfurgo" onchange="elegirFurgo(this.value)"><option value="">Elige furgoneta…</option>${l.map(x=>`<option value="${esc(x.id)}" ${f&&f.id===x.id?'selected':''}>${esc([x.matricula,x.marca,x.modelo].filter(Boolean).join(' · '))}</option>`).join('')}</select>` : '';
   if(!f) return `<div class="furg"><div class="top"><b>Furgoneta</b>${esAdmin()?'<button class="edit" onclick="abrirFurgos()">Gestionar</button>':''}</div>${sel}</div>`;
   const kv = [['Marca',f.marca],['Modelo',f.modelo],['Color',f.color],['Conductor',f.conductor],['Notas',f.notas]].filter(x=>x[1]).map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('');
@@ -1161,12 +1163,14 @@ function editarFurgo(i){
   const f = i>=0 ? S.furgos[i] : {};
   const campo = (id, t, ph) => `<label class="fld"><span>${t}</span><input id="f_${id}" value="${esc(f[id])}" placeholder="${ph}" autocomplete="off"></label>`;
   abrirSheet(`<h3>${i>=0?'Editar furgoneta':'Nueva furgoneta'}</h3>
-    ${campo('matricula','Matrícula','1234 ABC')}
+    <label class="fld"><span>Matrícula *</span><input id="f_matricula" class="platein" value="${esc(f.matricula)}" placeholder="1234 ABC" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" oninput="this.value=this.value.toUpperCase()"></label>
     <div class="row2">${campo('marca','Marca','Ej. Renault')}${campo('modelo','Modelo','Ej. Master L3H2')}</div>
     <div class="row2">${campo('color','Color','Blanca')}${campo('conductor','Conductor habitual','Nombre')}</div>
     <label class="fld"><span>Notas (ITV, seguro, gasoil, llaves…)</span><textarea id="f_notas" rows="3">${esc(f.notas)}</textarea></label>
     <div class="row2">${i>=0?`<button class="btn sec2 danger" onclick="borrarFurgo(${i})">Eliminar</button>`:`<button class="btn sec2" onclick="${S.vista==='furgos'?'cerrarSheet()':'abrirFurgos()'}">Cancelar</button>`}<button class="btn" onclick="guardarFurgo(${i})">Guardar</button></div>`);
+  if(i<0) setTimeout(()=>{ const x=$('#f_matricula'); if(x) x.focus(); }, 320);
 }
+function normMatricula(m){ return String(m||'').toUpperCase().replace(/[\s\-·.]/g,''); }
 async function guardarFurgos(l, msg){
   const prev = S.furgos; S.furgos = l; render();
   try{ S.furgos = await call('ckGuardarFurgonetas', l); toast(msg); render(); if(S.vista==='furgos') cerrarSheet(); else abrirFurgos(); }
@@ -1175,9 +1179,14 @@ async function guardarFurgos(l, msg){
 function guardarFurgo(i){
   const f = i>=0 ? Object.assign({}, S.furgos[i]) : {};
   ['matricula','marca','modelo','color','conductor','notas'].forEach(c=> f[c] = ($('#f_'+c).value||'').trim());
-  f.matricula = f.matricula.toUpperCase();
+  f.matricula = normMatricula(f.matricula);
+  if(!f.matricula){ toast('Pon la matrícula'); const x=$('#f_matricula'); if(x) x.focus(); return; }
+  if(f.matricula.length<4){ toast('La matrícula parece incompleta'); return; }
+  if((S.furgos||[]).some((x,j)=> j!==i && normMatricula(x.matricula)===f.matricula)){ toast('Ya hay una furgoneta con la matrícula '+f.matricula); return; }
+  if(!f.id) f.id = 'f'+Date.now().toString(36);
   const l = (S.furgos||[]).slice(); if(i>=0) l[i]=f; else l.push(f);
-  guardarFurgos(l, 'Furgoneta guardada');
+  const nueva = i<0, enBolo = nueva && S.vista!=='furgos' && S.bolo && S.num && !(S.bolo.ficha||{}).furgo;
+  guardarFurgos(l, nueva ? 'Furgoneta '+f.matricula+' añadida' : 'Furgoneta guardada').then(()=>{ if(enBolo && (S.furgos||[]).some(x=>x.id===f.id)){ cerrarSheet(); elegirFurgo(f.id); } });
 }
 function borrarFurgo(i){
   if(!confirm('¿Eliminar esta furgoneta?')) return;
