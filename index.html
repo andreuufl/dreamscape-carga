@@ -196,7 +196,7 @@ textarea{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .salida.firma{background:var(--gold);color:#16243a}}
 .fld{display:block;margin-bottom:12px}
 .fld span{display:block;font-size:13px;font-weight:650;color:var(--mut);margin-bottom:5px}
-.fld input,.fld textarea,.inp,.selfurgo{width:100%;border:1.5px solid var(--line);border-radius:13px;padding:13px;font:inherit;font-size:16px;margin:0;min-height:0;background:var(--inp);color:var(--txt);outline:none}
+.fld input,.fld textarea,.fld select,.inp,.selfurgo{width:100%;border:1.5px solid var(--line);border-radius:13px;padding:13px;font:inherit;font-size:16px;margin:0;min-height:0;background:var(--inp);color:var(--txt);outline:none}
 .fld input:focus,.fld textarea:focus,.inp:focus,textarea:focus{border-color:var(--gold)}
 .scan{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:15px;background:var(--card);border:1.5px dashed var(--line);font-weight:700;font-size:15px;margin-bottom:12px;color:var(--txt)}
 .scanov{position:fixed;inset:0;background:#000;z-index:50}
@@ -1278,7 +1278,7 @@ function editarSubalq(i){
   cargarProvs();
   abrirSheet(`<h3>${i>=0?'Editar subalquiler':'Nuevo subalquiler'}</h3>
     <div class="chips" id="sqTipo" style="margin:0 0 12px"><button class="chip ${x.tipo!=='furgo'?'on':''}" data-v="mat" onclick="sqTipo(this)">Material</button><button class="chip ${x.tipo==='furgo'?'on':''}" data-v="furgo" onclick="sqTipo(this)">Furgoneta</button></div>
-    <label class="fld"><span>Proveedor</span><input id="sqProv" list="sqProvL" value="${esc(x.prov)}" placeholder="Ej. IBERFURGO" autocomplete="off" onchange="sqProvElegido(this.value)"><datalist id="sqProvL">${provsConocidos().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></label>
+    <label class="fld"><span>Proveedor</span><select id="sqProvSel" class="inp" onchange="sqProvSel(this.value)"></select><input id="sqProv" value="${esc(x.prov)}" placeholder="Nombre del proveedor" autocomplete="off" hidden onchange="sqProvElegido(this.value)" style="margin-top:8px"></label>
     <label class="fld"><span>Dirección de recogida y devolución</span><input id="sqDir" value="${esc(x.dir)}" placeholder="Calle, número y población" autocomplete="off"></label>
     <label class="fld"><span>Qué se alquila</span><textarea id="sqQue" rows="2" placeholder="Ej. 2 cabezas móviles + 1 mesa de luces">${esc(x.que)}</textarea></label>
     <div class="fld"><span>Recogida y devolución</span><div class="meta" style="margin-bottom:6px">Si lo dejas vacío: el día antes del montaje y el día después del desmontaje, a la hora de apertura del proveedor.</div>
@@ -1286,12 +1286,32 @@ function editarSubalq(i){
       <label><small>Día devolver</small><input type="date" id="sqFDev" value="${aISO(x.fDev)}"></label><label><small>Hora</small><input type="time" id="sqHDev" value="${esc(x.hDev||'')}" step="300"></label></div></div>
     <div id="sqFur" ${x.tipo==='furgo'?'':'hidden'}><div class="meta" style="margin:0 0 8px">Si ya sabes la furgoneta, ponla. Si no, se pide al recogerla.</div>${camposFurgoSq(x)}</div>
     <div class="row2" style="margin-top:12px">${i>=0?`<button class="btn sec2 danger" onclick="borrarSubalq(${i})">Eliminar</button>`:'<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>'}<button class="btn" onclick="guardarSubalq(${i})">Guardar</button></div>`);
+  pintarProvSel(x.tipo==='furgo'?'furgo':'mat', x.prov||'');
+  cargarProvs().then(() => { if($('#sqProvSel')) pintarProvSel(sqTipoActual(), ($('#sqProv')||{}).value||''); });
 }
 function camposFurgoSq(x){
   return `<label class="fld"><span>Matrícula</span><input id="sqMat" class="platein" list="sqMatL" value="${esc(x.matricula)}" placeholder="1234 ABC" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" oninput="this.value=this.value.toUpperCase();sqAutoFurgo()"><datalist id="sqMatL">${(S.furgos||[]).map(f=>`<option value="${esc(f.matricula)}">${esc([f.marca,f.modelo].filter(Boolean).join(' '))}</option>`).join('')}</datalist></label>
     <div class="row2"><label class="fld"><span>Marca</span><input id="sqMarca" value="${esc(x.marca)}" placeholder="Ej. Renault" autocomplete="off"></label><label class="fld"><span>Modelo</span><input id="sqModelo" value="${esc(x.modelo)}" placeholder="Ej. Master" autocomplete="off"></label></div>`;
 }
-function sqTipo(b){ document.querySelectorAll('#sqTipo .chip').forEach(c=>c.classList.toggle('on', c===b)); const f=$('#sqFur'); if(f) f.hidden = b.dataset.v!=='furgo'; }
+function sqTipo(b){ document.querySelectorAll('#sqTipo .chip').forEach(c=>c.classList.toggle('on', c===b)); const f=$('#sqFur'); if(f) f.hidden = b.dataset.v!=='furgo'; const pi = $('#sqProv'); if(pi) pi.value = ''; const d = $('#sqDir'); if(d) d.value = ''; pintarProvSel(b.dataset.v, ''); }
+function sqTipoActual(){ return ((document.querySelector('#sqTipo .chip.on')||{}).dataset||{}).v === 'furgo' ? 'furgo' : 'mat'; }
+function provsDeTipo(tipo){
+  const l = (S.provs||[]).filter(p => (p.tipo || 'mat') === tipo).map(p => p.nombre);
+  if(!S.provs && tipo==='furgo') return PROV_FURGOS.slice();
+  return l;
+}
+function pintarProvSel(tipo, actual){
+  const sel = $('#sqProvSel'), inp = $('#sqProv'); if(!sel || !inp) return;
+  const l = provsDeTipo(tipo); if(actual && !l.includes(actual)) l.unshift(actual);
+  sel.innerHTML = `<option value="">${S.provs ? (tipo==='furgo' ? 'Elige la empresa de furgonetas…' : 'Elige la empresa de material…') : 'Cargando proveedores…'}</option>` + l.map(n=>`<option value="${esc(n)}" ${n===actual?'selected':''}>${esc(n)}</option>`).join('') + `<option value="__otro">Otro proveedor…</option>`;
+  inp.hidden = true;
+}
+function sqProvSel(v){
+  const inp = $('#sqProv'); if(!inp) return;
+  if(v === '__otro'){ inp.hidden = false; inp.value = ''; inp.focus(); return; }
+  inp.hidden = true; inp.value = v;
+  const p = provDe(v), d = $('#sqDir'); if(d && p) d.value = p.dir || '';
+}
 function sqAutoFurgo(){ const m = normMatricula(($('#sqMat')||{}).value), f = (S.furgos||[]).find(x=>normMatricula(x.matricula)===m); if(f){ if($('#sqMarca')&&!$('#sqMarca').value) $('#sqMarca').value = f.marca||''; if($('#sqModelo')&&!$('#sqModelo').value) $('#sqModelo').value = f.modelo||''; } }
 function leerFurgoSq(x){ if(!$('#sqMat')) return; x.matricula = normMatricula($('#sqMat').value); x.marca = ($('#sqMarca').value||'').trim(); x.modelo = ($('#sqModelo').value||'').trim(); }
 async function guardarSubalqs(l, msg){
@@ -1360,7 +1380,7 @@ function deshacerSubalq(i){
    ========================================================= */
 let SQ_PRESET = null;
 async function cargarRecogidas(){ try{ const l = await call('ckRecogidas'); const a = JSON.stringify(S.recogidas||[]); S.recogidas = l || []; if(JSON.stringify(S.recogidas) !== a && S.vista==='lista' && !$('#sheet').classList.contains('open')) render(); }catch(e){} }
-async function cargarProvs(){ if(S.provs) return S.provs; try{ S.provs = await call('ckProveedores') || []; }catch(e){ S.provs = []; } const dl = $('#sqProvL'); if(dl) dl.innerHTML = [...new Set(provsConocidos().concat(S.provs.map(p=>p.nombre)))].map(p=>`<option value="${esc(p)}">`).join(''); return S.provs; }
+async function cargarProvs(){ if(S.provs) return S.provs; try{ S.provs = await call('ckProveedores') || []; }catch(e){ S.provs = null; return []; } return S.provs; }
 function provDe(nombre){ const n = String(nombre||'').trim().toLowerCase(); return (S.provs||[]).find(p=>String(p.nombre).toLowerCase()===n) || null; }
 function sqProvElegido(v){ const p = provDe(v); if(p){ const d = $('#sqDir'); if(d && !d.value && p.dir) d.value = p.dir; } }
 function misRecogidas(){ const vis = new Set((S.presus||[]).map(p=>p.num)); return (S.recogidas||[]).filter(t => esAdmin() || vis.has(t.num)); }
