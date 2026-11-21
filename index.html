@@ -853,7 +853,7 @@ async function abrir(num, refresco){
   const viejo = VUELO > 0 || ESCR_T > tPet; // mientras viajaba la petición se marcó algo: no pisar lo marcado con datos de antes
   if(viejo && S.num===num){ clearTimeout(abrir.re); abrir.re = setTimeout(()=>{ if(S.vista==='det' && S.num===num && !VUELO) abrir(num, 'auto'); }, 4000); }
   if(rg.status==='fulfilled') S.gastos = rg.value || [];
-  if(rm.status==='fulfilled'){ if(!COLA.length && !(viejo && S.items.length)){ S.items=rm.value.items; S.opciones=rm.value.opciones; } actualizarResumen(); if(!auto) cargarFotosMat(); } else if(!S.items.length) toast('Error: '+rm.reason.message);
+  if(rm.status==='fulfilled'){ if(!COLA.length){ S.items=fusionarItems(num, rm.value.items); S.opciones=rm.value.opciones; } actualizarResumen(); if(!auto) cargarFotosMat(); } else if(!S.items.length) toast('Error: '+rm.reason.message);
   if(rb.status==='fulfilled' && !(viejo && S.bolo)){
     S.bolo = rb.value; S.furgos = rb.value.furgonetas || [];
     const f = S.bolo.ficha||{};
@@ -862,6 +862,47 @@ async function abrir(num, refresco){
   if(auto && JSON.stringify([S.items, S.bolo]) === antes) return;
   if(S.vista==='det' && S.num===num && !$('#sheet').classList.contains('open')) render();
 }
+/* ---------- EN DIRECTO: lo que marca un técnico lo ven los demás en segundos ---------- */
+const PEND = {}; // artículos con un cambio de este móvil aún viajando al Drive
+function pendMarca(num, fila, on){ const c = num+'|'+fila; if(on) PEND[c] = Date.now(); else delete PEND[c]; if(!on) VIVO.ult = 0; }
+function pendiente(num, fila){ const t = PEND[num+'|'+fila] || PEND[num+'|*']; return !!t && Date.now() - t < 30000; }
+function fusionarItems(num, srv){
+  if(!Array.isArray(srv)) return S.items;
+  if(S.num !== num || !S.items.length) return srv;
+  const loc = {}; S.items.forEach(i => loc[i.fila] = i);
+  return srv.map(i => (pendiente(num, i.fila) && loc[i.fila]) ? loc[i.fila] : i);
+}
+async function leerVivo(fn, ...args){
+  const u = API + '?k=' + encodeURIComponent(KEY) + '&a=' + fn + '&p=' + encodeURIComponent(JSON.stringify(args)) + '&t=' + Date.now();
+  const r = await fetch(u, { credentials:'omit', cache:'no-store' }); const j = await r.json();
+  if(!j.ok) throw new Error(j.e || 'Error');
+  if(fn==='ckBolo') aplicarMarcas(args[0], j.r, Date.now(), false);
+  cacheSet(fn+JSON.stringify(args), j.r);
+  return j.r;
+}
+const VIVO = { ocupado:false, ult:0, cambio:Date.now(), sucio:false };
+async function vivo(){
+  if(VIVO.ocupado || document.hidden || !KEY || S.vista!=='det' || !S.num || COLA.length || S.offline) return;
+  const quieto = Date.now() - VIVO.cambio > 180000; // sin cambios en 3 min: mirar con menos prisa
+  if(Date.now() - VIVO.ult < (quieto ? 10000 : 2000)) return;
+  VIVO.ocupado = true; VIVO.ult = Date.now();
+  const num = S.num, t0 = Date.now();
+  try{
+    const [rm, rb] = await Promise.allSettled([leerVivo('ckMaterial', num), leerVivo('ckBolo', num)]);
+    if(S.vista!=='det' || S.num!==num || COLA.length) return;
+    const antes = JSON.stringify([S.items, (S.bolo||{}).ficha]);
+    if(rm.status==='fulfilled' && rm.value && Array.isArray(rm.value.items)){ S.items = fusionarItems(num, rm.value.items); S.opciones = rm.value.opciones || S.opciones; }
+    const fasePend = Object.keys(PEND).some(c => c.indexOf(num+'|')===0 && Date.now()-PEND[c] < 30000);
+    if(rb.status==='fulfilled' && rb.value && !(fasePend && S.bolo) && !(ESCR_T > t0)){ S.bolo = rb.value; S.furgos = rb.value.furgonetas || S.furgos; }
+    if(JSON.stringify([S.items, (S.bolo||{}).ficha]) === antes) return;
+    VIVO.cambio = Date.now(); actualizarResumen();
+    if($('#sheet').classList.contains('open') || SCAN){ VIVO.sucio = true; return; }
+    const y = window.scrollY; render(); window.scrollTo(0, y);
+  }catch(e){}
+  finally{ VIVO.ocupado = false; }
+}
+setInterval(vivo, 1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ VIVO.ult = 0; VIVO.cambio = Date.now(); } });
 function ficha(){ return (S.bolo && S.bolo.ficha) || {}; }
 function vistaDet(){
   const p = S.presus.find(x=>x.num===S.num) || {num:S.num, evento:''};
@@ -2010,10 +2051,12 @@ async function toggle(fila, soloMarcar, sinUndo){
   if(!SCAN && !sinUndo) mostrarDeshacer(fila, it[k]);
   if(!SCAN && it[k]){ const lv = itemsVista(); if(lv.length && lv.every(x=>x[k])) setTimeout(confeti, 150); }
   guardarMatCache();
+  const numP = S.num; pendMarca(numP, fila, true);
   try{
     const r = esFase(modo) ? await enviar('ckFase', S.num, modo, it.material, it[k]) : await enviar('ckMarcar', fila, S.num, it.material, modo, it[k]);
     if(r!=null){ it[hk] = r; if(esFase(modo)){ faseLocal(modo, it.material, r); guardarBoloCache(); } guardarMatCache(); } if(!SCAN) render(); }
   catch(e){ it[k]=prev[0]; it[hk]=prev[1]; if(esFase(modo)){ faseLocal(modo, it.material, prev[0] ? prev[1] : ''); guardarBoloCache(); } actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+  finally{ pendMarca(numP, fila, false); }
 }
 async function todo(valor){
   if(valor && !okDia(S.num, 'marcar material')) return;
@@ -2026,8 +2069,10 @@ async function todo(valor){
   if(esFase(modo)) guardarBoloCache();
   actualizarResumen(); render();
   guardarMatCache();
+  const numT = S.num; pendMarca(numT, '*', true);
   try{ const r = esFase(modo) ? await enviar('ckFaseTodo', S.num, modo, valor) : await enviar('ckMarcarTodo', S.num, modo, valor); if(r!==null) toast('Guardado en el Drive'); }
   catch(e){ S.items.forEach((i,n)=>{ i[k]=prev[n][0]; i[hk]=prev[n][1]; }); if(esFase(modo) && S.bolo){ S.bolo.ficha.fases[modo] = JSON.parse(prevF); guardarBoloCache(); } actualizarResumen(); render(); toast('No se guardó: '+e.message); }
+  finally{ setTimeout(()=>pendMarca(numT, '*', false), 1500); }
 }
 
 /* ---------- INCIDENCIAS ---------- */
@@ -2049,7 +2094,7 @@ function abrirInc(fila){
   cargarFotos().then(()=>pintarFotosInc(it.material));
 }
 function selInc(el,o){ incSel = incSel===o ? '' : o; document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c.textContent===incSel)); }
-function cerrarSheet(){ $('#sheet').classList.remove('open'); setTimeout(()=>$('#sbg').style.display='none',200); }
+function cerrarSheet(){ $('#sheet').classList.remove('open'); setTimeout(()=>$('#sbg').style.display='none',200); if(VIVO.sucio && S.vista==='det'){ VIVO.sucio = false; setTimeout(()=>{ if(!$('#sheet').classList.contains('open') && !SCAN) render(); }, 220); } }
 async function guardarInc(quitar){
   const it = S.items.find(i=>i.fila===incFila); if(!it) return;
   const prev=[it.incidencia,it.nota];
@@ -4189,7 +4234,7 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ if(COL
 setInterval(() => {
   if(document.hidden || !KEY || S.pend || SCAN || S.enviando || COLA.length || $('#sheet').classList.contains('open')) return;
   if(S.vista==='lista'){ call('ckPresupuestos').then(l => { if(JSON.stringify(l) !== JSON.stringify(S.presus)){ S.presus = l; if(S.vista==='lista') render(); } }).catch(()=>{}); }
-  else if(S.vista==='det' && S.num){ const p0 = S.num; call('ckPresupuestos').then(l => { S.presus = l; }).catch(()=>{}); abrir(p0, 'auto'); }
+  else if(S.vista==='det' && S.num){ call('ckPresupuestos').then(l => { S.presus = l; }).catch(()=>{}); }
 }, 30000);
 if('serviceWorker' in navigator){
   const avisoVersion = () => { if($('#nuevaVer')) return; const d = document.createElement('button'); d.id='nuevaVer'; d.className='redbar'; d.style.background='#1f6f4a'; d.textContent='✨ Hay una versión nueva de la app · toca para actualizar'; d.onclick=()=>location.reload(); document.body.appendChild(d); };
