@@ -574,6 +574,7 @@ details.pldet>summary{font-size:13.5px;font-weight:700;color:var(--gold,#c9a66b)
 details.pldet>summary::after{content:" ▾"}
 details.pldet[open]>summary::after{content:" ▴"}
 /* ---------- INFO PRÁCTICA y DICTADO ---------- */
+.hcard .hgr{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hcard .hit{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;line-height:1.3;min-width:0}.hcard .hit small{display:block;color:var(--mut,#6b7280);font-size:12px}.hcard .hdur{display:inline;color:var(--mut,#6b7280);font-size:12px}.hcard .hnotas{margin-top:10px;font-size:14px;line-height:1.35;word-break:break-word}
 .ipr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
 .ipi{display:flex;gap:8px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 11px;box-shadow:var(--sh);font-size:14.5px;line-height:1.3;min-width:0;word-break:break-word}
 .ipi small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:1px}
@@ -890,11 +891,11 @@ async function vivo(){
   try{
     const [rm, rb] = await Promise.allSettled([leerVivo('ckMaterial', num), leerVivo('ckBolo', num)]);
     if(S.vista!=='det' || S.num!==num || COLA.length) return;
-    const antes = JSON.stringify([S.items, (S.bolo||{}).ficha]);
+    const antes = JSON.stringify([S.items, (S.bolo||{}).ficha, (S.bolo||{}).horarioB]);
     if(rm.status==='fulfilled' && rm.value && Array.isArray(rm.value.items)){ S.items = fusionarItems(num, rm.value.items); S.opciones = rm.value.opciones || S.opciones; }
     const fasePend = Object.keys(PEND).some(c => c.indexOf(num+'|')===0 && Date.now()-PEND[c] < 30000);
     if(rb.status==='fulfilled' && rb.value && !(fasePend && S.bolo) && !(ESCR_T > t0)){ S.bolo = rb.value; S.furgos = rb.value.furgonetas || S.furgos; }
-    if(JSON.stringify([S.items, (S.bolo||{}).ficha]) === antes) return;
+    if(JSON.stringify([S.items, (S.bolo||{}).ficha, (S.bolo||{}).horarioB]) === antes) return;
     VIVO.cambio = Date.now(); actualizarResumen();
     if($('#sheet').classList.contains('open') || SCAN){ VIVO.sucio = true; return; }
     const y = window.scrollY; render(); window.scrollTo(0, y);
@@ -981,7 +982,7 @@ function vistaDet(){
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">${ic('refresh')}</button></div>
     <h1 class="htit">${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1>
     ${tot && !soloT ? stepper(tot) : ''}
-  </header><main class="${S.modo==='dev'?'mode-dev':''}">${tarjetaInfoPractica()}${body}</main>${foot}`;
+  </header><main class="${S.modo==='dev'?'mode-dev':''}">${tarjetaHorario()}${tarjetaInfoPractica()}${body}</main>${foot}`;
 }
 function centrarPaso(){ try{ const h = document.querySelector('#app > header'); document.documentElement.style.setProperty('--hdr', (h ? h.offsetHeight : 0)+'px'); }catch(e){} try{ const c = $('#pasos2'), o = c && c.querySelector('.paso.on'); if(o) c.scrollLeft = o.offsetLeft - (c.clientWidth - o.offsetWidth)/2; }catch(e){} }
 function stepper(tot){
@@ -1484,7 +1485,7 @@ function abrirFicha(){
     ${esAdmin() ? `<div class="fld"><span>Tipo de bolo</span><div class="seg mini" id="b_tipo" style="margin:6px 0 0">${[['','Automático'],['si','Solo técnico'],['no','Con material']].map(([v,t])=>`<button type="button" data-v="${v}" class="${String(f.soloTecnico||'')===v||(v==='si'&&f.soloTecnico==='true')?'on':''}" onclick="[...this.parentNode.children].forEach(b=>b.classList.remove('on'));this.classList.add('on')">${t}</button>`).join('')}</div><div class="meta" style="margin-top:4px">Automático: si no tiene material, sale como «Solo técnico» (fichar por días).</div></div>
     <div class="row2"><label class="fld"><span>Primer día</span><input type="date" id="b_dIni" value="${(String(f.dias||'').split('|')[0])||''}"></label><label class="fld"><span>Último día</span><input type="date" id="b_dFin" value="${(String(f.dias||'').split('|')[1])||''}"></label></div>` : ''}
     <label class="fld"><span>Dirección exacta (para el GPS y la hora de salida)</span><input id="b_direccion" value="${esc(f.direccion||'')}" placeholder="Calle, número y población" autocomplete="off"></label>
-    ${selectorHoras(f)}
+    <div class="fld"><span>Horarios</span><div class="meta">Se cambian en la tarjeta «Horario del bolo», arriba del todo (y en la pestaña Horarios del Drive).</div></div>
     <label class="fld"><span>Acceso</span><textarea id="b_acceso" rows="2" placeholder="Ej. Entrada por la calle de atrás, montacargas hasta las 18h">${esc(f.acceso)}</textarea></label>
     <label class="fld"><span>Notas</span><textarea id="b_notas" rows="2">${esc(f.notas)}</textarea></label>
     <div class="fld"><span>Info práctica para el equipo</span></div>
@@ -1914,7 +1915,6 @@ async function guardarDireccion(){
 async function guardarFichaUI(){
   const patch = {}; ['contacto','telefono','acceso','notas','direccion','ropa','comida','aparcar','emergencia','titulo'].forEach(c=> { const el = $('#b_'+c); if(el) patch[c] = (el.value||'').trim(); });
   if(patch.direccion !== String(ficha().direccion||'')) delete CLIMA[S.num];
-  patch.horario = horarioDeSelector();
   patch.tecnicos = [...document.querySelectorAll('.chip.tec.on')].map(b=>b.dataset.n);
   const tb = document.querySelector('#b_tipo button.on'); if(tb) patch.soloTecnico = tb.dataset.v;
   if($('#b_dIni')){ let a = $('#b_dIni').value, b = $('#b_dFin').value || a; if(a && b < a){ const t = a; a = b; b = t; } patch.dias = a ? a+'|'+b : ''; }
@@ -4163,6 +4163,50 @@ function tarjetaRentabilidad(){
     <div class="meta">${x.pct}% de margen${x.horas?' · '+x.horas+' h apuntadas':''}${x.horasSinPrecio?' · hay horas sin €/hora en la pestaña Equipo':''}. Se actualiza con cada gasto, hora y fichaje.</div></div>`;
 }
 
+/* =========================================================
+   HORARIO DEL BOLO · pestaña «Horarios» del Drive ⇄ app
+   ========================================================= */
+const DIAS_SEM = ['dom','lun','mar','mié','jue','vie','sáb'];
+function fechaCorta(f){ const m = String(f||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if(!m) return esc(f||''); const d = new Date(+m[3], +m[2]-1, +m[1]); return `${DIAS_SEM[d.getDay()]} ${+m[1]}/${+m[2]}`; }
+function duracionTxt(a, b){ const m = x => { const t = String(x||'').match(/^(\d{1,2}):(\d{2})$/); return t ? +t[1]*60 + +t[2] : null; }; const x = m(a), y = m(b); if(x==null || y==null) return ''; let d = y - x; if(d <= 0) d += 1440; const h = Math.floor(d/60), mi = d%60; return h + ' h' + (mi ? ' ' + mi + ' min' : ''); }
+function tarjetaHorario(){
+  const h = S.bolo && S.bolo.horarioB; if(!h) return '';
+  const l = [];
+  if(h.hCarga) l.push(['🚚','Carga en almacén', (h.fMontaje ? fechaCorta(h.fMontaje) + ' · ' : '') + esc(h.hCarga)]);
+  if(h.fMontaje || h.hMontaje) l.push(['🔧','Montaje', [h.fMontaje ? fechaCorta(h.fMontaje) : '', esc(h.hMontaje||'')].filter(Boolean).join(' · ')]);
+  if(h.hEvento) l.push(['🎤','Evento', esc(h.hEvento) + (h.hFin ? ' – ' + esc(h.hFin) + ` <small class="hdur">(${duracionTxt(h.hEvento, h.hFin)})</small>` : '')]);
+  if(h.fDesmontaje || h.hDesmontaje) l.push(['📦','Desmontaje', [h.fDesmontaje ? fechaCorta(h.fDesmontaje) : '', esc(h.hDesmontaje||'')].filter(Boolean).join(' · ')]);
+  if(!l.length && !h.notas && !esAdmin()) return '';
+  return `<div class="furg hcard"><div class="top"><b>${ic('today','s')} Horario del bolo</b>${esAdmin() ? `<button class="edit" onclick="editarHorario()">Cambiar</button>` : ''}</div>
+    ${l.length ? `<div class="hgr">${l.map(([e,t,v])=>`<div class="hit"><span class="ipe" aria-hidden="true">${e}</span><span><small>${t}</small>${v}</span></div>`).join('')}</div>` : `<div class="meta">Aún sin horario. ${esAdmin() ? 'Pulsa «Cambiar» o rellénalo en la pestaña Horarios del Drive.' : ''}</div>`}
+    ${h.notas ? `<div class="hnotas">📝 ${esc(h.notas)}</div>` : ''}</div>`;
+}
+const aISO = f => { const m = String(f||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+const deISO = v => { const m = String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+function editarHorario(){
+  if(!esAdmin() || !S.bolo) return;
+  const h = S.bolo.horarioB || {};
+  const t = (id, txt) => `<label><small>${txt}</small><input type="time" id="ho_${id}" value="${esc(h[id]||'')}" step="300"></label>`;
+  abrirSheet(`<h3>🕒 Horario del bolo</h3><div class="meta" style="margin-bottom:12px">Se guarda en la pestaña Horarios del Drive y lo ve todo el equipo al momento.</div>
+    <div class="fld"><span>Montaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fMontaje" value="${aISO(h.fMontaje)}"></label>${t('hCarga','Carga en almacén')}${t('hMontaje','Montaje en el lugar')}</div></div>
+    <div class="fld"><span>Evento</span><div class="hgrid">${t('hEvento','Empieza')}${t('hFin','Termina')}</div></div>
+    <div class="fld"><span>Desmontaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fDesmontaje" value="${aISO(h.fDesmontaje)}"></label>${t('hDesmontaje','Hora')}</div></div>
+    <label class="fld"><span>Notas para el equipo</span><textarea id="ho_notas" rows="2" placeholder="Ej. montaje por el muelle, prueba de sonido a las 18h">${esc(h.notas||'')}</textarea></label>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarHorarioUI()">Guardar</button></div>`);
+}
+async function guardarHorarioUI(){
+  const h0 = Object.assign({}, (S.bolo||{}).horarioB || {}), patch = {};
+  ['hCarga','hMontaje','hEvento','hFin','hDesmontaje'].forEach(k => { const v = ($('#ho_'+k)||{}).value || ''; if(v !== (h0[k]||'')) patch[k] = v; });
+  ['fMontaje','fDesmontaje'].forEach(k => { const v = deISO(($('#ho_'+k)||{}).value); if(v !== (h0[k]||'')) patch[k] = v; });
+  const n = (($('#ho_notas')||{}).value || '').trim(); if(n !== (h0.notas||'')) patch.notas = n;
+  cerrarSheet();
+  if(!Object.keys(patch).length) return;
+  const num = S.num; S.bolo.horarioB = Object.assign({}, h0, patch); guardarBoloCache(); render();
+  pendMarca(num, 'horario', true);
+  try{ const r = await enviar('ckGuardarHorario', num, patch); if(r){ if(S.num===num && S.bolo){ S.bolo.horarioB = r; guardarBoloCache(); render(); } toast('Horario guardado en el Drive'); } }
+  catch(e){ if(S.num===num && S.bolo){ S.bolo.horarioB = h0; render(); } toast('No se guardó: '+e.message); }
+  finally{ pendMarca(num, 'horario', false); }
+}
 /* =========================================================
    INFO PRÁCTICA · MI MES · DICTAR POR VOZ
    ========================================================= */
