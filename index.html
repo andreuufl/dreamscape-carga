@@ -904,7 +904,13 @@ async function vivo(){
 }
 setInterval(vivo, 1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ VIVO.ult = 0; VIVO.cambio = Date.now(); } });
-function ficha(){ return (S.bolo && S.bolo.ficha) || {}; }
+function conHorario(txt, h){
+  if(!h || !(h.hCarga || h.hMontaje || h.hEvento || h.hDesmontaje)) return txt || '';
+  const l = []; if(h.hCarga) l.push('Carga '+h.hCarga); if(h.hMontaje) l.push('Montaje '+h.hMontaje); if(h.hEvento) l.push('Evento '+h.hEvento+(h.hFin?' – '+h.hFin:'')); if(h.hDesmontaje) l.push('Desmontaje '+h.hDesmontaje);
+  const otros = String(txt||'').split(/\s*·\s*/).filter(x => x && !/^(carga|montaje|llegada|evento|inicio|desmontaje)\b/i.test(x));
+  return l.concat(otros).join(' · ');
+}
+function ficha(){ const f = (S.bolo && S.bolo.ficha) || {}; if(S.bolo && S.bolo.horarioB && S.bolo.ficha){ const t = conHorario(f.horario, S.bolo.horarioB); if(t !== (f.horario||'')) f.horario = t; } return f; }
 function vistaDet(){
   const p = S.presus.find(x=>x.num===S.num) || {num:S.num, evento:''};
   if(!esAdmin() && S.modo==='ruta') S.modo = 'descSitio';
@@ -1534,9 +1540,9 @@ async function pintarPlan(tipo){
   await cargarLugar(p); if(!$('#plan_'+tipo)) return;
   const clave = [S.num, tipo, f.horario, cfg().almacen, p.lugar, dirBolo(p), n].join('|');
   if(PLAN[clave]){ el.innerHTML = PLAN[clave]; return; }
-  const cab = `<div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b>${esAdmin()?'<button class="edit" onclick="abrirFicha()">Horas</button>':''}</div>`;
+  const cab = `<div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b>${esAdmin()?'<button class="edit" onclick="editarHorario()">Horas</button>':''}</div>`;
   const llegada = tipo==='desmontaje' ? H.desmontaje : H.montaje;
-  if(llegada == null){ el.innerHTML = cab + `<div class="meta">${esAdmin() ? 'Pon la hora de '+tipo+' en la ficha del bolo (botón «Horas») y calculo a qué hora salir.' : 'Aún no hay hora de '+tipo+' en la ficha del bolo.'}</div>`; return; }
+  if(llegada == null){ el.innerHTML = cab + `<div class="meta">${esAdmin() ? 'Pon la hora de '+tipo+' con el botón «Horas» (o en la pestaña Horarios del Drive) y calculo a qué hora salir.' : 'Aún no hay hora de '+tipo+' en la ficha del bolo.'}</div>`; return; }
   if(!al){ el.innerHTML = cab + `<div class="meta">${tipo==='desmontaje'?'Desmontaje':'Montaje'} a las <b>${hhmm(llegada)}</b>.${esAdmin()?' Guarda la dirección del almacén (paso Almacén) para calcular la salida.':''}</div>`; return; }
   const dest = await geoBolo(p), min = dest ? await minutosRuta(al, dest) : null;
   if(!$('#plan_'+tipo)) return;
@@ -3683,9 +3689,11 @@ async function guardarDias(){
   const H = horasFicha(ficha()), ent = $('#dEnt').value, evt = $('#dEvt').value;
   const l = []; if(H.carga != null) l.push('Carga '+hhmm(H.carga)); if(ent) l.push('Montaje '+ent); if(evt) l.push('Evento '+evt); if(H.desmontaje != null) l.push('Desmontaje '+hhmm(H.desmontaje)); H.otros.forEach(x=>l.push(x));
   const patch = { dias: a+'|'+b, horario: l.join(' · ') };
-  const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); cerrarSheet(); render(); guardarBoloCache();
-  try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(r!==null) toast('Días guardados'); }
-  catch(e){ S.bolo.ficha = prev; render(); toast('No se guardó: '+e.message); }
+  const hp = {}; const h0 = Object.assign({}, S.bolo.horarioB || {});
+  if(ent !== (h0.hMontaje||'')) hp.hMontaje = ent; if(evt !== (h0.hEvento||'')) hp.hEvento = evt;
+  const prev = Object.assign({}, S.bolo.ficha); Object.assign(S.bolo.ficha, patch); if(S.bolo.horarioB) Object.assign(S.bolo.horarioB, hp); cerrarSheet(); render(); guardarBoloCache();
+  try{ const r = await enviar('ckGuardarFicha', S.num, patch); if(Object.keys(hp).length && esAdmin()){ const rh = await enviar('ckGuardarHorario', S.num, hp); if(rh && S.bolo) S.bolo.horarioB = rh; } if(r!==null) toast('Días guardados'); }
+  catch(e){ S.bolo.ficha = prev; if(S.bolo.horarioB) S.bolo.horarioB = h0; render(); toast('No se guardó: '+e.message); }
 }
 async function ponerTipoBolo(v){
   if(!S.bolo) return;
