@@ -574,6 +574,7 @@ details.pldet>summary{font-size:13.5px;font-weight:700;color:var(--gold,#c9a66b)
 details.pldet>summary::after{content:" ▾"}
 details.pldet[open]>summary::after{content:" ▴"}
 /* ---------- INFO PRÁCTICA y DICTADO ---------- */
+.sqcard .sqtask{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 0;border-top:1px solid var(--line,rgba(0,0,0,.08));background:none}.sqcard .sqtask:first-of-type{border-top:0}.sqcard .sqic{font-size:22px;flex:none}.sqcard .sqtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sqcard .sqtx b{font-size:15px}.sqcard small{color:var(--mut,#6b7280);font-size:12.5px}.sqcard .sqlibre{color:#b45309}.sqcard .sqtag{font-size:11px;font-weight:700;color:#fff;background:#dc2626;border-radius:8px;padding:3px 7px;flex:none}.sqf{margin-top:6px;line-height:1.45}.hgr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hgr2 small{display:block;color:var(--mut,#6b7280);font-size:12px}.hgr2 b{font-size:15px}
 .hcard .hgr{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hcard .hit{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;line-height:1.3;min-width:0}.hcard .hit small{display:block;color:var(--mut,#6b7280);font-size:12px}.hcard .hdur{display:inline;color:var(--mut,#6b7280);font-size:12px}.hcard .hnotas{margin-top:10px;font-size:14px;line-height:1.35;word-break:break-word}
 .ipr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
 .ipi{display:flex;gap:8px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 11px;box-shadow:var(--sh);font-size:14.5px;line-height:1.3;min-width:0;word-break:break-word}
@@ -756,7 +757,7 @@ async function cargarLista(){
   S.listo = true;
   if(S.vista==='lista') render();
   ocultarSplash();
-  cargarAvisos();
+  cargarAvisos(); cargarRecogidas();
   avisarRecordatorios();
   cargarPortadas(); revisarPush(); revisarLogros(); if(navigator.onLine !== false) setTimeout(()=>prepararOffline(false), 2500);
 }
@@ -805,7 +806,7 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias()+tarjetaFaltasHome():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
+    ${semana()}${tarjetasPendientes()}${tarjetaRecogidas()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias()+tarjetaFaltasHome():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
     ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
@@ -1262,22 +1263,27 @@ function tarjetaSubalq(){
     const q = encodeURIComponent(x.dir||x.prov||'');
     const estado = x.devuelto ? `<span class="sqok">Devuelto · ${esc(x.devuelto)}</span>` : x.recogido ? `<span class="sqmid">Recogido · ${esc(x.recogido)}</span>` : '<span class="sqpend">Pendiente de recoger</span>';
     const furgo = x.tipo==='furgo' ? (x.matricula ? `<div style="margin:8px 0 2px"><span class="plate sm">${esc(x.matricula)}</span> <span class="meta">${esc([x.marca,x.modelo].filter(Boolean).join(' '))}</span></div>` : '<div class="meta" style="margin-top:6px">La matrícula se pone al recogerla.</div>') : '';
-    const btn = !x.recogido ? `<button class="btn" onclick="marcarSubalq(${i},'recogido')">${ic('check','s')} ${x.tipo==='furgo'?'Furgoneta recogida':'Recogido'}</button>`
-      : !x.devuelto ? `<button class="btn" onclick="marcarSubalq(${i},'devuelto')">${ic('check','s')} ${x.tipo==='furgo'?'Furgoneta devuelta':'Devuelto'}</button>` : '';
+    const btn = !x.recogido ? `<button class="btn" onclick="abrirTareaSq('${esc(S.num)}','${esc(x.id)}','rec')">${ic('check','s')} ${x.tipo==='furgo'?'Recoger furgoneta':'Recoger'}</button>`
+      : !x.devuelto ? `<button class="btn" onclick="abrirTareaSq('${esc(S.num)}','${esc(x.id)}','dev')">${ic('check','s')} ${x.tipo==='furgo'?'Devolver furgoneta':'Devolver'}</button>` : '';
+    const fechas = `<div class="meta sqf">🔄 Recoger ${x.fRec?fechaCorta(x.fRec):'—'}${x.hRec?' · '+esc(x.hRec):''}${x.resp&&!x.recogido?' · va '+esc(String(x.resp).split(' · ').pop()):''}<br>↩️ Devolver ${x.fDev?fechaCorta(x.fDev):'—'}${x.hDev?' · '+esc(x.hDev):''}${x.respDev&&!x.devuelto?' · va '+esc(String(x.respDev).split(' · ').pop()):''}</div>`;
     return `<div class="sqrow"><div class="top"><b>${x.tipo==='furgo'?ic('truck','s'):ic('box','s')} ${esc(x.prov||'Proveedor')}</b>${esAdmin()?`<button class="edit" onclick="editarSubalq(${i})">Editar</button>`:''}</div>
-      ${x.que?`<div class="sqque">${esc(x.que)}</div>`:''}${furgo}
+      ${x.que?`<div class="sqque">${esc(x.que)}</div>`:''}${furgo}${fechas}
       <div style="margin:6px 0 10px">${estado}</div>
       <div class="row2">${x.dir?`<a class="btn sec2" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">${ic('nav','s')} Ir</a>`:''}${btn}${x.recogido&&esAdmin()?`<button class="btn sec2" onclick="deshacerSubalq(${i})">Deshacer</button>`:''}</div></div>`;
   };
   return `<div class="furg sq"><div class="top"><b>${ic('box','s')} Subalquiler</b>${esAdmin()?'<button class="edit" onclick="editarSubalq(-1)">+ Añadir</button>':''}</div>${l.map(fila).join('')}</div>`;
 }
 function editarSubalq(i){
-  const x = i>=0 ? subalqs()[i] : { tipo:'mat' };
+  const x = i>=0 ? subalqs()[i] : Object.assign({ tipo:'mat' }, SQ_PRESET || {});
+  cargarProvs();
   abrirSheet(`<h3>${i>=0?'Editar subalquiler':'Nuevo subalquiler'}</h3>
     <div class="chips" id="sqTipo" style="margin:0 0 12px"><button class="chip ${x.tipo!=='furgo'?'on':''}" data-v="mat" onclick="sqTipo(this)">Material</button><button class="chip ${x.tipo==='furgo'?'on':''}" data-v="furgo" onclick="sqTipo(this)">Furgoneta</button></div>
-    <label class="fld"><span>Proveedor</span><input id="sqProv" list="sqProvL" value="${esc(x.prov)}" placeholder="Ej. IBERFURGO" autocomplete="off"><datalist id="sqProvL">${provsConocidos().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></label>
+    <label class="fld"><span>Proveedor</span><input id="sqProv" list="sqProvL" value="${esc(x.prov)}" placeholder="Ej. IBERFURGO" autocomplete="off" onchange="sqProvElegido(this.value)"><datalist id="sqProvL">${provsConocidos().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></label>
     <label class="fld"><span>Dirección de recogida y devolución</span><input id="sqDir" value="${esc(x.dir)}" placeholder="Calle, número y población" autocomplete="off"></label>
     <label class="fld"><span>Qué se alquila</span><textarea id="sqQue" rows="2" placeholder="Ej. 2 cabezas móviles + 1 mesa de luces">${esc(x.que)}</textarea></label>
+    <div class="fld"><span>Recogida y devolución</span><div class="meta" style="margin-bottom:6px">Si lo dejas vacío: el día antes del montaje y el día después del desmontaje, a la hora de apertura del proveedor.</div>
+      <div class="hgrid"><label><small>Día recoger</small><input type="date" id="sqFRec" value="${aISO(x.fRec)}"></label><label><small>Hora</small><input type="time" id="sqHRec" value="${esc(x.hRec||'')}" step="300"></label>
+      <label><small>Día devolver</small><input type="date" id="sqFDev" value="${aISO(x.fDev)}"></label><label><small>Hora</small><input type="time" id="sqHDev" value="${esc(x.hDev||'')}" step="300"></label></div></div>
     <div id="sqFur" ${x.tipo==='furgo'?'':'hidden'}><div class="meta" style="margin:0 0 8px">Si ya sabes la furgoneta, ponla. Si no, se pide al recogerla.</div>${camposFurgoSq(x)}</div>
     <div class="row2" style="margin-top:12px">${i>=0?`<button class="btn sec2 danger" onclick="borrarSubalq(${i})">Eliminar</button>`:'<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>'}<button class="btn" onclick="guardarSubalq(${i})">Guardar</button></div>`);
 }
@@ -1289,9 +1295,9 @@ function sqTipo(b){ document.querySelectorAll('#sqTipo .chip').forEach(c=>c.clas
 function sqAutoFurgo(){ const m = normMatricula(($('#sqMat')||{}).value), f = (S.furgos||[]).find(x=>normMatricula(x.matricula)===m); if(f){ if($('#sqMarca')&&!$('#sqMarca').value) $('#sqMarca').value = f.marca||''; if($('#sqModelo')&&!$('#sqModelo').value) $('#sqModelo').value = f.modelo||''; } }
 function leerFurgoSq(x){ if(!$('#sqMat')) return; x.matricula = normMatricula($('#sqMat').value); x.marca = ($('#sqMarca').value||'').trim(); x.modelo = ($('#sqModelo').value||'').trim(); }
 async function guardarSubalqs(l, msg){
-  if(!S.bolo) return; const prev = S.bolo.ficha.subalq; S.bolo.ficha.subalq = l; render(); guardarBoloCache();
-  try{ const r = await enviar('ckGuardarFicha', S.num, { subalq:l }); if(r!==null) toast(msg); }
-  catch(e){ S.bolo.ficha.subalq = prev; render(); toast('No se guardó: '+e.message); }
+  if(!S.bolo) return; const num = S.num, prev = S.bolo.ficha.subalq; S.bolo.ficha.subalq = l; render(); guardarBoloCache();
+  try{ const r = await enviar('ckSubalq', num, 'lista', l); if(r){ if(S.num===num && S.bolo){ S.bolo.ficha.subalq = r; guardarBoloCache(); render(); } toast(msg); cargarRecogidas(); } }
+  catch(e){ if(S.num===num && S.bolo){ S.bolo.ficha.subalq = prev; render(); } toast('No se guardó: '+e.message); }
 }
 async function furgoDeSubalq(x){
   // Si la matrícula no está en la lista de furgonetas, la añade (alquilada) y la asigna al bolo
@@ -1309,6 +1315,9 @@ function guardarSubalq(i){
   const l = subalqs(), x = i>=0 ? Object.assign({}, l[i]) : { id:'s'+Date.now().toString(36) };
   x.tipo = (document.querySelector('#sqTipo .chip.on')||{}).dataset.v || 'mat';
   x.prov = ($('#sqProv').value||'').trim(); x.dir = ($('#sqDir').value||'').trim(); x.que = ($('#sqQue').value||'').trim();
+  const fr = deISO(($('#sqFRec')||{}).value), fd = deISO(($('#sqFDev')||{}).value), hr = ($('#sqHRec')||{}).value||'', hd = ($('#sqHDev')||{}).value||'';
+  x.fRec = fr; x.fDev = fd; x.hRec = hr; x.hDev = hd;
+  if(i < 0 && SQ_PRESET && SQ_PRESET.items) x.items = SQ_PRESET.items; SQ_PRESET = null;
   if(x.tipo==='furgo') leerFurgoSq(x); else { delete x.matricula; delete x.marca; delete x.modelo; }
   if(!x.prov){ toast('Pon el proveedor'); return; }
   recordarProv(x.prov);
@@ -1346,6 +1355,89 @@ function deshacerSubalq(i){
   delete x[k]; l[i] = x; guardarSubalqs(l, 'Marca quitada');
 }
 
+/* =========================================================
+   RECOGIDAS Y DEVOLUCIONES DE SUBALQUILER (como un bolo)
+   ========================================================= */
+let SQ_PRESET = null;
+async function cargarRecogidas(){ try{ const l = await call('ckRecogidas'); const a = JSON.stringify(S.recogidas||[]); S.recogidas = l || []; if(JSON.stringify(S.recogidas) !== a && S.vista==='lista' && !$('#sheet').classList.contains('open')) render(); }catch(e){} }
+async function cargarProvs(){ if(S.provs) return S.provs; try{ S.provs = await call('ckProveedores') || []; }catch(e){ S.provs = []; } const dl = $('#sqProvL'); if(dl) dl.innerHTML = [...new Set(provsConocidos().concat(S.provs.map(p=>p.nombre)))].map(p=>`<option value="${esc(p)}">`).join(''); return S.provs; }
+function provDe(nombre){ const n = String(nombre||'').trim().toLowerCase(); return (S.provs||[]).find(p=>String(p.nombre).toLowerCase()===n) || null; }
+function sqProvElegido(v){ const p = provDe(v); if(p){ const d = $('#sqDir'); if(d && !d.value && p.dir) d.value = p.dir; } }
+function misRecogidas(){ const vis = new Set((S.presus||[]).map(p=>p.num)); return (S.recogidas||[]).filter(t => esAdmin() || vis.has(t.num)); }
+function tareaTitulo(t){ return (t.fase==='rec' ? (t.tipo==='furgo' ? 'Recoger furgoneta' : 'Recoger material') : (t.tipo==='furgo' ? 'Devolver furgoneta' : 'Devolver material')) + ' · ' + (t.prov || 'proveedor'); }
+function tarjetaRecogidas(){
+  const l = misRecogidas().filter(t=>!t.hecho); if(!l.length) return '';
+  const hoyT = diaDe(Date.now());
+  const fila = (t) => { const i = (S.recogidas||[]).indexOf(t); const d = (String(t.fecha).match(/^(\d{2})\/(\d{2})\/(\d{4})$/)||[]); const ts = d.length ? new Date(+d[3], +d[2]-1, +d[1]).getTime() : null; const tarde = ts != null && ts < hoyT;
+    return `<button class="sqtask ${t.fase} ${tarde?'tarde':''}" onclick="abrirTarea(${i})"><span class="sqic">${t.fase==='rec'?'🔄':'↩️'}</span><span class="sqtx"><b>${esc(tareaTitulo(t))}</b><small>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''} · ${esc(t.evento||t.num)}</small>${t.resp?`<small class="sqresp">✋ ${esc(String(t.resp).split(' · ').pop())}</small>`:'<small class="sqlibre">Sin asignar · tócala para aceptarla</small>'}</span>${tarde?'<span class="sqtag">Atrasada</span>':''}</button>`; };
+  return `<div class="furg sqcard"><div class="top"><b>${ic('truck','s')} Recogidas y devoluciones</b><span class="meta">${l.length}</span></div>${l.slice(0,8).map(fila).join('')}${l.length>8?`<div class="meta">y ${l.length-8} más</div>`:''}</div>`;
+}
+function abrirTarea(i){ const t = (S.recogidas||[])[i]; if(t) abrirTareaSq(t.num, t.id, t.fase); }
+function datosTarea(num, id, fase){
+  const t = (S.recogidas||[]).find(x=>x.num===num && String(x.id)===String(id) && x.fase===fase);
+  const x = (S.num===num && S.bolo) ? (subalqs().find(y=>String(y.id)===String(id)) || null) : null;
+  if(x) return { num, id, fase, evento:(S.presus.find(p=>p.num===num)||{}).evento || (t||{}).evento || num, tipo:x.tipo||'mat', prov:x.prov||'', que:x.que||'', dir:x.dir||'', fecha: fase==='rec'?x.fRec:x.fDev, hora: fase==='rec'?x.hRec:x.hDev, resp: fase==='rec'?x.resp:x.respDev, hecho: fase==='rec'?x.recogido:x.devuelto, matricula:x.matricula||'', marca:x.marca||'', modelo:x.modelo||'' };
+  return t ? Object.assign({}, t) : null;
+}
+function abrirTareaSq(num, id, fase){
+  const t = datosTarea(num, id, fase); if(!t){ toast('Esta tarea ya no existe'); return; }
+  const p = provDe(t.prov) || {}, q = encodeURIComponent(t.dir || t.prov || ''), yo = yoNombre();
+  const respN = String(t.resp||'').split(' · ').pop(), mia = respN && respN === yo;
+  const furgo = t.tipo==='furgo';
+  const accion = t.hecho ? `<div class="done-banner">${ic('check','s')} ${fase==='rec'?'Recogido':'Devuelto'} · ${esc(t.hecho)}</div>`
+    : `${!t.resp ? `<button class="btn" onclick="aceptarTareaSq('${esc(num)}','${esc(id)}','${fase}')">✋ Aceptar: voy yo</button>` : ''}
+       ${furgo && fase==='rec' ? `<div class="fld" style="margin-top:10px"><span>Furgoneta</span></div>${camposFurgoSq(t)}` : ''}
+       <label class="btn fotobtn ${t.resp?'':'sec2'}" for="sqFotoIn" style="margin-top:10px">📷 ${fase==='rec' ? (furgo ? 'Foto (km y gasolina) y confirmar recogida' : 'Foto del material y confirmar recogida') : (furgo ? 'Foto (km y gasolina) y confirmar devolución' : 'Foto y confirmar devolución')}</label>
+       <input type="file" id="sqFotoIn" accept="image/*" capture="environment" hidden onchange="confirmarTareaSq(this,'${esc(num)}','${esc(id)}','${fase}')">
+       <button class="link" style="padding:10px 0 0" onclick="confirmarTareaSq(null,'${esc(num)}','${esc(id)}','${fase}')">Confirmar sin foto</button>`;
+  abrirSheet(`<h3>${fase==='rec'?'🔄':'↩️'} ${esc(tareaTitulo(t))}</h3>
+    <div class="meta" style="margin-bottom:10px">Para ${esc(t.evento||num)} · ${esc(num)}</div>
+    <div class="hgr2">
+      <div><small>Cuándo</small><b>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''}</b></div>
+      <div><small>Quién va</small><b>${t.resp ? esc(respN) + (mia?' (tú)':'') : 'Sin asignar'}</b></div>
+    </div>
+    ${t.que?`<div class="sqque" style="margin:10px 0">${esc(t.que)}</div>`:''}
+    ${p.horario?`<div class="meta">🕘 Horario del proveedor: ${esc(p.horario)}</div>`:''}
+    ${t.dir?`<div class="meta">📍 ${esc(t.dir)}</div>`:''}
+    <div class="row2" style="margin:10px 0">${t.dir||t.prov?`<a class="btn sec2" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">${ic('nav','s')} Ir</a>`:''}${p.telefono?`<a class="btn sec2" href="tel:${esc(tel(p.telefono))}">${ic('phone','s')} Llamar</a>`:''}</div>
+    ${accion}
+    <div class="row2" style="margin-top:14px">${t.resp && !t.hecho && (mia || esAdmin()) ? `<button class="btn sec2" onclick="soltarTareaSq('${esc(num)}','${esc(id)}','${fase}')">Ya no voy</button>` : ''}<button class="btn sec2" onclick="cerrarSheet();abrir('${esc(num)}')">Abrir el bolo</button></div>`);
+}
+async function marcarTareaSq(num, id, datos, msg){
+  try{
+    const r = await enviar('ckSubalq', num, 'marcar', id, datos);
+    if(r && S.num===num && S.bolo){ S.bolo.ficha.subalq = r; guardarBoloCache(); }
+    if(r!==null) toast(msg);
+    await cargarRecogidas(); render(); return r;
+  }catch(e){ toast('No se guardó: '+e.message); return null; }
+}
+function aceptarTareaSq(num, id, fase){ cerrarSheet(); vib(15); marcarTareaSq(num, id, fase==='rec' ? { resp:true } : { respDev:true }, 'Aceptada: te toca a ti'); }
+function soltarTareaSq(num, id, fase){ if(!confirm('¿Dejar libre esta tarea para que la coja otro?')) return; cerrarSheet(); marcarTareaSq(num, id, fase==='rec' ? { resp:'' } : { respDev:'' }, 'Tarea libre'); }
+async function confirmarTareaSq(input, num, id, fase){
+  const t = datosTarea(num, id, fase); if(!t) return;
+  const datos = {};
+  if(t.tipo==='furgo' && fase==='rec'){
+    const m = normMatricula(($('#sqMat')||{}).value);
+    if(!m || m.length < 4){ toast('Pon la matrícula de la furgoneta'); if(input) input.value=''; const e=$('#sqMat'); if(e) e.focus(); return; }
+    datos.matricula = m; datos.marca = (($('#sqMarca')||{}).value||'').trim(); datos.modelo = (($('#sqModelo')||{}).value||'').trim();
+  }
+  if(!input && !confirm(fase==='rec' ? '¿Confirmar la recogida sin foto?' : '¿Confirmar la devolución sin foto?')) return;
+  if(!t.resp) datos[fase==='rec'?'resp':'respDev'] = true;
+  datos[fase==='rec'?'recogido':'devuelto'] = true;
+  const f = input && input.files && input.files[0];
+  cerrarSheet(); vib([15,40,15]);
+  if(f){ toast('Subiendo la foto…'); try{ const d = await comprimir(f, 1000, 45000); await enviar('ckFoto', num, 'Subalquiler ' + (t.prov||''), fase==='rec' ? 'recogida subalquiler' : 'devolución subalquiler', d); datos[fase==='rec'?'fotoRec':'fotoDev'] = hora(); }catch(e){ toast('La foto no se pudo subir: '+e.message); } }
+  const r = await marcarTareaSq(num, id, datos, fase==='rec' ? (t.tipo==='furgo' ? 'Furgoneta recogida' : 'Recogida confirmada') : (t.tipo==='furgo' ? 'Furgoneta devuelta' : 'Devolución confirmada'));
+  if(r && fase==='rec' && t.tipo==='furgo' && S.num===num){ const x = (r||[]).find(y=>String(y.id)===String(id)); if(x) furgoDeSubalq(x); }
+  if(r && fase==='rec') setTimeout(confeti, 150);
+}
+function subalquilarFalta(num){
+  const b = (S.stock||[]).find(x=>x.num===num); if(!b) return;
+  const items = (b.falta||[]).map(f => ({ material: f.material, cant: Math.max(1, (+f.usado||0) - (+f.stock||0)) }));
+  SQ_PRESET = { tipo:'mat', que: items.map(it => it.cant + '× ' + it.material).join(', '), items };
+  cerrarSheet(); abrir(num);
+  let n = 0; const esperar = () => { if(S.num===num && S.bolo){ editarSubalq(-1); return; } if(++n < 40) setTimeout(esperar, 250); }; setTimeout(esperar, 300);
+}
 /* ---------- FOTO DE LA FURGONETA CARGADA ---------- */
 let FOTOS = {}; try{ FOTOS = JSON.parse(localStorage.getItem('ck_fotos')||'{}'); }catch(e){}
 function guardarFotos(){ try{ const ks=Object.keys(FOTOS); while(ks.length>3){ delete FOTOS[ks.shift()]; } localStorage.setItem('ck_fotos', JSON.stringify(FOTOS)); }catch(e){} }
@@ -3539,7 +3631,7 @@ function verStock(){
   abrirSheet(`<h3>${ic('alert')} Falta stock</h3><div class="meta" style="margin-bottom:10px">Material que no llega en los próximos 14 días porque está en otro bolo a la vez o en reparación. Mejor resolverlo ahora que el día de la carga.</div>
     ${l.map(b=>`<div class="furg"><div class="top"><b>${esc(b.evento||b.num)}</b><span class="meta">${esc(b.montaje||'')}</span></div>
       ${b.falta.map(f=>`<div class="hrow2" style="padding:6px 0"><div><b>${esc(f.material)}</b><div class="meta inc">Necesitas ${f.usado} · hay ${f.stock}${(f.otros||[]).length?' · también en '+esc(f.otros.join(', ')):''}</div></div></div>`).join('')}
-      <button class="link" style="padding:8px 0 0" onclick="cerrarSheet();abrir('${esc(b.num)}')">Abrir el bolo ›</button></div>`).join('') || '<div class="meta">Todo el material llega. 👍</div>'}`);
+      <div class="row2" style="margin-top:8px">${esAdmin()?`<button class="btn" onclick="subalquilarFalta('${esc(b.num)}')">${ic('box','s')} Subalquilar</button>`:''}<button class="btn sec2" onclick="cerrarSheet();abrir('${esc(b.num)}')">Abrir el bolo</button></div></div>`).join('') || '<div class="meta">Todo el material llega. 👍</div>'}`);
 }
 
 /* ---------- 5. FICHAJE ---------- */
