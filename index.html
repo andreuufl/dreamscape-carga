@@ -658,6 +658,47 @@ header.top .hrow h1{font-weight:700;letter-spacing:-.03em}
 .quien small{display:block;color:var(--mut);font-size:12px}
 .quien b{font-size:15.5px}
 .quien .edit{flex:none}
+/* ===== v51 · Logística y Equipo ===== */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.kpis>div{background:var(--card);border-radius:14px;padding:12px;box-shadow:var(--ring),var(--sh)}
+.kpis b{display:block;font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.kpis small{color:var(--mut);font-size:12px;font-weight:550}
+.kpis .warn b{color:var(--warn)}
+.lcard{padding:6px 14px}
+.lcard>.top{padding:8px 0 4px}
+.ltask{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:11px 0}
+.lcard .ltask:first-child,.lcard>.top+.ltask{border-top:0}
+.ltask .lmain{flex:1;min-width:0;display:flex;align-items:center;gap:11px;text-align:left}
+.ltask .sqic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--card2);box-shadow:var(--ring);flex:none}
+.ltask .sqic.rec{color:var(--gold)}.ltask .sqic.dev{color:var(--dev)}
+.ltask .sqtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ltask .sqtx b{font-size:15px;font-weight:620;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ltask .sqtx small{color:var(--mut);font-size:12.5px}
+.lres{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px}
+.lres .who{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600}
+.lasg{flex:none;font-size:13px;font-weight:620;padding:8px 12px;border-radius:10px;background:var(--card2);box-shadow:var(--ring);color:var(--txt)}
+.lfurgo{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 0;border-top:1px solid var(--line)}
+.lcard .lfurgo:first-child{border-top:0}
+.empty.sm{padding:22px 10px}
+.ebolo .chipsr,.eper .chipsr{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px 3px 3px;border-radius:999px;background:var(--card2);box-shadow:var(--ring)}
+.pchip i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:10px;font-weight:700}
+.pchip.mal{background:var(--badbg);color:var(--bad);box-shadow:none}
+.eper{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.lcard .eper:first-child{border-top:0}
+.eper .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:650;font-size:14px;flex:none}
+.eper .tx{flex:1;min-width:0}
+.eper .tx b{font-weight:620}
+.eper .tx small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eper .tx small.sin{color:var(--warn)}
+.avisos{padding:6px 14px}
+.avisos>.top{padding:8px 0 4px}
+.arow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 0;border-top:1px solid var(--line);font-weight:560;font-size:15px}
+.arow>span{flex:1}
+.arow svg:first-child{color:var(--warn)}
+.arow svg:last-child{color:var(--mut)}
+.tabbar.t5{grid-template-columns:repeat(5,1fr)}
+.tabbar.t5 button svg{width:42px}
 </style>
 </head>
 <body>
@@ -841,6 +882,8 @@ function tarjetaBolo(p){
 function tarjetasPendientes(){ return (S.pendientes||[]).filter(x => esAdmin() || S.presus.some(p=>p.num===x.num)).map(x=>`<button class="card alerta" onclick="abrir('${esc(x.num)}')"><b>${ic('alert','s')} Material sin devolver</b><div class="meta">${esc(x.num)} · ${esc(x.evento)} · ${x.n} artículos</div></button>`).join(''); }
 function vistaLista(){
   if((S.tab||'hoy')==='hoy') return vistaHoy();
+  if(S.tab==='logi' && esAdmin()) return vistaLogistica();
+  if(S.tab==='equipo' && esAdmin()) return vistaEquipo();
   const l = filtrados();
   const body = !S.presus.length && !S.listo ? `<div class="loading"><div class="spin"></div>Cargando presupuestos…</div>`
     : !l.length ? `<div class="empty">${ic('box')}<div>No hay presupuestos ${S.filtro==='prox'?'próximos':''}</div></div>`
@@ -863,20 +906,100 @@ function vistaHoy(){
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
   const body = cargando ? `<div class="loading"><div class="spin"></div>Cargando…</div>` : `
-    ${semana()}${tarjetasPendientes()}${tarjetaRecogidas()}${esAdmin()?tarjetaStock()+tarjetaCobros()+tarjetaAverias()+tarjetaFaltasHome():''}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}${esAdmin()?tarjetasAvisos():''}
-    ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,4).map(tarjetaBolo).join('')}${resto.length>4?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
+    ${semana()}${esAdmin()?'':tarjetasPendientes()}${resumenAvisosHoy()}${tarjetaRecogidasHoy()}${hero}${widgetHoy()}${esAdmin() && heroes ? `<button class="card panelbtn" onclick="verPanel()">${ic('today','s')}<span><b>Panel del día</b><small>Quién ha salido, llegado o va con retraso</small></span>${ic('chev','s')}</button>` : ''}
+    ${resto.length ? `<div class="sec">Próximos bolos <span class="cnt">${resto.length}</span></div>${resto.slice(0,3).map(tarjetaBolo).join('')}${resto.length>3?`<button class="link" onclick="irTab('bolos')">Ver los ${resto.length} bolos ›</button>`:''}` : ''}
     ${!hero && !resto.length ? `<div class="empty">${ic('today')}<div>${esAdmin() ? 'No hay bolos a la vista.<br>Cuando aceptes uno en el Drive, aparecerá aquí.' : 'No tienes bolos asignados.<br>Cuando te asignen uno, aparecerá aquí.'}</div></div>` : ''}`;
   return `<header class="top">${BRAND}
     <div class="hrow"><div style="flex:1;min-width:0"><h1>${esc(saludo)}${nombre?', '+esc(nombre):''}<span class="sync" id="dot"></span></h1><div class="sub">${esc(fecha)}</div></div>
     <button class="ref" onclick="cargarLista()" aria-label="Actualizar">${ic('refresh')}</button></div>
   </header><main>${body}</main>`;
 }
+/* =========================================================
+   v51 · LOGÍSTICA y EQUIPO (pestañas del administrador)
+   ========================================================= */
+function tsTarea(t){ const d = String(t.fecha||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return d ? new Date(+d[3], +d[2]-1, +d[1]).getTime() : null; }
+function respDe(t){ return t.resp ? String(t.resp).split(' · ').pop() : ''; }
+function claveInv(t){ return t.num+'|'+t.id+'|'+t.fase; }
+function cargarInvitaciones(l){
+  S.inv = S.inv || {};
+  l.filter(t => t.resp && !t.hecho && !(claveInv(t) in S.inv)).slice(0, 10).forEach(t => {
+    const k = claveInv(t); S.inv[k] = '';
+    call('ckEstadoInvit', t.num, t.id, t.fase).then(st => { S.inv[k] = st || ''; if(S.vista==='lista' && ['logi','equipo'].includes(S.tab) && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{ delete S.inv[k]; });
+  });
+}
+function chipInv(t){ const v = INV_TXT[(S.inv||{})[claveInv(t)]]; if(!v) return ''; const corto = { YES:'Aceptada', NO:'No puede', MAYBE:'Quizás', INVITED:'Sin responder', SIN_CORREO:'Sin correo' }[(S.inv||{})[claveInv(t)]]; return `<span class="sqst ${v[0]}">${v[0]==='ok'?ic('check','xs'):''}${esc(corto)}</span>`; }
+function filaTarea(t){
+  const i = (S.recogidas||[]).indexOf(t), ts = tsTarea(t), tarde = ts != null && ts < diaDe(Date.now()), r = respDe(t);
+  return `<div class="ltask ${tarde?'tarde':''}"><button class="lmain" onclick="abrirTarea(${i})"><span class="sqic ${t.fase}">${ic(t.fase==='rec'?'box':'refresh','s')}</span><span class="sqtx"><b>${esc(tareaTitulo(t))}</b><small>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''} · ${esc(t.evento||t.num)}</small>
+    <span class="lres">${r ? `<span class="who">${ic('user','xs')} ${esc(r)}</span>${chipInv(t)}` : '<span class="sqst pend">Sin asignar</span>'}${tarde?'<span class="sqst no">Atrasada</span>':''}</span></span></button>
+    ${esAdmin() ? `<button class="lasg" onclick="abrirAsignarSq('${esc(t.num)}','${esc(t.id)}','${t.fase}')">${r?'Cambiar':'Asignar'}</button>` : ''}</div>`;
+}
+function vistaLogistica(){
+  const l = misRecogidas().filter(t=>!t.hecho).sort((a,b)=>(tsTarea(a)||9e15)-(tsTarea(b)||9e15));
+  const sin = l.filter(t=>!t.resp), con = l.filter(t=>t.resp);
+  if(!S.furgos && !vistaLogistica.f){ vistaLogistica.f = 1; cargarFurgos().then(()=>{ if(S.vista==='lista' && S.tab==='logi') render(); }); }
+  cargarInvitaciones(con);
+  const alertas = tarjetasPendientes() + (esAdmin() ? tarjetaStock() + tarjetaFaltasHome() + tarjetasAvisos() : '');
+  const furgos = (S.furgos||[]).map((f,i)=>`<button class="lfurgo" onclick="${esAdmin()?`editarFurgo(${i})`:''}">${f.matricula?`<span class="plate sm">${esc(f.matricula)}</span>`:'<b>Furgoneta</b>'}<span class="meta">${esc([f.marca,f.modelo].filter(Boolean).join(' ')||f.notas||'')}</span></button>`).join('');
+  const body = `
+    <div class="kpis"><div><b>${l.length}</b><small>Pendientes</small></div><div class="${sin.length?'warn':''}"><b>${sin.length}</b><small>Sin asignar</small></div><div><b>${con.filter(t=>(S.inv||{})[claveInv(t)]==='YES').length}</b><small>Aceptadas</small></div></div>
+    <div class="sec sl">Recogidas y devoluciones <span class="cnt">${l.length}</span></div>
+    ${l.length ? `<div class="furg lcard">${sin.concat(con).map(filaTarea).join('')}</div>` : `<div class="empty sm">${ic('check')}<div>No hay recogidas ni devoluciones pendientes.</div></div>`}
+    ${alertas ? `<div class="sec sl">Material</div>${alertas}` : ''}
+    <div class="sec sl">Furgonetas <span class="cnt">${(S.furgos||[]).length}</span></div>
+    <div class="furg lcard">${furgos || '<div class="meta">Aún no hay furgonetas.</div>'}
+      <div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn sec2" onclick="editarFurgo(-1)">${ic('plus','s')} Añadir</button>`:''}<button class="btn sec2" onclick="verMant()">${ic('wrench','s')} Mantenimiento</button></div></div>`;
+  return `<header class="top">${BRAND}<div class="hrow"><h1>Logística<span class="sync" id="dot"></span></h1><button class="ref" onclick="vistaLogistica.f=0;S.inv={};S.furgos=null;cargarRecogidas().then(render)" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
+}
+function vistaEquipo(){
+  if(!S.acc && !vistaEquipo.c){ vistaEquipo.c = 1; call('ckUsuarios').then(a=>{ S.acc = a; if(S.vista==='lista' && S.tab==='equipo') render(); }).catch(()=>{ vistaEquipo.c = 0; }); }
+  if(!S.nodisp && !vistaEquipo.n){ vistaEquipo.n = 1; call('ckNoDisp').then(m=>{ S.nodisp = m || {}; if(S.vista==='lista' && S.tab==='equipo') render(); }).catch(()=>{}); }
+  const hoy = diaDe(Date.now()), fin = hoy + 14*864e5, nd = S.nodisp || {};
+  const bolos = (S.presus||[]).filter(p => !p.cerrado && p.ts && p.ts >= hoy && p.ts < fin).sort((a,b)=>a.ts-b.ts);
+  const tareas = misRecogidas().filter(t=>!t.hecho);
+  cargarInvitaciones(tareas.filter(t=>t.resp));
+  const fila = p => { const tec = p.tecnicos || [], iso = fechaISO(p.ts), choque = tec.filter(n => (nd[n]||[]).includes(iso));
+    return `<button class="card ebolo" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="date">${esc(p.montaje||'')}</span>${tec.length?'':'<span class="sqst no">Sin equipo</span>'}</div><div class="ev">${esc(p.evento)}</div>
+      <div class="chipsr">${tec.map(n=>`<span class="pchip ${choque.includes(n)?'mal':''}"><i>${esc(iniciales(n))}</i>${esc(n.split(' ')[0])}</span>`).join('')}</div>${choque.length?`<div class="meta inc" style="margin-top:6px">${ic('alert','xs')} ${esc(choque.join(', '))} ${choque.length>1?'marcaron':'marcó'} que no puede ese día</div>`:''}</button>`; };
+  const gente = equipoAsig();
+  const persona = p => { const mis = tareas.filter(t=>respDe(t)===p.nombre), nb = bolos.filter(b=>(b.tecnicos||[]).includes(p.nombre)).length, no = (nd[p.nombre]||[]).filter(d=>d>=fechaISO(hoy) && d<fechaISO(fin));
+    return `<div class="eper"><span class="av">${esc(iniciales(p.nombre))}</span><div class="tx"><b>${esc(p.nombre)}</b><small class="${p.email?'':'sin'}">${p.email?esc(p.email):'Sin correo: no le llegan las invitaciones'}</small>
+      <div class="chipsr">${nb?`<span class="sqst">${nb} bolo${nb>1?'s':''}</span>`:''}${mis.length?`<span class="sqst">${mis.length} recogida${mis.length>1?'s':''}</span>`:''}${mis.map(chipInv).join('')}${no.length?`<span class="sqst pend">No puede ${no.length} día${no.length>1?'s':''}</span>`:''}</div></div>
+      <button class="lasg" onclick="editarPersona(this.dataset.n)" data-n="${esc(p.nombre)}">Datos</button></div>`; };
+  const body = `
+    <div class="sec sl">Próximos 14 días <span class="cnt">${bolos.length}</span></div>
+    ${bolos.length ? bolos.map(fila).join('') : `<div class="empty sm">${ic('today')}<div>No hay bolos en los próximos 14 días.</div></div>`}
+    <div class="sec sl">Personas <span class="cnt">${gente.length||''}</span></div>
+    ${!S.acc ? '<div class="loading"><div class="spin"></div>Cargando el equipo…</div>' : `<div class="furg lcard">${gente.map(persona).join('')}</div>`}
+    <div class="row2" style="margin-top:4px"><button class="btn sec2" onclick="verAccesos()">${ic('users','s')} Accesos</button><button class="btn sec2" onclick="verCalendario()">${ic('today','s')} Calendario</button></div>
+    <button class="link" onclick="verDisponibilidad()">Días que no puede cada uno ›</button>`;
+  return `<header class="top">${BRAND}<div class="hrow"><h1>Equipo<span class="sync" id="dot"></span></h1><button class="ref" onclick="vistaEquipo.c=0;vistaEquipo.n=0;S.acc=null;S.nodisp=null;S.inv={};render()" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
+}
+// Hoy: un solo bloque de avisos del administrador (el detalle está en Logística y en Más)
+function resumenAvisosHoy(){
+  if(!esAdmin()) return '';
+  const st = S.stock || [], nst = st.reduce((a,b)=>a+b.falta.length,0), fa = (S.faltas||[]).length, av = averiasAlerta().length, co = cobrosAlerta(), ncob = co.sinFacturar.length + co.vencidos.length;
+  const sin = misRecogidas().filter(t=>!t.hecho && !t.resp).length, a = S.avisos || {}, mv = (a.mantenimiento||[]).filter(m=>m.dias<0).length;
+  const pe = (S.pendientes||[]).length;
+  const r = (on, ico, txt, f) => on ? `<button class="arow" onclick="${f}">${ic(ico,'s')}<span>${txt}</span>${ic('chev','s')}</button>` : '';
+  const h = r(pe, 'home', `Material sin devolver en ${pe} ${pe>1?'bolos':'bolo'}`, "irTab('logi')") + r(sin, 'user', `${sin} ${sin>1?'recogidas':'recogida'} sin asignar`, "irTab('logi')") + r(nst, 'alert', `Falta stock: ${nst} ${nst>1?'equipos':'equipo'} en ${st.length} ${st.length>1?'bolos':'bolo'}`, 'verStock()') + r(fa, 'box', `${fa} ${fa>1?'faltas':'falta'} de material sin resolver`, 'verFaltas()') + r(mv, 'wrench', `${mv} ${mv>1?'mantenimientos vencidos':'mantenimiento vencido'}`, 'verMant()') + r(av, 'wrench', `${av} ${av>1?'equipos fallan':'equipo falla'} a menudo`, 'verAverias()') + r(ncob, 'euro', `Cobros: ${[co.sinFacturar.length?co.sinFacturar.length+' sin facturar':'', co.vencidos.length?co.vencidos.length+' vencidos':''].filter(Boolean).join(' · ')}`, 'verCobros()');
+  return h ? `<div class="furg avisos"><div class="top"><b>${ic('alert','s')} Avisos</b></div>${h}</div>` : '';
+}
+// Hoy: solo las recogidas que te tocan (y, si eres administrador, las sin asignar de los próximos 2 días)
+function tarjetaRecogidasHoy(){
+  if(!esAdmin()) return tarjetaRecogidas();
+  const yo = yoNombre(), lim = diaDe(Date.now()) + 2*864e5;
+  const l = misRecogidas().filter(t => !t.hecho && (respDe(t)===yo || (!t.resp && (tsTarea(t)||0) <= lim)));
+  if(!l.length) return '';
+  return `<div class="furg lcard"><div class="top"><b>${ic('truck','s')} Te toca</b><button class="edit" onclick="irTab('logi')">Logística</button></div>${l.slice(0,4).map(filaTarea).join('')}</div>`;
+}
 function tabbar(){
   const t = S.vista==='furgos' ? 'furgos' : (S.tab||'hoy');
   const n = (S.pendientes||[]).filter(x => esAdmin() || S.presus.some(p=>p.num===x.num)).length + (esAdmin() ? ((S.avisos||{}).mantenimiento||[]).filter(m=>m.dias<0).length : 0);
-  const b = (id, ico, txt, f) => `<button class="${t===id?'on':''}" onclick="${f}">${ic(ico)}<span>${txt}</span>${id==='hoy'&&n?`<span class="bdg">${n}</span>`:''}</button>`;
+  const nl = esAdmin() ? misRecogidas().filter(x=>!x.hecho && !x.resp).length : 0;
+  const b = (id, ico, txt, f) => `<button class="${t===id?'on':''}" onclick="${f}">${ic(ico)}<span>${txt}</span>${id==='hoy'&&n?`<span class="bdg">${n}</span>`:''}${id==='logi'&&nl?`<span class="bdg">${nl}</span>`:''}</button>`;
   if(!esAdmin()) return `<nav class="tabbar" style="grid-template-columns:repeat(3,1fr)">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
-  return `<nav class="tabbar">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('furgos','truck','Furgos',"irTab('furgos')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
+  return `<nav class="tabbar t5">${b('hoy','today','Hoy',"irTab('hoy')")}${b('bolos','list','Bolos',"irTab('bolos')")}${b('logi','truck','Logística',"irTab('logi')")}${b('equipo','users','Equipo',"irTab('equipo')")}${b('mas','grid','Más','abrirMenu()')}</nav>`;
 }
 function irTab(t){
   vib(8);
@@ -1281,13 +1404,13 @@ function editarFurgo(i){
     <div class="row2">${campo('marca','Marca','Ej. Renault')}${campo('modelo','Modelo','Ej. Master L3H2')}</div>
     <div class="row2">${campo('color','Color','Blanca')}${campo('conductor','Conductor habitual','Nombre')}</div>
     <label class="fld"><span>Notas (ITV, seguro, gasoil, llaves…)</span><textarea id="f_notas" rows="3">${esc(f.notas)}</textarea></label>
-    <div class="row2">${i>=0?`<button class="btn sec2 danger" onclick="borrarFurgo(${i})">Eliminar</button>`:`<button class="btn sec2" onclick="${S.vista==='furgos'?'cerrarSheet()':'abrirFurgos()'}">Cancelar</button>`}<button class="btn" onclick="guardarFurgo(${i})">Guardar</button></div>`);
+    <div class="row2">${i>=0?`<button class="btn sec2 danger" onclick="borrarFurgo(${i})">Eliminar</button>`:`<button class="btn sec2" onclick="${S.vista==='furgos'||(S.vista==='lista'&&S.tab==='logi')?'cerrarSheet()':'abrirFurgos()'}">Cancelar</button>`}<button class="btn" onclick="guardarFurgo(${i})">Guardar</button></div>`);
   if(i<0) setTimeout(()=>{ const x=$('#f_matricula'); if(x) x.focus(); }, 320);
 }
 function normMatricula(m){ return String(m||'').toUpperCase().replace(/[\s\-·.]/g,''); }
 async function guardarFurgos(l, msg){
   const prev = S.furgos; S.furgos = l; render();
-  try{ S.furgos = await call('ckGuardarFurgonetas', l); toast(msg); render(); if(S.vista==='furgos') cerrarSheet(); else abrirFurgos(); }
+  try{ S.furgos = await call('ckGuardarFurgonetas', l); toast(msg); render(); if(S.vista==='furgos'||(S.vista==='lista'&&S.tab==='logi')) cerrarSheet(); else abrirFurgos(); }
   catch(e){ S.furgos = prev; render(); toast('No se guardó: '+e.message); }
 }
 function guardarFurgo(i){
@@ -1437,7 +1560,7 @@ function deshacerSubalq(i){
    RECOGIDAS Y DEVOLUCIONES DE SUBALQUILER (como un bolo)
    ========================================================= */
 let SQ_PRESET = null;
-async function cargarRecogidas(){ try{ const l = await call('ckRecogidas'); const a = JSON.stringify(S.recogidas||[]); S.recogidas = l || []; if(JSON.stringify(S.recogidas) !== a && S.vista==='lista' && !$('#sheet').classList.contains('open')) render(); }catch(e){} }
+async function cargarRecogidas(){ try{ const l = await call('ckRecogidas'); const a = JSON.stringify(S.recogidas||[]); S.recogidas = l || []; if(JSON.stringify(S.recogidas) !== a && S.vista==='lista' && !$('#sheet').classList.contains('open')) render(); }catch(e){} return S.recogidas; }
 async function cargarProvs(){ if(S.provs) return S.provs; try{ S.provs = await call('ckProveedores') || []; }catch(e){ S.provs = null; return []; } return S.provs; }
 function provDe(nombre){ const n = String(nombre||'').trim().toLowerCase(); return (S.provs||[]).find(p=>String(p.nombre).toLowerCase()===n) || null; }
 function sqProvElegido(v){ const p = provDe(v); if(p){ const d = $('#sqDir'); if(d && !d.value && p.dir) d.value = p.dir; } }
