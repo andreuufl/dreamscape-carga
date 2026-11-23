@@ -757,6 +757,13 @@ header.top .hrow h1{font-weight:700;letter-spacing:-.03em}
 .almmas{color:#8f9bb0;font-size:14px}
 .almok{display:flex;align-items:center;gap:8px;color:#34d17f;font-weight:700;font-size:18px;padding:10px 0}
 .almvacio{text-align:center;color:#8f9bb0;padding:80px 0;font-size:20px}
+/* ===== v53 · Entrega anticipada ===== */
+.furg.antic{box-shadow:inset 0 0 0 1.5px var(--dev),var(--sh)}
+.furg.antic .top b{color:var(--dev)}
+button.furg.antic{display:block;width:100%;text-align:left}
+button.furg.antic.off{box-shadow:var(--ring),var(--sh)}button.furg.antic.off .top b{color:var(--txt)}
+.est.est-antic{background:var(--devbg);color:var(--dev)}
+.card.est-antic{border-left-color:var(--dev)}
 </style>
 </head>
 <body>
@@ -1080,7 +1087,7 @@ async function verHojaRuta(num){
 function textoHojaRuta(){
   const p = S.presus.find(x=>x.num===S.num) || { num:S.num }, f = ficha(), h = (S.bolo||{}).horarioB || {}, fu = S.bolo ? furgoActual() : null;
   const l = [`HOJA DE RUTA · ${p.evento||p.num}`, `Bolo ${p.num} · ${h.fMontaje||p.montaje||''}`];
-  if(h.hCarga) l.push(`Carga en almacén: ${h.hCarga} · ${cfg().almacen||'Almacén'}`);
+  if(anticipado(S.num)) l.push('Material ya en el lugar (entrega anticipada): directos a montar'); else if(h.hCarga) l.push(`Carga en almacén: ${h.hCarga} · ${cfg().almacen||'Almacén'}`);
   if(h.hMontaje) l.push(`Montaje: ${h.hMontaje}`); if(h.hEvento) l.push(`Evento: ${h.hEvento}${h.hFin?' – '+h.hFin:''}`); if(h.hDesmontaje) l.push(`Desmontaje: ${h.hDesmontaje}`);
   if(p.lugar || f.direccion) l.push(`Lugar: ${[p.lugar, f.direccion].filter(Boolean).join(' · ')}`);
   if(f.acceso) l.push(`Acceso: ${f.acceso}`); if(f.aparcar) l.push(`Aparcar: ${f.aparcar}`);
@@ -1095,7 +1102,7 @@ function vistaHojaRuta(){
   const eq = (S.bolo||{}).equipo || [], tecs = (f.tecnicos||[]).length ? f.tecnicos : eq.map(x=>x.nombre);
   const dir = [f.direccion || destino(p.lugar||'')].filter(Boolean)[0] || '', q = encodeURIComponent(dir || p.lugar || '');
   const fila = (t, v, s) => v ? `<div class="hrrow"><small>${t}</small><div>${v}${s?`<span>${s}</span>`:''}</div></div>` : '';
-  const tl = [ ['Carga en almacén', h.hCarga, cfg().almacen || ''], ['Montaje', h.hMontaje, h.fMontaje || ''], ['Evento', h.hEvento ? h.hEvento + (h.hFin ? ' – ' + h.hFin : '') : '', ''], ['Desmontaje', h.hDesmontaje, h.fDesmontaje || ''] ].filter(x=>x[1]);
+  const tl = [ (anticipado(S.num) ? ['Material ya en el lugar', '✓', 'Entregado el ' + (anticipado(S.num).f || '')] : ['Carga en almacén', h.hCarga, cfg().almacen || '']), ['Montaje', h.hMontaje, h.fMontaje || ''], ['Evento', h.hEvento ? h.hEvento + (h.hFin ? ' – ' + h.hFin : '') : '', ''], ['Desmontaje', h.hDesmontaje, h.fDesmontaje || ''] ].filter(x=>x[1]);
   const items = S.hrItems || [];
   const body = !S.bolo ? `<div class="loading"><div class="spin"></div>Cargando la hoja de ruta…</div>` : `
     <div class="hrhero"><div class="lbl">Hoja de ruta · ${esc(p.num)}</div><h2>${esc(p.evento||'')}</h2><div class="hrdate">${esc(h.fMontaje ? fechaCorta(h.fMontaje) : (p.montaje||''))}${p.lugar?' · '+esc(destino(p.lugar)):''}</div></div>
@@ -1216,11 +1223,46 @@ function vistaAlmacen(){
       <h2>${esc(p.evento||p.num)}</h2><div class="almsub">${esc(p.num)}${p.lugar?' · '+esc(destino(p.lugar)):''}</div>
       <div class="almrow">${fu&&fu.matricula?`<span class="plate">${esc(fu.matricula)}</span>`:'<span class="almsin">Sin furgoneta</span>'}<span class="almeq">${ic('users','s')} ${esc((f.tecnicos||p.tecnicos||[]).join(', ') || 'Sin equipo')}</span></div>
       <div class="almbar"><div style="width:${pc}%"></div></div><div class="almpc"><b>${p.cargados||0}/${p.total||0}</b> cargado · ${pc}%</div>
-      ${a.items ? (pend.length ? `<div class="almlst">${pend.slice(0,14).map(i=>`<div><b>${esc(i.cant)}</b><span>${esc(i.material)}</span></div>`).join('')}${pend.length>14?`<div class="almmas">y ${pend.length-14} más</div>`:''}</div>` : `<div class="almok">${ic('check')} Todo cargado</div>`) : '<div class="almsub">Cargando material…</div>'}</div>`; };
+      ${f.anticipado ? `<div class="almok">${ic('check')} Material ya en el lugar</div>` : a.items ? (pend.length ? `<div class="almlst">${pend.slice(0,14).map(i=>`<div><b>${esc(i.cant)}</b><span>${esc(i.material)}</span></div>`).join('')}${pend.length>14?`<div class="almmas">y ${pend.length-14} más</div>`:''}</div>` : `<div class="almok">${ic('check')} Todo cargado</div>`) : '<div class="almsub">Cargando material…</div>'}</div>`; };
   const ahora = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   return `<div class="almacen"><div class="almhead">${BRAND}<div class="almclock">${ahora}</div><button class="back" onclick="S.vista='lista';render()" aria-label="Salir">${ic('x')}</button></div>
     <div class="almtit">Almacén · hoy y mañana <span>${S.almT?'actualizado '+esc(S.almT):'cargando…'}</span></div>
     ${l.length ? `<div class="almgrid">${l.slice(0,6).map(col).join('')}</div>` : `<div class="almvacio">${ic('check')}<div>No hay bolos hoy ni mañana.</div></div>`}</div>`;
+}
+/* =========================================================
+   v53 · ENTREGA ANTICIPADA (material llevado al lugar antes del bolo)
+   ========================================================= */
+function anticipado(num){ const f = num===S.num && S.bolo ? ficha() : fichaDe(num); return f && f.anticipado ? f.anticipado : null; }
+function antesDelBolo(num){ return fueraDeDia(num); }
+async function marcarAnticipado(num, on){
+  const f = num===S.num && S.bolo ? S.bolo.ficha : null, prev = f ? f.anticipado : null;
+  if(f){ f.anticipado = on ? { h: hora(), por: yoNombre(), f: new Date().toLocaleDateString('es-ES') } : ''; guardarBoloCache(); render(); }
+  try{ const r = await enviar('ckAnticipado', num, !!on); if(r !== null && f){ f.anticipado = r; guardarBoloCache(); render(); } toast(on ? 'Entrega anticipada: el bolo se activa el día del montaje' : 'Entrega anticipada quitada'); }
+  catch(e){ if(f){ f.anticipado = prev; render(); } toast('No se guardó: '+e.message); }
+}
+function tarjetaAnticipado(){
+  if(!S.bolo || !S.num) return '';
+  const a = anticipado(S.num), antes = antesDelBolo(S.num);
+  if(a) return `<div class="furg antic"><div class="top"><b>${ic('box','s')} Material ya en el lugar</b>${esAdmin()?`<button class="edit" onclick="if(confirm('¿Quitar la entrega anticipada?'))marcarAnticipado('${esc(S.num)}', false)">Quitar</button>`:''}</div>
+    <div class="meta">Entregado por adelantado el ${esc(a.f||a.h||'')}${a.por?' por '+esc(a.por):''}. ${antes ? 'Es solo informativo: el bolo se activa el día del montaje.' : 'Hoy se va directo al lugar a montar, sin pasar por el almacén.'}</div></div>`;
+  if(antes && (S.modo==='carga' || S.modo==='descSitio' || S.modo==='ruta')) return `<button class="furg antic off" onclick="if(confirm('¿Has llevado el material al lugar antes del bolo?\\n\\nSe marca como entrega anticipada: es solo informativo y el bolo no se activa hasta el día del montaje. Ese día iréis directos al lugar.'))marcarAnticipado('${esc(S.num)}', true)"><div class="top"><b>${ic('box','s')} ¿Llevas el material antes del bolo?</b>${ic('chev','s')}</div><div class="meta">Márcalo como entrega anticipada: queda apuntado, pero el bolo no se activa hasta su día.</div></button>`;
+  return '';
+}
+// Plan del día del montaje cuando el material ya está en el lugar: directo al lugar desde donde estés
+async function pintarPlanAnticipado(el, p, llegada){
+  const a = anticipado(S.num) || {};
+  el.innerHTML = `<div class="top"><b>${ic('clock','s')} Plan del montaje</b>${esAdmin()?'<button class="edit" onclick="editarHorario()">Horas</button>':''}</div>
+    <div class="plst"><div class="plrow"><b>✓</b><span>Material ya en el lugar<small>Entregado el ${esc(a.f||a.h||'')} · no hace falta pasar por el almacén</small></span></div>
+    ${llegada != null ? `<div class="plrow"><b>${hhmm(llegada)}</b><span>Llegada y montaje<small>${esc(dirBolo(p) || destino(p.lugar) || '')}</small></span></div>` : ''}</div>
+    ${llegada != null ? `<button class="link" style="padding:8px 0 0;text-align:left" onclick="salgoAlLugar(${llegada}, this)">${ic('nav','s')} ¿A qué hora salgo de donde estoy hacia el lugar?</button>` : '<div class="meta">Pon la hora de montaje para calcular a qué hora salir.</div>'}`;
+}
+async function salgoAlLugar(llegada, btn){
+  const p = S.presus.find(x=>x.num===S.num) || {};
+  btn.textContent = 'Buscando tu ubicación…';
+  const g = await ubicacion(); if(!g){ btn.textContent = 'No puedo ver tu ubicación: activa la localización'; return; }
+  const dest = await geoBolo(p), min = dest ? await minutosRuta(g, dest) : null; if(min == null){ btn.textContent = 'No he podido calcular el trayecto'; return; }
+  const marg = margenTrafico(min, llegada - min), s = llegada - min - marg;
+  btn.outerHTML = `<div class="plrow" style="margin-top:8px"><b>${hhmm(s)}</b><span>Sal de donde estás hacia el lugar<small>${min} min + ${marg} de margen · para llegar a las ${hhmm(llegada)}</small></span></div>`;
 }
 function tabbar(){
   const t = S.vista==='furgos' ? 'furgos' : (S.tab||'hoy');
@@ -1399,7 +1441,7 @@ function vistaDet(){
       <button class="ref" onclick="abrir(S.num,true)" aria-label="Actualizar">${ic('refresh')}</button></div>
     <h1 class="htit">${esc(p.evento||p.num)}<span class="sync" id="dot"></span></h1>
     ${tot && !soloT ? stepper(tot) : ''}
-  </header><main class="${S.modo==='dev'?'mode-dev':''}">${tarjetaFinalizar(p)}${tarjetaHorario()}${tarjetaInfoPractica()}${body}</main>${foot}`;
+  </header><main class="${S.modo==='dev'?'mode-dev':''}">${tarjetaFinalizar(p)}${tarjetaAnticipado()}${tarjetaHorario()}${tarjetaInfoPractica()}${body}</main>${foot}`;
 }
 function centrarPaso(){ try{ const h = document.querySelector('#app > header'); document.documentElement.style.setProperty('--hdr', (h ? h.offsetHeight : 0)+'px'); }catch(e){} try{ const c = $('#pasos2'), o = c && c.querySelector('.paso.on'); if(o) c.scrollLeft = o.offsetLeft - (c.clientWidth - o.offsetWidth)/2; }catch(e){} }
 function stepper(tot){
@@ -1423,6 +1465,13 @@ function fueraDeDia(num){
 }
 function okDia(num, que){
   if(!num || !fueraDeDia(num) || DIA_OK[num]) return true;
+  if(que==='marcar material' && num===S.num && S.bolo && ['carga','descSitio'].includes(S.modo)){
+    if(anticipado(num)){ DIA_OK[num] = true; return true; }
+    if(S.modo==='descSitio'){
+      if(confirm('⚠️ Hoy no es el día de este bolo.\n\n¿Estás dejando el material en el lugar por adelantado?\n\nSe marcará como ENTREGA ANTICIPADA: queda apuntado, pero es solo informativo y el bolo no se activa hasta su día. Ese día iréis directos al lugar a montar.')){ DIA_OK[num] = true; marcarAnticipado(num, true); return true; }
+      return false;
+    }
+  }
   const p = S.presus.find(x=>x.num===num) || {}, d = diasLista(p);
   const ok = confirm(`⚠️ Hoy no es el día de este bolo (es el ${fDia(d[0], true)}).\n\n¿Seguro que quieres ${que||'empezar'} ahora?`);
   if(ok) DIA_OK[num] = true;
@@ -2003,7 +2052,7 @@ function vistaMontaje(p, tot){
   const firma = !f.pedirFirma && !f.firma ? '' : f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaUrgencias()}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaFichaje(false,'montaje','salida')}${plegado(tarjetaExtrasCli() + tarjetaEstadoLugar('lugar-llegada') + (esAdmin()?tarjetaGastos():'') + tarjetaRentabilidad() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, gastos, notas y ficha')}`;
+  const body = `${tarjetaUrgencias()}${anticipado(S.num) && !f.llegada ? tarjetaPlan('montaje') : ''}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaFichaje(false,'montaje','salida')}${plegado(tarjetaExtrasCli() + tarjetaEstadoLugar('lugar-llegada') + (esAdmin()?tarjetaGastos():'') + tarjetaRentabilidad() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, gastos, notas y ficha')}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -2138,6 +2187,7 @@ async function pintarPlan(tipo){
   if(PLAN[clave]){ el.innerHTML = PLAN[clave]; return; }
   const cab = `<div class="top"><b>${ic('clock','s')} Plan ${tipo==='desmontaje'?'del desmontaje':'del montaje'}</b>${esAdmin()?'<button class="edit" onclick="editarHorario()">Horas</button>':''}</div>`;
   const llegada = tipo==='desmontaje' ? H.desmontaje : H.montaje;
+  if(tipo==='montaje' && anticipado(S.num)){ pintarPlanAnticipado(el, p, llegada); return; }
   if(llegada == null){ el.innerHTML = cab + `<div class="meta">${esAdmin() ? 'Pon la hora de '+tipo+' con el botón «Horas» (o en la pestaña Horarios del Drive) y calculo a qué hora salir.' : 'Aún no hay hora de '+tipo+' en la ficha del bolo.'}</div>`; return; }
   if(!al){ el.innerHTML = cab + `<div class="meta">${tipo==='desmontaje'?'Desmontaje':'Montaje'} a las <b>${hhmm(llegada)}</b>.${esAdmin()?' Guarda la dirección del almacén (paso Almacén) para calcular la salida.':''}</div>`; return; }
   const dest = await geoBolo(p), min = dest ? await minutosRuta(al, dest) : null;
@@ -3980,6 +4030,7 @@ async function quitarPortada(){ try{ await callPost('ckFotoMat', 'PORTADA:'+S.nu
 /* ---------- 9. COLORES POR ESTADO ---------- */
 function estadoBolo(p){
   if(p.archivado) return ['fin', p.estado || 'Terminado'];
+  if(!p.cerrado && anticipado(p.num) && fueraDeDia(p.num)) return ['antic', 'Material en el lugar'];
   if(p.cerrado || (p.total && p.devueltos === p.total)) return ['listo', 'Listo para facturar'];
   if(p.devueltos > 0) return ['vuelta', 'Por devolver'];
   if(p.total && p.cargados === p.total) return ['curso', 'En curso'];
