@@ -699,6 +699,64 @@ header.top .hrow h1{font-weight:700;letter-spacing:-.03em}
 .arow svg:last-child{color:var(--mut)}
 .tabbar.t5{grid-template-columns:repeat(5,1fr)}
 .tabbar.t5 button svg{width:42px}
+/* ===== v52 · Hoja de ruta, revisión de furgoneta, ocupación, modo almacén ===== */
+.pchip.ok{background:var(--okbg);color:var(--ok);box-shadow:none}.pchip.pend{background:var(--warnbg);color:var(--warn);box-shadow:none}.pchip.sinc{opacity:.65}
+.pchip em{font-style:normal;font-weight:700;margin-left:2px}
+.convleg{display:flex;flex-wrap:wrap;gap:6px;margin:0 4px 10px}
+.hrbtn{margin-bottom:12px}
+.hruta .hrhero{background:linear-gradient(160deg,#1a2c49 0%,#0f1a2b 75%);color:#fff;border-radius:20px;padding:18px;margin-bottom:12px}
+.hruta .hrhero .lbl{color:var(--gold);letter-spacing:.12em}
+.hruta .hrhero h2{margin:6px 0 4px;font-size:24px;letter-spacing:-.02em}
+.hrdate{color:#a9b6ca;font-size:14px}
+.hrcard{padding:14px 16px}
+.hrtl{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.hrt{background:var(--card2);border-radius:12px;padding:10px 12px;box-shadow:var(--ring)}
+.hrt b{display:block;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hrt span{font-size:13px;font-weight:600;color:var(--mut)}.hrt small{display:block;font-weight:450;font-size:12px}
+.hrrow{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.hrcard .top+.hrrow{border-top:0}
+.hrrow small{color:var(--mut);font-size:12.5px;font-weight:600;padding-top:2px}
+.hrrow span{display:block;margin-top:2px}.hrrow a{color:var(--dev);font-weight:600;text-decoration:none}
+.hrmat{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.hrmat div{display:flex;gap:8px;font-size:14px;padding:4px 0;border-bottom:1px solid var(--line)}
+.hrmat b{min-width:26px;font-variant-numeric:tabular-nums}
+@media (max-width:420px){.hrmat{grid-template-columns:1fr}}
+@media print{body{background:#fff!important;color:#111!important}.hruta .hrhero{background:#0f1a2b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.furg,.card{box-shadow:none!important;border:1px solid #ddd}main.hruta{padding:0}}
+.revf{display:block;width:100%;text-align:left}
+.revf.ok{box-shadow:inset 0 0 0 1.5px var(--ok),var(--sh)}
+.revg{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+.revg div{background:var(--card2);border-radius:12px;padding:8px 10px;box-shadow:var(--ring)}
+.revg small{display:block;color:var(--mut);font-size:12px}.revg b{font-size:17px;font-variant-numeric:tabular-nums}.revg b.mal{color:var(--bad)}
+.ocg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.ocd{border-radius:9px;background:var(--card2);min-height:42px;padding:4px 5px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--ring)}
+.ocd span{font-size:11px;color:var(--mut);font-weight:600}.ocd b{font-size:15px;align-self:flex-end;font-variant-numeric:tabular-nums}
+.ocd.hoy{box-shadow:inset 0 0 0 2px var(--gold)}
+.ocd.usa,.ocleg .usa::before{background:var(--devbg)}.ocd.usa b{color:var(--dev)}
+.ocd.lleno,.ocleg .lleno::before{background:var(--warnbg)}.ocd.lleno b{color:var(--warn)}
+.ocd.mal,.ocleg .mal::before{background:var(--badbg)}.ocd.mal b{color:var(--bad)}
+.ocleg{display:flex;gap:14px;margin-top:10px;font-size:12.5px;color:var(--mut)}
+.ocleg span{display:flex;align-items:center;gap:5px}.ocleg span::before{content:"";width:12px;height:12px;border-radius:4px}
+.almacen{min-height:100vh;background:#070d17;color:#eef1f6;padding:calc(env(safe-area-inset-top) + 16px) 22px 24px}
+.almhead{display:flex;align-items:center;gap:16px}.almhead .brand{display:flex;align-items:baseline;gap:8px;flex:1}
+.almclock{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.almtit{margin:14px 0 16px;font-size:13px;font-weight:650;letter-spacing:.1em;text-transform:uppercase;color:#8f9bb0;display:flex;justify-content:space-between}
+.almtit span{letter-spacing:0;text-transform:none;font-weight:500}
+.almgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.almc{background:#111a29;border-radius:20px;padding:18px;box-shadow:inset 0 0 0 1px #223047}
+.almc.hoy{box-shadow:inset 0 0 0 2px var(--gold)}
+.almtop{display:flex;justify-content:space-between;align-items:center}
+.almdia{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--gold)}.almc:not(.hoy) .almdia{color:#8f9bb0}
+.almh{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.almc h2{font-size:24px;margin:8px 0 2px;letter-spacing:-.02em;line-height:1.2}
+.almsub{color:#8f9bb0;font-size:14px}
+.almrow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}
+.almeq{display:flex;align-items:center;gap:6px;font-weight:600}.almsin{color:var(--warn);font-weight:600}
+.almbar{height:10px;border-radius:9px;background:#223047;overflow:hidden}.almbar div{height:100%;background:var(--ok);border-radius:9px}
+.almpc{font-size:14px;color:#a9b6ca;margin:6px 0 10px}.almpc b{color:#fff}
+.almlst div{display:flex;gap:10px;padding:7px 0;border-top:1px solid #1d2a3f;font-size:16px}.almlst b{min-width:30px;color:var(--gold);font-variant-numeric:tabular-nums}
+.almmas{color:#8f9bb0;font-size:14px}
+.almok{display:flex;align-items:center;gap:8px;color:#34d17f;font-weight:700;font-size:18px;padding:10px 0}
+.almvacio{text-align:center;color:#8f9bb0;padding:80px 0;font-size:20px}
 </style>
 </head>
 <body>
@@ -948,7 +1006,8 @@ function vistaLogistica(){
     ${alertas ? `<div class="sec sl">Material</div>${alertas}` : ''}
     <div class="sec sl">Furgonetas <span class="cnt">${(S.furgos||[]).length}</span></div>
     <div class="furg lcard">${furgos || '<div class="meta">Aún no hay furgonetas.</div>'}
-      <div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn sec2" onclick="editarFurgo(-1)">${ic('plus','s')} Añadir</button>`:''}<button class="btn sec2" onclick="verMant()">${ic('wrench','s')} Mantenimiento</button></div></div>`;
+      <div class="row2" style="margin-top:10px">${esAdmin()?`<button class="btn sec2" onclick="editarFurgo(-1)">${ic('plus','s')} Añadir</button>`:''}<button class="btn sec2" onclick="verMant()">${ic('wrench','s')} Mantenimiento</button></div></div>
+    <div class="row2"><button class="btn sec2" onclick="verOcupacion()">${ic('box','s')} Ocupación</button><button class="btn sec2" onclick="verAlmacen()">${ic('grid','s')} Modo almacén</button></div>`;
   return `<header class="top">${BRAND}<div class="hrow"><h1>Logística<span class="sync" id="dot"></span></h1><button class="ref" onclick="vistaLogistica.f=0;S.inv={};S.furgos=null;cargarRecogidas().then(render)" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
 }
 function vistaEquipo(){
@@ -957,10 +1016,10 @@ function vistaEquipo(){
   const hoy = diaDe(Date.now()), fin = hoy + 14*864e5, nd = S.nodisp || {};
   const bolos = (S.presus||[]).filter(p => !p.cerrado && p.ts && p.ts >= hoy && p.ts < fin).sort((a,b)=>a.ts-b.ts);
   const tareas = misRecogidas().filter(t=>!t.hecho);
-  cargarInvitaciones(tareas.filter(t=>t.resp));
+  cargarInvitaciones(tareas.filter(t=>t.resp)); cargarConvocatorias(bolos.map(b=>b.num));
   const fila = p => { const tec = p.tecnicos || [], iso = fechaISO(p.ts), choque = tec.filter(n => (nd[n]||[]).includes(iso));
     return `<button class="card ebolo" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="date">${esc(p.montaje||'')}</span>${tec.length?'':'<span class="sqst no">Sin equipo</span>'}</div><div class="ev">${esc(p.evento)}</div>
-      <div class="chipsr">${tec.map(n=>`<span class="pchip ${choque.includes(n)?'mal':''}"><i>${esc(iniciales(n))}</i>${esc(n.split(' ')[0])}</span>`).join('')}</div>${choque.length?`<div class="meta inc" style="margin-top:6px">${ic('alert','xs')} ${esc(choque.join(', '))} ${choque.length>1?'marcaron':'marcó'} que no puede ese día</div>`:''}</button>`; };
+      <div class="chipsr">${tec.map(n=>{ const c = estConv(p.num, n); return `<span class="pchip ${choque.includes(n)?'mal':c[0]}"><i>${esc(iniciales(n))}</i>${esc(n.split(' ')[0])}${c[1]?`<em>${c[1]}</em>`:''}</span>`; }).join('')}</div>${choque.length?`<div class="meta inc" style="margin-top:6px">${ic('alert','xs')} ${esc(choque.join(', '))} ${choque.length>1?'marcaron':'marcó'} que no puede ese día</div>`:''}</button>`; };
   const gente = equipoAsig();
   const persona = p => { const mis = tareas.filter(t=>respDe(t)===p.nombre), nb = bolos.filter(b=>(b.tecnicos||[]).includes(p.nombre)).length, no = (nd[p.nombre]||[]).filter(d=>d>=fechaISO(hoy) && d<fechaISO(fin));
     return `<div class="eper"><span class="av">${esc(iniciales(p.nombre))}</span><div class="tx"><b>${esc(p.nombre)}</b><small class="${p.email?'':'sin'}">${p.email?esc(p.email):'Sin correo: no le llegan las invitaciones'}</small>
@@ -968,12 +1027,13 @@ function vistaEquipo(){
       <button class="lasg" onclick="editarPersona(this.dataset.n)" data-n="${esc(p.nombre)}">Datos</button></div>`; };
   const body = `
     <div class="sec sl">Próximos 14 días <span class="cnt">${bolos.length}</span></div>
+    ${bolos.length ? `<div class="convleg"><span class="pchip ok">✓ Ha aceptado</span><span class="pchip pend">… Sin responder</span><span class="pchip mal">✕ No puede</span></div>` : ''}
     ${bolos.length ? bolos.map(fila).join('') : `<div class="empty sm">${ic('today')}<div>No hay bolos en los próximos 14 días.</div></div>`}
     <div class="sec sl">Personas <span class="cnt">${gente.length||''}</span></div>
     ${!S.acc ? '<div class="loading"><div class="spin"></div>Cargando el equipo…</div>' : `<div class="furg lcard">${gente.map(persona).join('')}</div>`}
     <div class="row2" style="margin-top:4px"><button class="btn sec2" onclick="verAccesos()">${ic('users','s')} Accesos</button><button class="btn sec2" onclick="verCalendario()">${ic('today','s')} Calendario</button></div>
     <button class="link" onclick="verDisponibilidad()">Días que no puede cada uno ›</button>`;
-  return `<header class="top">${BRAND}<div class="hrow"><h1>Equipo<span class="sync" id="dot"></span></h1><button class="ref" onclick="vistaEquipo.c=0;vistaEquipo.n=0;S.acc=null;S.nodisp=null;S.inv={};render()" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
+  return `<header class="top">${BRAND}<div class="hrow"><h1>Equipo<span class="sync" id="dot"></span></h1><button class="ref" onclick="vistaEquipo.c=0;vistaEquipo.n=0;S.acc=null;S.nodisp=null;S.inv={};S.convo={};render()" aria-label="Actualizar">${ic('refresh')}</button></div></header><main>${body}</main>`;
 }
 // Hoy: un solo bloque de avisos del administrador (el detalle está en Logística y en Más)
 function resumenAvisosHoy(){
@@ -992,6 +1052,175 @@ function tarjetaRecogidasHoy(){
   const l = misRecogidas().filter(t => !t.hecho && (respDe(t)===yo || (!t.resp && (tsTarea(t)||0) <= lim)));
   if(!l.length) return '';
   return `<div class="furg lcard"><div class="top"><b>${ic('truck','s')} Te toca</b><button class="edit" onclick="irTab('logi')">Logística</button></div>${l.slice(0,4).map(filaTarea).join('')}</div>`;
+}
+/* =========================================================
+   v52 · CONVOCATORIAS, HOJA DE RUTA, REVISIÓN DE FURGONETA,
+   OCUPACIÓN DEL MATERIAL y MODO ALMACÉN
+   ========================================================= */
+// ---------- Convocatoria de bolos (estado de la invitación de cada técnico) ----------
+function cargarConvocatorias(nums){
+  S.convo = S.convo || {};
+  nums.filter(n => !(n in S.convo)).slice(0, 10).forEach(n => {
+    S.convo[n] = null;
+    call('ckEstadoBolo', n).then(r => { S.convo[n] = r || {}; if(S.vista==='lista' && S.tab==='equipo' && !$('#sheet').classList.contains('open')) render(); }).catch(()=>{ delete S.convo[n]; });
+  });
+}
+function estConv(num, n){ const st = ((S.convo||{})[num]||{})[n]; return { YES:['ok','✓'], NO:['mal','✕'], MAYBE:['pend','?'], INVITED:['pend','…'], SIN_CORREO:['sinc','sin correo'] }[st] || ['', '']; }
+
+// ---------- Hoja de ruta ----------
+async function verHojaRuta(num){
+  S.num = num; S.vista = 'hruta';
+  const cb = cacheGet('ckBolo'+JSON.stringify([num])), cm = cacheGet('ckMaterial'+JSON.stringify([num]));
+  if(!S.bolo || S.num !== num || !S.bolo.ficha) S.bolo = cb || null;
+  S.hrItems = cm ? cm.items : (S.items && S.items.length ? S.items : null);
+  try{ history.pushState({v:'hruta'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{ const [b, m] = await Promise.all([call('ckBolo', num), call('ckMaterial', num)]); if(S.num===num){ S.bolo = b; S.furgos = b.furgonetas || S.furgos; S.hrItems = (m||{}).items || []; if(S.vista==='hruta') render(); } }catch(e){ if(!S.bolo) toast(e.red?'Sin conexión: se muestra lo guardado':'Error: '+e.message); }
+}
+function textoHojaRuta(){
+  const p = S.presus.find(x=>x.num===S.num) || { num:S.num }, f = ficha(), h = (S.bolo||{}).horarioB || {}, fu = S.bolo ? furgoActual() : null;
+  const l = [`HOJA DE RUTA · ${p.evento||p.num}`, `Bolo ${p.num} · ${h.fMontaje||p.montaje||''}`];
+  if(h.hCarga) l.push(`Carga en almacén: ${h.hCarga} · ${cfg().almacen||'Almacén'}`);
+  if(h.hMontaje) l.push(`Montaje: ${h.hMontaje}`); if(h.hEvento) l.push(`Evento: ${h.hEvento}${h.hFin?' – '+h.hFin:''}`); if(h.hDesmontaje) l.push(`Desmontaje: ${h.hDesmontaje}`);
+  if(p.lugar || f.direccion) l.push(`Lugar: ${[p.lugar, f.direccion].filter(Boolean).join(' · ')}`);
+  if(f.acceso) l.push(`Acceso: ${f.acceso}`); if(f.aparcar) l.push(`Aparcar: ${f.aparcar}`);
+  if(f.contacto || f.telefono) l.push(`Contacto: ${[f.contacto, f.telefono].filter(Boolean).join(' ')}`);
+  if(fu) l.push(`Furgoneta: ${[fu.matricula, fu.marca, fu.modelo].filter(Boolean).join(' ')}`);
+  if((f.tecnicos||[]).length) l.push(`Equipo: ${f.tecnicos.join(', ')}`);
+  if(f.ropa) l.push(`Ropa: ${f.ropa}`); if(f.comida) l.push(`Comida: ${f.comida}`); if(f.notas) l.push(`Notas: ${f.notas}`);
+  return l.join('\n');
+}
+function vistaHojaRuta(){
+  const p = S.presus.find(x=>x.num===S.num) || { num:S.num }, f = ficha(), h = (S.bolo||{}).horarioB || {}, fu = S.bolo ? furgoActual() : null;
+  const eq = (S.bolo||{}).equipo || [], tecs = (f.tecnicos||[]).length ? f.tecnicos : eq.map(x=>x.nombre);
+  const dir = [f.direccion || destino(p.lugar||'')].filter(Boolean)[0] || '', q = encodeURIComponent(dir || p.lugar || '');
+  const fila = (t, v, s) => v ? `<div class="hrrow"><small>${t}</small><div>${v}${s?`<span>${s}</span>`:''}</div></div>` : '';
+  const tl = [ ['Carga en almacén', h.hCarga, cfg().almacen || ''], ['Montaje', h.hMontaje, h.fMontaje || ''], ['Evento', h.hEvento ? h.hEvento + (h.hFin ? ' – ' + h.hFin : '') : '', ''], ['Desmontaje', h.hDesmontaje, h.fDesmontaje || ''] ].filter(x=>x[1]);
+  const items = S.hrItems || [];
+  const body = !S.bolo ? `<div class="loading"><div class="spin"></div>Cargando la hoja de ruta…</div>` : `
+    <div class="hrhero"><div class="lbl">Hoja de ruta · ${esc(p.num)}</div><h2>${esc(p.evento||'')}</h2><div class="hrdate">${esc(h.fMontaje ? fechaCorta(h.fMontaje) : (p.montaje||''))}${p.lugar?' · '+esc(destino(p.lugar)):''}</div></div>
+    ${tl.length ? `<div class="furg hrcard"><div class="top"><b>${ic('today','s')} Horario</b></div><div class="hrtl">${tl.map(x=>`<div class="hrt"><b>${esc(x[1])}</b><span>${x[0]}${x[2]?`<small>${esc(x[2])}</small>`:''}</span></div>`).join('')}</div>${h.notas?`<div class="meta" style="margin-top:8px">${esc(h.notas)}</div>`:''}</div>` : ''}
+    <div class="furg hrcard"><div class="top"><b>${ic('pin','s')} Lugar</b>${dir||p.lugar?`<a class="edit noprint" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">Ir</a>`:''}</div>
+      ${fila('Dirección', esc(dir || p.lugar || '—'))}${fila('Acceso', esc(f.acceso||''))}${fila('Aparcar', esc(f.aparcar||''))}
+      ${f.contacto||f.telefono ? fila('Contacto', esc(f.contacto||''), f.telefono ? `<a href="tel:${esc(tel(f.telefono))}">${esc(f.telefono)}</a>` : '') : ''}${fila('Emergencias', esc(f.emergencia||''))}</div>
+    <div class="furg hrcard"><div class="top"><b>${ic('truck','s')} Furgoneta y equipo</b></div>
+      ${fu ? `<div style="margin-bottom:10px">${fu.matricula?`<span class="plate sm">${esc(fu.matricula)}</span> `:''}<span class="meta">${esc([fu.marca,fu.modelo].filter(Boolean).join(' '))}</span></div>` : '<div class="meta" style="margin-bottom:8px">Furgoneta sin asignar</div>'}
+      ${tecs.map(n => { const e = eq.find(x=>x.nombre===n) || {}; return `<div class="hrrow"><small>${esc(n)}</small><div>${e.telefono?`<a href="tel:${esc(tel(e.telefono))}">${esc(e.telefono)}</a>`:'<span class="meta">sin teléfono</span>'}</div></div>`; }).join('') || '<div class="meta">Sin equipo asignado</div>'}</div>
+    ${f.ropa||f.comida||f.notas ? `<div class="furg hrcard"><div class="top"><b>${ic('msg','s')} A tener en cuenta</b></div>${fila('Ropa', esc(f.ropa||''))}${fila('Comida', esc(f.comida||''))}${fila('Notas', esc(f.notas||''))}</div>` : ''}
+    <div class="furg hrcard"><div class="top"><b>${ic('box','s')} Material</b><span class="meta">${items.length ? items.length + ' líneas' : ''}</span></div>
+      ${S.hrItems == null ? '<div class="meta">Cargando material…</div>' : items.length ? `<div class="hrmat">${items.map(i=>`<div><b>${esc(i.cant)}</b><span>${esc(i.material)}</span></div>`).join('')}</div>` : '<div class="meta">Sin material</div>'}</div>
+    <div class="row2 noprint" style="margin-top:6px"><button class="btn sec2" onclick="window.print()">${ic('list','s')} PDF / imprimir</button><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(textoHojaRuta())}">Enviar por WhatsApp</a></div>
+    <div class="meta noprint" style="margin:10px 4px">Para guardar el PDF en el iPhone: «PDF / imprimir» → compartir → Guardar en Archivos.</div>`;
+  return `<header class="noprint"><div class="hrow"><button class="back" onclick="abrir('${esc(S.num)}')" aria-label="Volver">${ic('back')}</button><h1>Hoja de ruta</h1></div></header><main class="hruta">${body}</main>`;
+}
+function btnHojaRuta(){ return S.num ? `<button class="card panelbtn hrbtn" onclick="verHojaRuta('${esc(S.num)}')">${ic('nav','s')}<span><b>Hoja de ruta</b><small>Horario, lugar, furgoneta, equipo y material · PDF</small></span>${ic('chev','s')}</button>` : ''; }
+
+// ---------- Revisión de la furgoneta (salida y vuelta) ----------
+const GAS = ['Reserva','1/4','1/2','3/4','Lleno'];
+function tarjetaRevFurgo(fase){
+  if(!S.bolo) return '';
+  const fu = furgoActual(), rev = ficha().revFurgo || {}, r = rev[fase], s = rev.salida;
+  const tit = fase==='salida' ? 'Revisión de la furgoneta al salir' : 'Revisión de la furgoneta al volver';
+  if(r){ const kmRec = fase==='vuelta' && s && s.km && r.km ? (+r.km - +s.km) : null;
+    return `<div class="furg revf ok"><div class="top"><b>${ic('check','s')} ${tit}</b>${esAdmin()?`<button class="edit" onclick="abrirRevFurgo('${fase}')">Rehacer</button>`:''}</div>
+      <div class="revg">${r.km?`<div><small>Km</small><b>${esc(Number(r.km).toLocaleString('es-ES'))}</b></div>`:''}${r.gas?`<div><small>Gasolina</small><b>${esc(r.gas)}</b></div>`:''}<div><small>Golpes nuevos</small><b class="${r.golpes?'mal':''}">${r.golpes?'Sí':'No'}</b></div>${kmRec!=null && kmRec>=0?`<div><small>Recorridos</small><b>${kmRec.toLocaleString('es-ES')} km</b></div>`:''}</div>
+      <div class="meta" style="margin-top:6px">${esc(r.por||'')} · ${esc(r.h||'')}${r.fotos?` · ${r.fotos} foto${r.fotos>1?'s':''}`:''}${r.notas?` · ${esc(r.notas)}`:''}</div></div>`; }
+  return `<button class="furg revf" onclick="abrirRevFurgo('${fase}')"><div class="top"><b>${ic('truck','s')} ${tit}</b><span class="sqst pend">Pendiente</span></div><div class="meta">${fu&&fu.matricula?`<span class="plate sm">${esc(fu.matricula)}</span> `:''}Fotos de km, gasolina y golpes. Si hay una reclamación, tienes la prueba con fecha y hora.</div></button>`;
+}
+let REV = null;
+function abrirRevFurgo(fase){
+  const fu = furgoActual(), r = (ficha().revFurgo||{})[fase] || {};
+  REV = { fase, gas: r.gas || '', golpes: !!r.golpes, fotos: [] };
+  abrirSheet(`<h3>${ic('truck')} ${fase==='salida'?'Furgoneta · salida':'Furgoneta · vuelta'}</h3><div class="meta" style="margin-bottom:12px">${fu ? esc([fu.matricula, fu.marca, fu.modelo].filter(Boolean).join(' · ')) : 'Furgoneta sin asignar'}</div>
+    <label class="fld"><span>Kilómetros del cuadro</span><input id="rvKm" inputmode="numeric" autocomplete="off" placeholder="Ej. 128450" value="${esc(r.km||'')}"></label>
+    <div class="fld"><span>Gasolina</span><div class="chips" id="rvGas" style="margin:6px 0 0">${GAS.map(g=>`<button class="chip ${REV.gas===g?'on':''}" onclick="REV.gas='${g}';document.querySelectorAll('#rvGas .chip').forEach(c=>c.classList.toggle('on',c===this))">${g}</button>`).join('')}</div></div>
+    <div class="fld"><span>¿Golpes o daños nuevos?</span><div class="chips" id="rvGol" style="margin:6px 0 0"><button class="chip ${!REV.golpes?'on':''}" onclick="REV.golpes=false;document.querySelectorAll('#rvGol .chip').forEach(c=>c.classList.toggle('on',c===this))">No</button><button class="chip ${REV.golpes?'on':''}" onclick="REV.golpes=true;document.querySelectorAll('#rvGol .chip').forEach(c=>c.classList.toggle('on',c===this))">Sí, hay golpes</button></div></div>
+    <label class="fld"><span>Notas (opcional)</span><input id="rvNotas" autocomplete="off" placeholder="Ej. rayón en la puerta lateral" value="${esc(r.notas||'')}"></label>
+    <label class="btn sec2 fotobtn" for="rvFotos">${ic('camera','s')} Fotos: cuadro (km y gasolina) y exterior</label>
+    <input type="file" id="rvFotos" accept="image/*" capture="environment" multiple hidden onchange="REV.fotos=[...REV.fotos, ...this.files];$('#rvN').textContent=REV.fotos.length?REV.fotos.length+' foto'+(REV.fotos.length>1?'s':'')+' lista'+(REV.fotos.length>1?'s':''):''">
+    <div class="meta" id="rvN" style="margin:6px 2px 10px"></div>
+    <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="rvBtn" onclick="guardarRevFurgo()">${ic('check','s')} Guardar</button></div>`);
+}
+async function guardarRevFurgo(){
+  if(!REV || !S.bolo) return; const num = S.num, fu = furgoActual() || {};
+  const km = (($('#rvKm')||{}).value||'').replace(/\D/g,'');
+  if(!km){ toast('Pon los kilómetros del cuadro'); return; }
+  if(!REV.fotos.length && !confirm('¿Guardar la revisión sin fotos? Sin fotos no tendrás prueba si hay una reclamación.')) return;
+  const b = $('#rvBtn'); if(b){ b.disabled = true; b.textContent = 'Guardando…'; }
+  let n = 0;
+  for(const f of REV.fotos){ try{ if(b) b.textContent = `Subiendo foto ${n+1} de ${REV.fotos.length}…`; const d = await comprimir(f, 1200, 60000); await enviar('ckFoto', num, 'Furgoneta ' + (fu.matricula||''), 'revisión ' + REV.fase, d); n++; }catch(e){} }
+  try{
+    const r = await enviar('ckRevFurgo', num, REV.fase, { km, gas: REV.gas, golpes: REV.golpes, notas: (($('#rvNotas')||{}).value||'').trim(), fotos: n, matricula: fu.matricula||'' });
+    if(r && S.num===num && S.bolo){ S.bolo.ficha.revFurgo = r; guardarBoloCache(); }
+    else if(S.num===num && S.bolo){ const rv = Object.assign({}, S.bolo.ficha.revFurgo||{}); rv[REV.fase] = { km, gas:REV.gas, golpes:REV.golpes, fotos:n, h:hora(), por:yoNombre() }; S.bolo.ficha.revFurgo = rv; guardarBoloCache(); }
+    cerrarSheet(); vib([15,40,15]); toast('Revisión guardada' + (n ? ` con ${n} foto${n>1?'s':''}` : '')); render();
+  }catch(e){ if(b){ b.disabled = false; b.innerHTML = ic('check','s') + ' Guardar'; } toast('No se guardó: '+e.message); }
+}
+
+// ---------- Ocupación del material ----------
+async function verOcupacion(mat){
+  S.vista = 'ocup'; if(mat != null) S.ocMat = mat; try{ history.pushState({v:'ocup'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  if(!S.catalogo || !S.catalogo.length){ try{ const c = await call('ckCatalogo'); if(Array.isArray(c)){ S.catalogo = c; S.catIdx = null; } }catch(e){} if(S.vista==='ocup') render(); }
+  if(S.ocMat) buscarOcupacion(S.ocMat);
+}
+async function buscarOcupacion(m){
+  m = String(m||'').trim(); if(!m) return; S.ocMat = m; S.oc = null; render();
+  try{ S.oc = await call('ckOcupacion', m, 60); }catch(e){ S.oc = { error: e.red ? 'Necesitas conexión' : e.message }; }
+  if(S.vista==='ocup') render();
+}
+function vistaOcupacion(){
+  const o = S.oc, hoy = diaDe(Date.now());
+  let res = '';
+  if(S.ocMat && !o) res = `<div class="loading"><div class="spin"></div>Buscando…</div>`;
+  else if(o && o.error) res = `<div class="aviso">${ic('alert','s')} ${esc(o.error)}</div>`;
+  else if(o){
+    const dias = []; for(let i=0;i<60;i++){ const t = hoy + i*864e5; const u = o.bolos.filter(b => b.ini <= t && b.fin >= t).reduce((a,b)=>a+b.cant,0); dias.push({ t, u }); }
+    const st = o.stock, max = Math.max(...dias.map(d=>d.u), 0), libres = st != null ? Math.max(0, st - max) : null;
+    const off = (new Date(hoy).getDay()+6)%7;
+    const cel = d => { const cls = !d.u ? '' : st != null && d.u > st ? 'mal' : st != null && d.u === st ? 'lleno' : 'usa'; const dt = new Date(d.t); return `<div class="ocd ${cls} ${d.t===hoy?'hoy':''}" title="${dt.toLocaleDateString('es-ES')}"><span>${dt.getDate()}</span>${d.u?`<b>${d.u}</b>`:''}</div>`; };
+    res = `<div class="kpis"><div><b>${st != null ? st : '—'}</b><small>En stock</small></div><div class="${max>(st||0)&&st!=null?'warn':''}"><b>${max}</b><small>Máx. a la vez</small></div><div><b>${libres != null ? libres : '—'}</b><small>Siempre libres</small></div></div>
+      <div class="furg"><div class="top"><b>${ic('today','s')} Próximos 60 días</b></div>
+        <div class="ocg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${'<div></div>'.repeat(off)}${dias.map(cel).join('')}</div>
+        <div class="ocleg"><span class="usa">En uso</span><span class="lleno">Todo el stock</span><span class="mal">Falta</span></div></div>
+      <div class="sec sl">Bolos con ${esc(o.material)} <span class="cnt">${o.bolos.length}</span></div>
+      ${o.bolos.length ? o.bolos.map(b=>`<button class="card" onclick="abrir('${esc(b.num)}')"><div class="top"><span class="date">${new Date(b.ini).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})}${b.fin>b.ini?' – '+new Date(b.fin).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):''}</span><span class="pill ${st!=null && b.cant>st?'warn':''}">${b.cant} ud.</span></div><div class="ev" style="margin-bottom:0">${esc(b.evento)}</div></button>`).join('') : `<div class="empty sm">${ic('check')}<div>Libre: no está en ningún bolo en los próximos 60 días.</div></div>`}`;
+  }
+  const cat = (S.catalogo||[]).map(c=>c.nombre).filter(Boolean);
+  return `<header><div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Ocupación del material</h1></div>
+    <input class="search" type="search" list="ocL" placeholder="Busca un equipo (ej. altavoz, cabeza móvil…)" value="${esc(S.ocMat||'')}" onchange="buscarOcupacion(this.value)" onkeydown="if(event.key==='Enter')buscarOcupacion(this.value)"><datalist id="ocL">${cat.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></header>
+    <main>${res || `<div class="empty">${ic('box')}<div>Elige un equipo para ver en qué días está ocupado y cuántas unidades quedan libres. Útil antes de aceptar un presupuesto.</div></div>`}</main>`;
+}
+
+// ---------- Modo almacén (tablet) ----------
+let ALM_T = null, ALM_LOCK = null;
+async function verAlmacen(){
+  S.vista = 'almacen'; S.alm = S.alm || {}; try{ history.pushState({v:'almacen'},''); }catch(e){}
+  render(); window.scrollTo(0,0);
+  try{ if(navigator.wakeLock) ALM_LOCK = await navigator.wakeLock.request('screen'); }catch(e){}
+  clearInterval(ALM_T); ALM_T = setInterval(() => { if(S.vista !== 'almacen'){ clearInterval(ALM_T); try{ ALM_LOCK && ALM_LOCK.release(); }catch(e){} return; } refrescarAlmacen(); }, 120000);
+  refrescarAlmacen();
+}
+function bolosAlmacen(){ const hoy = diaDe(Date.now()), man = hoy + 864e5; return (S.presus||[]).filter(p => !p.cerrado && rangoBolo(p)[0] != null && rangoBolo(p)[0] >= hoy && rangoBolo(p)[0] <= man).sort((a,b)=>rangoBolo(a)[0]-rangoBolo(b)[0]); }
+async function refrescarAlmacen(){
+  try{ S.presus = await call('ckPresupuestos') || S.presus; }catch(e){}
+  const l = bolosAlmacen().slice(0, 6);
+  await Promise.all(l.map(async p => { try{ const [b, m] = await Promise.all([call('ckBolo', p.num), call('ckMaterial', p.num)]); S.alm[p.num] = { b, items: (m||{}).items || [] }; }catch(e){} }));
+  S.almT = hora(); if(S.vista==='almacen' && !$('#sheet').classList.contains('open')) render();
+}
+function vistaAlmacen(){
+  const l = bolosAlmacen(), hoy = diaDe(Date.now());
+  const col = p => { const a = (S.alm||{})[p.num] || {}, b = a.b || {}, f = b.ficha || {}, h = b.horarioB || {}, its = a.items || [];
+    const fu = (b.furgonetas||[]).find(x=>x.id===f.furgo) || null, pend = its.filter(i=>!i.cargado), pc = p.total ? Math.round(p.cargados/p.total*100) : 0, esHoy = rangoBolo(p)[0] === hoy;
+    return `<div class="almc ${esHoy?'hoy':''}"><div class="almtop"><span class="almdia">${esHoy?'HOY':'MAÑANA'}</span><span class="almh">${esc(h.hCarga ? 'Carga ' + h.hCarga : (p.montaje||''))}</span></div>
+      <h2>${esc(p.evento||p.num)}</h2><div class="almsub">${esc(p.num)}${p.lugar?' · '+esc(destino(p.lugar)):''}</div>
+      <div class="almrow">${fu&&fu.matricula?`<span class="plate">${esc(fu.matricula)}</span>`:'<span class="almsin">Sin furgoneta</span>'}<span class="almeq">${ic('users','s')} ${esc((f.tecnicos||p.tecnicos||[]).join(', ') || 'Sin equipo')}</span></div>
+      <div class="almbar"><div style="width:${pc}%"></div></div><div class="almpc"><b>${p.cargados||0}/${p.total||0}</b> cargado · ${pc}%</div>
+      ${a.items ? (pend.length ? `<div class="almlst">${pend.slice(0,14).map(i=>`<div><b>${esc(i.cant)}</b><span>${esc(i.material)}</span></div>`).join('')}${pend.length>14?`<div class="almmas">y ${pend.length-14} más</div>`:''}</div>` : `<div class="almok">${ic('check')} Todo cargado</div>`) : '<div class="almsub">Cargando material…</div>'}</div>`; };
+  const ahora = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  return `<div class="almacen"><div class="almhead">${BRAND}<div class="almclock">${ahora}</div><button class="back" onclick="S.vista='lista';render()" aria-label="Salir">${ic('x')}</button></div>
+    <div class="almtit">Almacén · hoy y mañana <span>${S.almT?'actualizado '+esc(S.almT):'cargando…'}</span></div>
+    ${l.length ? `<div class="almgrid">${l.slice(0,6).map(col).join('')}</div>` : `<div class="almvacio">${ic('check')}<div>No hay bolos hoy ni mañana.</div></div>`}</div>`;
 }
 function tabbar(){
   const t = S.vista==='furgos' ? 'furgos' : (S.tab||'hoy');
@@ -1152,6 +1381,7 @@ function vistaDet(){
     ${pend.length ? `<button class="link" onclick="todo(true)">${ic('checkall','s')} Marcar todo como ${KM().como}</button>` : `<button class="link" onclick="todo(false)">Desmarcar todo</button>`}
     ${esFase() ? '' : bloqueExtras()}
     ${S.modo==='carga' ? tarjetaQuien() : ''}
+    ${S.modo==='carga' ? tarjetaRevFurgo('salida') : S.modo==='dev' ? tarjetaRevFurgo('vuelta') : ''}
     ${plegado((S.modo==='carga' ? '' : tarjetaQuien()) + tarjetaNotas() + tarjetaMismoDia() + (S.modo==='dev' || S.modo==='cargaSitio' ? tarjetaFaltan() : '') + (S.modo==='dev' ? tarjetaValoracion() + tarjetaEstadoLugar('lugar-salida') + tarjetaRentabilidad() : ''))}
     ${!esAdmin() ? `<a class="link" href="tel:${EMPRESA.tel}">${ic('phone','s')} ¿Algún problema? Llama a Dreamscape · ${EMPRESA.telTxt}</a>` : ''}`;
   }
@@ -2580,6 +2810,8 @@ function abrirMenu(){
     ${it('alert','Averías por equipo','verAverias()','Qué equipos fallan más a menudo')}
     <div class="mgrp">Gestión</div>
     ${it('today','Panel del día','verPanel()','Quién ha salido, llegado o va con retraso')}
+    ${it('box','Ocupación del material','verOcupacion()','Qué días está ocupado cada equipo')}
+    ${it('grid','Modo almacén (tablet)','verAlmacen()','Pantalla grande para el Bluespace')}
     ${it('chart','Calendario','verCalendario()','Bolos del mes, equipo y furgonetas')}
     ${it('euro','Cobros','verCobros()','Qué falta por facturar y por cobrar')}
     ${it('chart','Resumen del mes','verResumen()','Bolos, facturación, horas, gastos e incidencias')}
@@ -3571,7 +3803,7 @@ function vistaEnRuta(){
       ${f.telefono ? b('msg','Avisar llegada','WhatsApp o SMS',{ on:'abrirAviso()' }) : ''}
       ${S.bolo ? (f.llegada ? b('check','Llegada', esc(f.llegada), { cls:'done', on:"hito('llegada', true)" }) : b('pin','He llegado','Apunta la hora',{ on:"hito('llegada')" })) : ''}
       ${S.bolo ? b('msg','Notas', nuevas ? nuevas+' nueva'+(nuevas>1?'s':'') : 'Del equipo', { on:'abrirNotas()', cls: nuevas?'warn':'' }) : ''}
-      ${b('box','Material','Ver el bolo',{ on:`abrir('${esc(S.num)}')` })}
+      ${b('nav','Hoja de ruta','Todo el bolo',{ on:`verHojaRuta('${esc(S.num)}')` })}${b('box','Material','Ver el bolo',{ on:`abrir('${esc(S.num)}')` })}
     </div>
     ${tarjetaFichaje(true)}
     ${f.acceso||f.notas||furgo||(f.tecnicos||[]).length ? `<dl class="kv rkv">${f.acceso?`<dt>Acceso</dt><dd>${esc(f.acceso)}</dd>`:''}${f.notas?`<dt>Notas</dt><dd>${esc(f.notas)}</dd>`:''}${furgo?`<dt>Furgoneta</dt><dd>${esc([furgo.matricula, furgo.marca, furgo.modelo].filter(Boolean).join(' · '))}</dd>`:''}${(f.tecnicos||[]).length?`<dt>Equipo</dt><dd>${esc(f.tecnicos.join(', '))}</dd>`:''}</dl>` : ''}
@@ -4543,7 +4775,8 @@ function tarjetaRentabilidad(){
 const DIAS_SEM = ['dom','lun','mar','mié','jue','vie','sáb'];
 function fechaCorta(f){ const m = String(f||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if(!m) return esc(f||''); const d = new Date(+m[3], +m[2]-1, +m[1]); return `${DIAS_SEM[d.getDay()]} ${+m[1]}/${+m[2]}`; }
 function duracionTxt(a, b){ const m = x => { const t = String(x||'').match(/^(\d{1,2}):(\d{2})$/); return t ? +t[1]*60 + +t[2] : null; }; const x = m(a), y = m(b); if(x==null || y==null) return ''; let d = y - x; if(d <= 0) d += 1440; const h = Math.floor(d/60), mi = d%60; return h + ' h' + (mi ? ' ' + mi + ' min' : ''); }
-function tarjetaHorario(){
+function tarjetaHorario(){ return btnHojaRuta() + tarjetaHorario0(); }
+function tarjetaHorario0(){
   const h = S.bolo && S.bolo.horarioB; if(!h) return '';
   const l = [];
   if(h.hCarga) l.push(['🚚','Carga en almacén', (h.fMontaje ? fechaCorta(h.fMontaje) + ' · ' : '') + esc(h.hCarga)]);
@@ -4640,7 +4873,7 @@ function dictar(id, b){
   try{ rec.start(); }catch(e){ VOZ.rec = null; b.classList.remove('on'); b.querySelector('span').textContent = 'Dictar'; toast('Usa el micrófono del teclado para dictar'); }
 }
 /* ---------- RENDER ---------- */
-function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad, mimes:vistaMiMes }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); centrarPaso(); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
+function render(){ const V = { lista:vistaLista, furgos:vistaFurgos, etiq:vistaEtiquetas, hist:vistaHistorial, accesos:vistaAccesos, resumen:vistaResumen, login:vistaLogin, factura:vistaFactura, rep:vistaRep, mant:vistaMant, plant:vistaPlantillas, copias:vistaCopias, enruta:vistaEnRuta, panel:vistaPanel, qrbolo:vistaQrBolo, mapa:vistaMapa, cal:vistaCalendario, sfotos:vistaSesionFotos, averias:vistaAverias, cobros:vistaCobros, qrkits:vistaQrKits, nodisp:vistaDisponibilidad, mimes:vistaMiMes, hruta:vistaHojaRuta, ocup:vistaOcupacion, almacen:vistaAlmacen }; const tabs = S.vista==='lista' || S.vista==='furgos'; if(S.vista!=='det'){ const u = $('#undo'); if(u) u.classList.remove('show'); } document.body.classList.toggle('tabs', tabs); $('#app').innerHTML = (V[S.vista] || vistaDet)() + (tabs ? tabbar() : ''); centrarPaso(); dot(); pintarRed(); salaAuto(); if(S.vista==='mapa') setTimeout(pintarMapa, 0); }
 /* Altura real visible en el iPhone (barra de Safari y teclado): las ventanas nunca quedan cortadas */
 (function(){ const vv = window.visualViewport; const fijar = () => { try{ document.documentElement.style.setProperty('--vvh', Math.round(vv ? vv.height : window.innerHeight) + 'px'); }catch(e){} };
   fijar(); if(vv){ vv.addEventListener('resize', fijar); vv.addEventListener('scroll', fijar); } window.addEventListener('orientationchange', () => setTimeout(fijar, 300));
