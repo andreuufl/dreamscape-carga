@@ -1219,7 +1219,7 @@ function vistaAlmacen(){
   const l = bolosAlmacen(), hoy = diaDe(Date.now());
   const col = p => { const a = (S.alm||{})[p.num] || {}, b = a.b || {}, f = b.ficha || {}, h = b.horarioB || {}, its = a.items || [];
     const fu = (b.furgonetas||[]).find(x=>x.id===f.furgo) || null, pend = its.filter(i=>!i.cargado), pc = p.total ? Math.round(p.cargados/p.total*100) : 0, esHoy = rangoBolo(p)[0] === hoy;
-    return `<div class="almc ${esHoy?'hoy':''}"><div class="almtop"><span class="almdia">${esHoy?'HOY':'MAÑANA'}</span><span class="almh">${esc(h.hCarga ? 'Carga ' + h.hCarga : (p.montaje||''))}</span></div>
+    return `<div class="almc ${esHoy?'hoy':''}"><div class="almtop"><span class="almdia">${esHoy?'HOY':'MAÑANA'}</span><span class="almh">${esc(f.anticipado ? (h.hMontaje ? 'Montaje ' + h.hMontaje : 'En el lugar') : h.hCarga ? 'Carga ' + h.hCarga : (p.montaje||''))}</span></div>
       <h2>${esc(p.evento||p.num)}</h2><div class="almsub">${esc(p.num)}${p.lugar?' · '+esc(destino(p.lugar)):''}</div>
       <div class="almrow">${fu&&fu.matricula?`<span class="plate">${esc(fu.matricula)}</span>`:'<span class="almsin">Sin furgoneta</span>'}<span class="almeq">${ic('users','s')} ${esc((f.tecnicos||p.tecnicos||[]).join(', ') || 'Sin equipo')}</span></div>
       <div class="almbar"><div style="width:${pc}%"></div></div><div class="almpc"><b>${p.cargados||0}/${p.total||0}</b> cargado · ${pc}%</div>
@@ -1358,7 +1358,8 @@ setInterval(vivo, 1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ VIVO.ult = 0; VIVO.cambio = Date.now(); } });
 function conHorario(txt, h){
   if(!h || !(h.hCarga || h.hMontaje || h.hEvento || h.hDesmontaje)) return txt || '';
-  const l = []; if(h.hCarga) l.push('Carga '+h.hCarga); if(h.hMontaje) l.push('Montaje '+h.hMontaje); if(h.hEvento) l.push('Evento '+h.hEvento+(h.hFin?' – '+h.hFin:'')); if(h.hDesmontaje) l.push('Desmontaje '+h.hDesmontaje);
+  const ant = S.bolo && S.bolo.ficha && S.bolo.ficha.anticipado && (!h.num || h.num===S.num); // material ya en el lugar: no hay hora de almacén
+  const l = []; if(h.hCarga && !ant) l.push('Carga '+h.hCarga); if(h.hMontaje) l.push('Montaje '+h.hMontaje); if(h.hEvento) l.push('Evento '+h.hEvento+(h.hFin?' – '+h.hFin:'')); if(h.hDesmontaje) l.push('Desmontaje '+h.hDesmontaje);
   const otros = String(txt||'').split(/\s*·\s*/).filter(x => x && !/^(carga|montaje|llegada|evento|inicio|desmontaje)\b/i.test(x));
   return l.concat(otros).join(' · ');
 }
@@ -2052,7 +2053,7 @@ function vistaMontaje(p, tot){
   const firma = !f.pedirFirma && !f.firma ? '' : f.firma
     ? `<div class="done-banner">${ic('sign','s')} Albarán firmado por ${esc(f.firma)} · ${esc(f.firmaHora||'')}</div><button class="link" onclick="abrirFirma('entrega')">Firmar otra vez</button>`
     : `<button class="salida firma" onclick="abrirFirma('entrega')">${ic('sign')} Firma del cliente y albarán</button>`;
-  const body = `${tarjetaUrgencias()}${anticipado(S.num) && !f.llegada ? tarjetaPlan('montaje') : ''}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaFichaje(false,'montaje','salida')}${plegado(tarjetaExtrasCli() + tarjetaEstadoLugar('lugar-llegada') + (esAdmin()?tarjetaGastos():'') + tarjetaRentabilidad() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, gastos, notas y ficha')}`;
+  const body = `${tarjetaUrgencias()}${anticipado(S.num) && !f.llegada ? tarjetaPlan('montaje') : ''}${anticipado(S.num) ? tarjetaFichaje(false,'montaje','entrada') : ''}${hito('llegada','He llegado al montaje',ic('pin'))}${tarjetaLugar(p)}${tarjetaChecklist()}${tarjetaFotosMontaje()}${hito('finMontaje','Montaje terminado',ic('sliders'))}${firma}${tarjetaFichaje(false,'montaje','salida')}${plegado(tarjetaExtrasCli() + tarjetaEstadoLugar('lugar-llegada') + (esAdmin()?tarjetaGastos():'') + tarjetaRentabilidad() + tarjetaNotas() + tarjetaFicha(), 'Más del bolo', 'Extras del cliente, gastos, notas y ficha')}`;
   const foot = `<div class="foot"><button class="btn" onclick="irA('desm')">Siguiente: desmontaje ${ic('chev','s')}</button></div>`;
   return { body, foot };
 }
@@ -4415,7 +4416,8 @@ async function pintarWidget(p){
     const min = await minutosRuta(al, c.g);
     let f = S.bolo && S.num===p.num ? ficha() : ((cacheGet('ckBolo'+JSON.stringify([p.num]))||{}).ficha || {});
     const HF = horasFicha(f), h = HF.montaje != null ? HF.montaje : horaDe(f.horario);
-    if(min != null && min > MAX_RUTA) salida = avisoRuta(p, min, c.g);
+    if(anticipado(p.num)) salida = `<div class="wsal">${ic('box','s')} Material ya en el lugar<small>No hace falta pasar por el almacén: id directos a montar${h!=null?' a las '+hhmm(h):''}</small></div>`;
+    else if(min != null && min > MAX_RUTA) salida = avisoRuta(p, min, c.g);
     else if(min != null){
       const margen = Math.round(min*0.25) + 15;
       salida = h != null ? (()=>{ const s = h - min - margen, hh = ((s%1440)+1440)%1440; return `<div class="wsal">${ic('truck','s')} Sal del almacén a las <b>${String(Math.floor(hh/60)).padStart(2,'0')}:${String(hh%60).padStart(2,'0')}</b><small>${min} min de trayecto + ${margen} de margen por tráfico</small></div>`; })()
@@ -4830,7 +4832,8 @@ function tarjetaHorario(){ return btnHojaRuta() + tarjetaHorario0(); }
 function tarjetaHorario0(){
   const h = S.bolo && S.bolo.horarioB; if(!h) return '';
   const l = [];
-  if(h.hCarga) l.push(['🚚','Carga en almacén', (h.fMontaje ? fechaCorta(h.fMontaje) + ' · ' : '') + esc(h.hCarga)]);
+  if(anticipado(S.num)) l.push(['📦','Material ya en el lugar', 'Sin pasar por el almacén']);
+  else if(h.hCarga) l.push(['🚚','Carga en almacén', (h.fMontaje ? fechaCorta(h.fMontaje) + ' · ' : '') + esc(h.hCarga)]);
   if(h.fMontaje || h.hMontaje) l.push(['🔧','Montaje', [h.fMontaje ? fechaCorta(h.fMontaje) : '', esc(h.hMontaje||'')].filter(Boolean).join(' · ')]);
   if(h.hEvento) l.push(['🎤','Evento', esc(h.hEvento) + (h.hFin ? ' – ' + esc(h.hFin) + ` <small class="hdur">(${duracionTxt(h.hEvento, h.hFin)})</small>` : '')]);
   if(h.fDesmontaje || h.hDesmontaje) l.push(['📦','Desmontaje', [h.fDesmontaje ? fechaCorta(h.fDesmontaje) : '', esc(h.hDesmontaje||'')].filter(Boolean).join(' · ')]);
