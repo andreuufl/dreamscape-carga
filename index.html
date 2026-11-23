@@ -14,7 +14,7 @@
 <title>Carga · Dreamscape</title>
 <script>window.T0=Date.now();try{var t=localStorage.getItem("ck_tema");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);if(localStorage.getItem("ck_big")==="1")document.documentElement.classList.add("big")}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,460&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,460&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root{--navy:#0f1a2b;--navy2:#1b2a41;--navy3:#26385a;--gold:#c9a66b;--gold2:#e2c48f;--bg:#f3f1ec;--card:#fff;--card2:#faf9f6;--txt:#111827;--mut:#6b7280;--line:#e6e2da;--ok:#15935a;--okbg:#e6f5ed;--dev:#2563eb;--devbg:#e8effd;--warn:#c56a04;--warnbg:#fff3df;--bad:#dc2626;--badbg:#fdecec;--r:18px;--sh:0 1px 2px rgba(17,24,39,.04),0 4px 14px rgba(17,24,39,.05);--inp:#fff;--track:#ebe7df}
 :root[data-theme="dark"]{--bg:#0a111c;--card:#131c2b;--card2:#172234;--txt:#eef1f6;--mut:#8f9bb0;--line:#243249;--okbg:rgba(34,197,94,.14);--ok:#34d17f;--devbg:rgba(59,130,246,.16);--dev:#6ea2ff;--warnbg:rgba(245,158,11,.15);--warn:#f5a524;--badbg:rgba(239,68,68,.15);--bad:#f87171;--sh:0 1px 0 rgba(255,255,255,.03),0 6px 18px rgba(0,0,0,.35);--inp:#0f1726;--track:#223047}
@@ -601,6 +601,63 @@ input[type=time]::-webkit-date-and-time-value{text-align:center;margin:0}
 .sheet .row2 .btn{min-width:0}
 .toast{max-width:calc(100vw - 32px);text-align:center}
 @media (max-width:360px){.row2{gap:8px}.sheet{padding-left:14px;padding-right:14px}}
+/* ===== v50 · Lavado de cara: estilo más profesional ===== */
+:root{--r:16px;--gold:#c8a568;--gold2:#e0c48f;--sh:0 1px 2px rgba(15,26,43,.04),0 6px 20px -10px rgba(15,26,43,.14);--ring:inset 0 0 0 1px var(--line)}
+:root[data-theme="dark"]{--sh:0 1px 0 rgba(255,255,255,.03),0 10px 28px -14px rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sh:0 1px 0 rgba(255,255,255,.03),0 10px 28px -14px rgba(0,0,0,.6)}}
+html,body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;font-size:16px;letter-spacing:-.011em;font-feature-settings:"cv11","ss01","ss03","calt"}
+.num,.date,.cnt,.pill,.dia,.ring b,.prog .big,.hst b,.plate,.sqtx small,.hgr2 b{font-variant-numeric:tabular-nums}
+header{background:linear-gradient(180deg,#101c2f 0%,#0b1422 100%);box-shadow:inset 0 -1px 0 rgba(200,165,104,.22)}
+.hrow h1{font-weight:650;letter-spacing:-.02em}
+header.top .hrow h1{font-weight:700;letter-spacing:-.03em}
+.sub{color:#93a1b8;font-weight:450}
+.back,.ref{border-radius:12px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.card,.furg,.dia{box-shadow:var(--ring),var(--sh)}
+.card{border-radius:var(--r);padding:16px 17px}
+.furg{border-radius:var(--r);padding:16px 17px}
+.card[class*="est-"]{border-left-width:4px}
+.card .top .num{font-weight:600;letter-spacing:.02em}
+.ev{font-weight:650;letter-spacing:-.018em}
+.sec{font-size:11.5px;font-weight:650;letter-spacing:.09em;color:var(--mut)}
+.sec .cnt{font-weight:600}
+.meta{color:var(--mut)}
+.btn{border-radius:13px;font-weight:620;font-size:16px;letter-spacing:-.01em;padding:15px 16px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 6px 16px -10px rgba(15,26,43,.55)}
+.btn.sec2{box-shadow:none;border-width:1px;font-weight:600}
+.btn.okb{box-shadow:0 6px 16px -10px rgba(21,147,90,.7)}
+.chip{border-radius:12px;font-weight:560;font-size:14.5px;border-width:1px;padding:10px 14px}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+:root[data-theme="dark"] .chip.on{background:var(--gold);border-color:var(--gold);color:#111}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip.on{background:var(--gold);border-color:var(--gold);color:#111}}
+.pill{font-weight:650;font-size:11.5px;letter-spacing:.01em;padding:3px 9px}
+.fld span{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.fld input,.fld textarea,.fld select,.inp{border-radius:12px}
+.sheet{border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
+.sheet h3{font-size:19px;font-weight:700;letter-spacing:-.022em;display:flex;align-items:center;gap:8px}
+.hoy{border-radius:20px;background:radial-gradient(120% 90% at 100% 0%,rgba(200,165,104,.16) 0%,transparent 55%),linear-gradient(160deg,#1a2c49 0%,#0f1a2b 75%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 14px 34px -16px rgba(15,26,43,.6)}
+.dia{border-radius:14px}
+.tabbar button{font-weight:600;font-size:10.5px;letter-spacing:.01em}
+.tabbar button.on svg{background:rgba(200,165,104,.16)}
+.toast{border-radius:14px;font-weight:550}
+/* Recogidas y devoluciones */
+.sqcard .sqic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--card2);box-shadow:var(--ring);font-size:0;color:var(--txt)}
+.sqcard .sqtask.dev .sqic{color:var(--dev)}
+.sqcard .sqtask.rec .sqic{color:var(--gold)}
+.sqcard .sqtx b{font-weight:620;letter-spacing:-.01em}
+.sqst{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--card2);color:var(--mut);box-shadow:var(--ring)}
+.sqst.ok{background:var(--okbg);color:var(--ok);box-shadow:none}
+.sqst.no{background:var(--badbg);color:var(--bad);box-shadow:none}
+.sqst.pend{background:var(--warnbg);color:var(--warn);box-shadow:none}
+.asg{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;background:var(--card2);box-shadow:var(--ring);margin-bottom:8px}
+.asg.on{box-shadow:inset 0 0 0 2px var(--gold);background:var(--card)}
+.asg .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:650;font-size:14px;flex:none;letter-spacing:.02em}
+.asg .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.asg .tx b{font-weight:620}
+.asg .tx small{color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asg .tx small.sin{color:var(--warn)}
+.quien{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;background:var(--card2);box-shadow:var(--ring);margin:10px 0}
+.quien small{display:block;color:var(--mut);font-size:12px}
+.quien b{font-size:15.5px}
+.quien .edit{flex:none}
 </style>
 </head>
 <body>
@@ -1269,6 +1326,7 @@ function tarjetaSubalq(){
     return `<div class="sqrow"><div class="top"><b>${x.tipo==='furgo'?ic('truck','s'):ic('box','s')} ${esc(x.prov||'Proveedor')}</b>${esAdmin()?`<button class="edit" onclick="editarSubalq(${i})">Editar</button>`:''}</div>
       ${x.que?`<div class="sqque">${esc(x.que)}</div>`:''}${furgo}${fechas}
       <div style="margin:6px 0 10px">${estado}</div>
+      ${esAdmin() && !x.devuelto ? `<button class="link" style="padding:0 0 10px;text-align:left" onclick="abrirAsignarSq('${esc(S.num)}','${esc(x.id)}','${x.recogido?'dev':'rec'}')">${ic('user','xs')} ${(x.recogido?x.respDev:x.resp)?'Cambiar quién va':'Asignar quién va'}</button>` : ''}
       <div class="row2">${x.dir?`<a class="btn sec2" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">${ic('nav','s')} Ir</a>`:''}${btn}${x.recogido&&esAdmin()?`<button class="btn sec2" onclick="deshacerSubalq(${i})">Deshacer</button>`:''}</div></div>`;
   };
   return `<div class="furg sq"><div class="top"><b>${ic('box','s')} Subalquiler</b>${esAdmin()?'<button class="edit" onclick="editarSubalq(-1)">+ Añadir</button>':''}</div>${l.map(fila).join('')}</div>`;
@@ -1389,8 +1447,54 @@ function tarjetaRecogidas(){
   const l = misRecogidas().filter(t=>!t.hecho); if(!l.length) return '';
   const hoyT = diaDe(Date.now());
   const fila = (t) => { const i = (S.recogidas||[]).indexOf(t); const d = (String(t.fecha).match(/^(\d{2})\/(\d{2})\/(\d{4})$/)||[]); const ts = d.length ? new Date(+d[3], +d[2]-1, +d[1]).getTime() : null; const tarde = ts != null && ts < hoyT;
-    return `<button class="sqtask ${t.fase} ${tarde?'tarde':''}" onclick="abrirTarea(${i})"><span class="sqic">${t.fase==='rec'?'🔄':'↩️'}</span><span class="sqtx"><b>${esc(tareaTitulo(t))}</b><small>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''} · ${esc(t.evento||t.num)}</small>${t.resp?`<small class="sqresp">✋ ${esc(String(t.resp).split(' · ').pop())}</small>`:'<small class="sqlibre">Sin asignar · tócala para aceptarla</small>'}</span>${tarde?'<span class="sqtag">Atrasada</span>':''}</button>`; };
+    return `<button class="sqtask ${t.fase} ${tarde?'tarde':''}" onclick="abrirTarea(${i})"><span class="sqic">${ic(t.fase==='rec'?'box':'refresh','s')}</span><span class="sqtx"><b>${esc(tareaTitulo(t))}</b><small>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''} · ${esc(t.evento||t.num)}</small>${t.resp?`<small class="sqresp">${ic('user','xs')} ${esc(String(t.resp).split(' · ').pop())}</small>`:'<small class="sqlibre">Sin asignar · tócala para aceptarla</small>'}</span>${tarde?'<span class="sqtag">Atrasada</span>':''}</button>`; };
   return `<div class="furg sqcard"><div class="top"><b>${ic('truck','s')} Recogidas y devoluciones</b><span class="meta">${l.length}</span></div>${l.slice(0,8).map(fila).join('')}${l.length>8?`<div class="meta">y ${l.length-8} más</div>`:''}</div>`;
+}
+/* ---------- v50 · Quién va a recoger / devolver (admin) ---------- */
+const INV_TXT = { YES:['ok','Ha aceptado la invitación'], NO:['no','Ha dicho que no puede'], MAYBE:['pend','Ha respondido «quizás»'], INVITED:['pend','Invitación enviada · sin responder'], SIN_CORREO:['no','Sin correo: no le llega la invitación'] };
+async function cargarInvit(num, id, fase){
+  try{ const st = await call('ckEstadoInvit', num, id, fase); const el = $('#invSt'); if(!el) return; const v = INV_TXT[st]; el.innerHTML = v ? `<span class="sqst ${v[0]}" style="margin-top:6px">${v[0]==='ok'?ic('check','xs'):''}${esc(v[1])}</span>` : ''; }catch(e){}
+}
+let ASG = null;
+function equipoAsig(){ const a = S.acc || {}, eq = a.equipo || [], us = (a.usuarios||[]).filter(u=>u.activo!==false).map(u=>u.nombre); return [...new Set([...eq.map(x=>x.nombre), ...us])].filter(Boolean).map(nombre => Object.assign({ nombre }, eq.find(x=>x.nombre===nombre) || {})); }
+function iniciales(n){ return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join(''); }
+async function abrirAsignarSq(num, id, fase){
+  if(!esAdmin()) return;
+  const t = datosTarea(num, id, fase); if(!t){ toast('Esta tarea ya no existe'); return; }
+  ASG = { num, id, fase, sel: t.resp ? String(t.resp).split(' · ').pop() : '' };
+  pintarAsignar();
+  if(!S.acc){ try{ S.acc = await call('ckUsuarios'); }catch(e){ toast(e.red?'Necesitas conexión':'Error: '+e.message); S.acc = null; } pintarAsignar(); }
+}
+function elegirAsig(b){ const m = $('#asgMail'); if(m && ASG.sel){ const p = equipoAsig().find(x=>x.nombre===ASG.sel); if(p) p._mail = m.value; } ASG.sel = b.dataset.n; pintarAsignar(); }
+function pintarAsignar(){
+  if(!ASG) return;
+  const t = datosTarea(ASG.num, ASG.id, ASG.fase) || {}, l = equipoAsig(), sel = l.find(p=>p.nombre===ASG.sel);
+  const tit = (ASG.fase==='rec' ? 'Quién recoge' : 'Quién devuelve') + (t.prov ? ' · ' + t.prov : '');
+  const lista = !S.acc ? '<div class="loading"><div class="spin"></div>Cargando el equipo…</div>'
+    : l.map(p=>`<button class="asg ${p.nombre===ASG.sel?'on':''}" data-n="${esc(p.nombre)}" onclick="elegirAsig(this)"><span class="av">${esc(iniciales(p.nombre))}</span><span class="tx"><b>${esc(p.nombre)}</b>${p.email?`<small>${esc(p.email)}</small>`:'<small class="sin">Sin correo</small>'}</span>${p.nombre===ASG.sel?ic('check','s'):''}</button>`).join('');
+  abrirSheet(`<h3>${ic('user')} ${esc(tit)}</h3><div class="meta" style="margin-bottom:12px">Le llega un correo con los detalles y una invitación del Google Calendar de Dreamscape para que acepte (sí / no).</div>
+    ${lista}
+    ${sel ? `<label class="fld" style="margin-top:6px"><span>Correo de ${esc(sel.nombre.split(' ')[0])}</span><input id="asgMail" type="email" autocomplete="off" autocapitalize="off" value="${esc(sel.email||'')}" placeholder="nombre@correo.com"></label>` : ''}
+    <div class="row2" style="margin-top:8px">${t.resp ? `<button class="btn sec2" onclick="guardarAsignacion(true)">Quitar</button>` : `<button class="btn sec2" onclick="cerrarSheet()">Cancelar</button>`}<button class="btn" id="asgBtn" ${sel?'':'disabled'} onclick="guardarAsignacion(false)">${ic('send','s')} Asignar y avisar</button></div>`);
+}
+async function guardarAsignacion(quitar){
+  if(!ASG) return; const { num, id, fase } = ASG, nombre = quitar ? '' : ASG.sel;
+  if(!quitar && !nombre){ toast('Elige quién va'); return; }
+  const b = $('#asgBtn'), listo = () => { if(b){ b.disabled = false; b.innerHTML = ic('send','s') + ' Asignar y avisar'; } };
+  if(b){ b.disabled = true; b.textContent = 'Enviando…'; }
+  try{
+    if(!quitar){
+      const p = equipoAsig().find(x=>x.nombre===nombre) || {}, mail = (($('#asgMail')||{}).value||'').trim();
+      if(mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){ toast('El correo no parece correcto'); listo(); return; }
+      if(!mail && !confirm(nombre+' no tiene correo: saldrá en el Calendar pero no le llegará la invitación. ¿Asignar igualmente?')){ listo(); return; }
+      if(mail !== String(p.email||'')) S.acc = await call('ckEditarPersona', nombre, p.telefono||'', mail);
+    }
+    const r = await call('ckSubalq', num, 'asignar', id, { fase, nombre });
+    if(r && S.num===num && S.bolo){ S.bolo.ficha.subalq = r; guardarBoloCache(); }
+    cerrarSheet(); vib(20);
+    toast(quitar ? 'Ya no hay nadie asignado' : 'Asignada a '+nombre+': le llega el correo y la invitación');
+    await cargarRecogidas(); render();
+  }catch(e){ listo(); toast(e.red?'Necesitas conexión':'Error: '+e.message); }
 }
 function abrirTarea(i){ const t = (S.recogidas||[])[i]; if(t) abrirTareaSq(t.num, t.id, t.fase); }
 function datosTarea(num, id, fase){
@@ -1405,23 +1509,25 @@ function abrirTareaSq(num, id, fase){
   const respN = String(t.resp||'').split(' · ').pop(), mia = respN && respN === yo;
   const furgo = t.tipo==='furgo';
   const accion = t.hecho ? `<div class="done-banner">${ic('check','s')} ${fase==='rec'?'Recogido':'Devuelto'} · ${esc(t.hecho)}</div>`
-    : `${!t.resp ? `<button class="btn" onclick="aceptarTareaSq('${esc(num)}','${esc(id)}','${fase}')">✋ Aceptar: voy yo</button>` : ''}
+    : `${!t.resp ? `<button class="btn" onclick="aceptarTareaSq('${esc(num)}','${esc(id)}','${fase}')">${ic('user','s')} Aceptar: voy yo</button>` : ''}
        ${furgo && fase==='rec' ? `<div class="fld" style="margin-top:10px"><span>Furgoneta</span></div>${camposFurgoSq(t)}` : ''}
-       <label class="btn fotobtn ${t.resp?'':'sec2'}" for="sqFotoIn" style="margin-top:10px">📷 ${fase==='rec' ? (furgo ? 'Foto (km y gasolina) y confirmar recogida' : 'Foto del material y confirmar recogida') : (furgo ? 'Foto (km y gasolina) y confirmar devolución' : 'Foto y confirmar devolución')}</label>
+       <label class="btn fotobtn ${t.resp?'':'sec2'}" for="sqFotoIn" style="margin-top:10px">${ic('camera','s')} ${fase==='rec' ? (furgo ? 'Foto (km y gasolina) y confirmar recogida' : 'Foto del material y confirmar recogida') : (furgo ? 'Foto (km y gasolina) y confirmar devolución' : 'Foto y confirmar devolución')}</label>
        <input type="file" id="sqFotoIn" accept="image/*" capture="environment" hidden onchange="confirmarTareaSq(this,'${esc(num)}','${esc(id)}','${fase}')">
        <button class="link" style="padding:10px 0 0" onclick="confirmarTareaSq(null,'${esc(num)}','${esc(id)}','${fase}')">Confirmar sin foto</button>`;
-  abrirSheet(`<h3>${fase==='rec'?'🔄':'↩️'} ${esc(tareaTitulo(t))}</h3>
+  abrirSheet(`<h3>${ic(fase==='rec'?'box':'refresh')} ${esc(tareaTitulo(t))}</h3>
     <div class="meta" style="margin-bottom:10px">Para ${esc(t.evento||num)} · ${esc(num)}</div>
     <div class="hgr2">
       <div><small>Cuándo</small><b>${t.fecha?fechaCorta(t.fecha):'Sin fecha'}${t.hora?' · '+esc(t.hora):''}</b></div>
-      <div><small>Quién va</small><b>${t.resp ? esc(respN) + (mia?' (tú)':'') : 'Sin asignar'}</b></div>
+      <div><small>Proveedor</small><b>${esc(t.prov||'—')}</b></div>
     </div>
+    <div class="quien"><div style="min-width:0"><small>Quién va</small><b>${t.resp ? esc(respN) + (mia?' (tú)':'') : 'Sin asignar'}</b><div id="invSt"></div></div>${esAdmin() && !t.hecho ? `<button class="edit" onclick="abrirAsignarSq('${esc(num)}','${esc(id)}','${fase}')">${t.resp?'Cambiar':'Asignar'}</button>` : ''}</div>
     ${t.que?`<div class="sqque" style="margin:10px 0">${esc(t.que)}</div>`:''}
     ${p.horario?`<div class="meta">🕘 Horario del proveedor: ${esc(p.horario)}</div>`:''}
     ${t.dir?`<div class="meta">📍 ${esc(t.dir)}</div>`:''}
     <div class="row2" style="margin:10px 0">${t.dir||t.prov?`<a class="btn sec2" href="https://maps.apple.com/?daddr=${q}&dirflg=d" target="_blank" rel="noopener">${ic('nav','s')} Ir</a>`:''}${p.telefono?`<a class="btn sec2" href="tel:${esc(tel(p.telefono))}">${ic('phone','s')} Llamar</a>`:''}</div>
     ${accion}
     <div class="row2" style="margin-top:14px">${t.resp && !t.hecho && (mia || esAdmin()) ? `<button class="btn sec2" onclick="soltarTareaSq('${esc(num)}','${esc(id)}','${fase}')">Ya no voy</button>` : ''}<button class="btn sec2" onclick="cerrarSheet();abrir('${esc(num)}')">Abrir el bolo</button></div>`);
+  if(t.resp && !t.hecho) cargarInvit(num, id, fase);
 }
 async function marcarTareaSq(num, id, datos, msg){
   try{
