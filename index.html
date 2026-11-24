@@ -4255,6 +4255,7 @@ function rangoBolo(p){
   if(p.num !== S.num && RANGO_MEMO[p.num]) return RANGO_MEMO[p.num];
   const [a, b] = String(fichaDe(p.num).dias||'').split('|');
   let i = tsIso(a), j = tsIso(b);
+  if(i == null || j == null){ const hb = (p.num === S.num ? (S.bolo||{}).horarioB : ((((S.alm||{})[p.num]||{}).b)||{}).horarioB) || {}, fx = s => { const m = String(s||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? new Date(+m[3], +m[2]-1, +m[1]).getTime() : null; }; if(i == null) i = fx(hb.fMontaje); if(j == null) j = fx(hb.fDesmontaje); }
   if(i == null) i = p.ts ? diaDe(p.ts) : null;
   if(i == null) return [null, null];
   if(j == null || j < i) j = i;
