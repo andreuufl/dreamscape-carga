@@ -4838,6 +4838,7 @@ function tarjetaHorario0(){
   if(h.fMontaje || h.hMontaje) l.push(['🔧','Montaje', [h.fMontaje ? fechaCorta(h.fMontaje) : '', esc(h.hMontaje||'')].filter(Boolean).join(' · ')]);
   if(h.hEvento) l.push(['🎤','Evento', esc(h.hEvento) + (h.hFin ? ' – ' + esc(h.hFin) + ` <small class="hdur">(${duracionTxt(h.hEvento, h.hFin)})</small>` : '')]);
   if(h.fDesmontaje || h.hDesmontaje) l.push(['📦','Desmontaje', [h.fDesmontaje ? fechaCorta(h.fDesmontaje) : '', esc(h.hDesmontaje||'')].filter(Boolean).join(' · ')]);
+  if(h.diasHoras && h.fMontaje !== h.fDesmontaje) l.push(['🗓️','Cada día', esc(h.diasHoras).replace(/\n/g,'<br>')]);
   if(!l.length && !h.notas && !esAdmin()) return '';
   return `<div class="furg hcard"><div class="top"><b>${ic('today','s')} Horario del bolo</b>${esAdmin() ? `<button class="edit" onclick="editarHorario()">Cambiar</button>` : ''}</div>
     ${l.length ? `<div class="hgr">${l.map(([e,t,v])=>`<div class="hit"><span class="ipe" aria-hidden="true">${e}</span><span><small>${t}</small>${v}</span></div>`).join('')}</div>` : `<div class="meta">Aún sin horario. ${esAdmin() ? 'Pulsa «Cambiar» o rellénalo en la pestaña Horarios del Drive.' : ''}</div>`}
@@ -4850,17 +4851,35 @@ function editarHorario(){
   const h = S.bolo.horarioB || {};
   const t = (id, txt) => `<label><small>${txt}</small><input type="time" id="ho_${id}" value="${esc(h[id]||'')}" step="300"></label>`;
   abrirSheet(`<h3>🕒 Horario del bolo</h3><div class="meta" style="margin-bottom:12px">Se guarda en la pestaña Horarios del Drive y lo ve todo el equipo al momento.</div>
-    <div class="fld"><span>Montaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fMontaje" value="${aISO(h.fMontaje)}"></label>${t('hCarga','Carga en almacén')}${t('hMontaje','Montaje en el lugar')}</div></div>
+    <div class="fld"><span>Montaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fMontaje" value="${aISO(h.fMontaje)}"></label>${t('hCarga','Carga en almacén')}${t('hMontaje','Montaje (empieza)')}</div></div>
     <div class="fld"><span>Evento</span><div class="hgrid">${t('hEvento','Empieza')}${t('hFin','Termina')}</div></div>
-    <div class="fld"><span>Desmontaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fDesmontaje" value="${aISO(h.fDesmontaje)}"></label>${t('hDesmontaje','Hora')}</div></div>
+    <div class="fld"><span>Desmontaje</span><div class="hgrid"><label><small>Día</small><input type="date" id="ho_fDesmontaje" value="${aISO(h.fDesmontaje)}"></label>${t('hDesmontaje','Desmontaje (termina)')}</div></div>
+    <div class="fld" id="ho_dias" data-txt="${esc(h.diasHoras||'')}"></div>
     <label class="fld"><span>Notas para el equipo</span><textarea id="ho_notas" rows="2" placeholder="Ej. montaje por el muelle, prueba de sonido a las 18h">${esc(h.notas||'')}</textarea></label>
     <div class="row2"><button class="btn sec2" onclick="cerrarSheet()">Cancelar</button><button class="btn" onclick="guardarHorarioUI()">Guardar</button></div>`);
+  pintarHorasDia();
+  ['ho_fMontaje','ho_fDesmontaje','ho_hMontaje','ho_hDesmontaje'].forEach(id => { const el = $('#'+id); if(el) el.addEventListener('change', () => { const c = $('#ho_dias'); if(c){ const tx = leerHorasDia(); if(tx) c.dataset.txt = tx; } pintarHorasDia(); }); });
 }
+/* Bolos de varios días: horario de cada día (llegada y salida). El 1.er día empieza a la hora de montaje y el último termina a la de desmontaje. */
+function diasHorario(fa, fb){ const p = s => { const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; }; const a = p(fa), b = p(fb) || a, l = []; if(!a) return l; for(let d = new Date(a); d <= b && l.length < 31; d.setDate(d.getDate()+1)) l.push(new Date(d)); return l; }
+function horasDiaMapa(txt){ const o = {}; String(txt||'').split(/\n|;/).forEach(l => { const m = l.match(/(\d{1,2})\/(\d{1,2})\D+?(\d{1,2})[:.h](\d{2})\s*[-–a]\s*(\d{1,2})[:.h](\d{2})/); if(m) o[(+m[1])+'/'+(+m[2])] = [String(m[3]).padStart(2,'0')+':'+m[4], String(m[5]).padStart(2,'0')+':'+m[6]]; }); return o; }
+function pintarHorasDia(){
+  const c = $('#ho_dias'); if(!c) return;
+  const ds = diasHorario(($('#ho_fMontaje')||{}).value, ($('#ho_fDesmontaje')||{}).value);
+  if(ds.length < 2){ c.innerHTML = ''; return; }
+  const mp = horasDiaMapa(c.dataset.txt), hi = ($('#ho_hMontaje')||{}).value || '', hf = ($('#ho_hDesmontaje')||{}).value || '', n = ds.length;
+  c.innerHTML = `<span>🗓️ Horario de cada día <small style="font-weight:400">(llegada y salida · un evento por día en el Calendar)</small></span>` + ds.map((d,k) => {
+    const key = d.getDate()+'/'+(d.getMonth()+1), v = mp[key] || [hi, hf], a = k===0 && hi ? hi : (v[0]||hi), b = k===n-1 && hf ? hf : (v[1]||hf);
+    return `<div class="hgrid hdia" data-k="${key}"><label><small>${DIAS_SEM[d.getDay()]} ${key} · llegada</small><input type="time" class="hd_i" value="${esc(a)}" step="300"${k===0 && hi ? ' readonly title="Es la hora de montaje"' : ''}></label><label><small>salida</small><input type="time" class="hd_f" value="${esc(b)}" step="300"${k===n-1 && hf ? ' readonly title="Es la hora de desmontaje"' : ''}></label></div>`;
+  }).join('');
+}
+function leerHorasDia(){ const c = $('#ho_dias'); if(!c) return ''; return [...c.querySelectorAll('.hdia')].map(r => { const i = r.querySelector('.hd_i').value, f = r.querySelector('.hd_f').value; return i ? r.dataset.k + ' ' + i + '-' + (f || i) : ''; }).filter(Boolean).join('\n'); }
 async function guardarHorarioUI(){
   const h0 = Object.assign({}, (S.bolo||{}).horarioB || {}), patch = {};
   ['hCarga','hMontaje','hEvento','hFin','hDesmontaje'].forEach(k => { const v = ($('#ho_'+k)||{}).value || ''; if(v !== (h0[k]||'')) patch[k] = v; });
   ['fMontaje','fDesmontaje'].forEach(k => { const v = deISO(($('#ho_'+k)||{}).value); if(v !== (h0[k]||'')) patch[k] = v; });
   const n = (($('#ho_notas')||{}).value || '').trim(); if(n !== (h0.notas||'')) patch.notas = n;
+  const dh = leerHorasDia(); if(dh !== (h0.diasHoras||'')) patch.diasHoras = dh;
   cerrarSheet();
   if(!Object.keys(patch).length) return;
   const num = S.num; S.bolo.horarioB = Object.assign({}, h0, patch); guardarBoloCache(); render();
