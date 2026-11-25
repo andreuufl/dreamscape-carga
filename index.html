@@ -784,6 +784,16 @@ button.furg.antic{display:block;width:100%;text-align:left}
 button.furg.antic.off{box-shadow:var(--ring),var(--sh)}button.furg.antic.off .top b{color:var(--txt)}
 .est.est-antic{background:var(--devbg);color:var(--dev)}
 .card.est-antic{border-left-color:var(--dev)}
+.dia{position:relative}.dtrk{position:absolute;top:3px;right:3px;font-style:normal;font-size:13px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.dia.trk:not(.on){box-shadow:inset 0 0 0 2px var(--warn),var(--sh)}
+.cev.ctrk{border-color:var(--warn);background:var(--warnbg);color:var(--warn);font-weight:700}
+.rbanner{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--warnbg);color:var(--warn);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:inset 0 0 0 1.5px rgba(197,106,4,.35)}
+.rbanner.hoy{background:var(--warn);color:#fff;box-shadow:0 6px 18px -8px rgba(197,106,4,.7);animation:rbPulso 2.4s ease-in-out infinite}
+.rbanner.tarde{background:var(--badbg);color:var(--bad);box-shadow:inset 0 0 0 1.5px rgba(220,38,38,.35)}
+.rbic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(197,106,4,.14)}.rbanner.hoy .rbic{background:rgba(255,255,255,.2)}
+.rbtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.rbtx small{font-size:11px;font-weight:800;letter-spacing:.08em;opacity:.85}.rbtx b{font-size:16px;line-height:1.25}.rbtx em{font-style:normal;font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes rbPulso{0%,100%{transform:none}50%{transform:scale(1.012)}}
+@media (prefers-reduced-motion:reduce){.rbanner.hoy{animation:none}}
 </style>
 </head>
 <body>
@@ -941,7 +951,7 @@ async function cargarLista(){
   S.listo = true;
   if(S.vista==='lista') render();
   ocultarSplash();
-  cargarAvisos(); cargarRecogidas();
+  cargarAvisos(); cargarRecogidas().then(()=>setTimeout(avisarRecogidas, 600));
   avisarRecordatorios();
   cargarPortadas(); revisarPush(); revisarLogros(); if(navigator.onLine !== false) setTimeout(()=>prepararOffline(false), 2500);
 }
@@ -1074,13 +1084,23 @@ function resumenAvisosHoy(){
   return h ? `<div class="furg avisos"><div class="top"><b>${ic('alert','s')} Avisos</b></div>${h}</div>` : '';
 }
 // Hoy: solo las recogidas que te tocan (y, si eres administrador, las sin asignar de los próximos 2 días)
+// v60 · Recogidas y devoluciones que te tocan: aviso grande hoy/mañana y lista informativa de los próximos días
+function tareasDia(t){ return misRecogidas().filter(x => !x.hecho && tsTarea(x) === t); }
+function misProximasRecogidas(dias){
+  const yo = yoNombre(), lim = diaDe(Date.now()) + dias*864e5;
+  return misRecogidas().filter(t => !t.hecho && tsTarea(t) != null && tsTarea(t) <= lim && (!t.resp || respDe(t)===yo))
+    .sort((a,b)=>(tsTarea(a)-tsTarea(b)) || String(a.hora||'').localeCompare(String(b.hora||'')));
+}
+function cuandoTarea(t){ const ts = tsTarea(t), hoy = diaDe(Date.now()); if(ts == null) return ''; if(ts < hoy) return 'Atrasada'; if(ts === hoy) return 'Hoy'; if(ts === hoy + 864e5) return 'Mañana'; const n = Math.round((ts-hoy)/864e5); return 'En ' + n + ' días'; }
+function bannerTarea(t){
+  const i = (S.recogidas||[]).indexOf(t), c = cuandoTarea(t), furgo = t.tipo==='furgo';
+  const que = t.fase==='rec' ? (furgo ? 'recoger la furgoneta' : 'ir a buscar material') : (furgo ? 'devolver la furgoneta' : 'devolver material');
+  return `<button class="rbanner ${c==='Atrasada'?'tarde':c==='Hoy'?'hoy':''}" onclick="abrirTarea(${i})"><span class="rbic">${ic(t.fase==='rec'?'truck':'refresh')}</span><span class="rbtx"><small>${esc(c.toUpperCase())}${t.hora?' · '+esc(t.hora):''}${t.resp?'':' · sin asignar'}</small><b>${c==='Atrasada'?'Pendiente: ':'Tienes que '}${esc(que)}${t.prov?' en '+esc(t.prov):''}</b><em>${esc(t.que||'')}${t.que?' · ':''}${esc(t.evento||t.num)}</em></span>${ic('chev','s')}</button>`;
+}
 function tarjetaRecogidasHoy(){
-  if(!esAdmin()) return tarjetaRecogidas();
-  // solo el día de recoger o devolver (las sin asignar de los próximos días ya salen en «Avisos»)
-  const yo = yoNombre(), hoy = diaDe(Date.now());
-  const l = misRecogidas().filter(t => !t.hecho && tsTarea(t) === hoy && (respDe(t)===yo || !t.resp));
-  if(!l.length) return '';
-  return `<div class="furg lcard"><div class="top"><b>${ic('truck','s')} Te toca</b><button class="edit" onclick="irTab('logi')">Logística</button></div>${l.slice(0,4).map(filaTarea).join('')}</div>`;
+  const l = misProximasRecogidas(10); if(!l.length) return '';
+  const man = diaDe(Date.now()) + 864e5, urg = l.filter(t => tsTarea(t) <= man), resto = l.filter(t => tsTarea(t) > man);
+  return urg.map(bannerTarea).join('') + (resto.length ? `<div class="furg lcard"><div class="top"><b>${ic('truck','s')} Próximas recogidas</b>${esAdmin()?`<button class="edit" onclick="irTab('logi')">Logística</button>`:''}</div>${resto.slice(0,4).map(filaTarea).join('')}</div>` : '');
 }
 /* =========================================================
    v52 · CONVOCATORIAS, HOJA DE RUTA, REVISIÓN DE FURGONETA,
@@ -3329,6 +3349,29 @@ function avisarRecordatorios(){
     ${pedir?`<button class="btn sec2" style="margin-top:6px" onclick="activarNotis()">${ic('bell','s')} Activar avisos en el móvil</button>`:''}
     <button class="btn" style="margin-top:10px" onclick="cerrarSheet()">Entendido</button>`);
 }
+// v60 · Aviso de recogida/devolución de subalquiler: hoy, mañana o atrasada (notificación en el móvil + ventana en la app)
+function avisarRecogidas(){
+  const man = diaDe(Date.now()) + 864e5, l = misProximasRecogidas(1).filter(t => tsTarea(t) <= man); if(!l.length) return;
+  let vistos = {}; try{ vistos = JSON.parse(localStorage.getItem('ck_recsq')||'{}') || {}; }catch(e){}
+  const dia = diaDe(Date.now()), clave = t => claveInv(t) + '|' + dia;
+  const nuevos = l.filter(t => !vistos[clave(t)]); if(!nuevos.length) return;
+  const lim = dia - 7*864e5; Object.keys(vistos).forEach(k => { if(+k.split('|').pop() < lim) delete vistos[k]; });
+  nuevos.forEach(t => vistos[clave(t)] = 1);
+  try{ localStorage.setItem('ck_recsq', JSON.stringify(vistos)); }catch(e){}
+  const tit = t => { const c = cuandoTarea(t); return (c==='Atrasada' ? 'Pendiente' : c) + ': ' + tareaTitulo(t).replace(' · ', ' en '); };
+  try{
+    if('Notification' in window && Notification.permission === 'granted' && navigator.serviceWorker)
+      navigator.serviceWorker.ready.then(r => nuevos.forEach(t => r.showNotification(tit(t), { body: [t.hora, t.que, t.evento||t.num].filter(Boolean).join(' · '), icon:'icon-192.png', badge:'icon-192.png', tag:'sq-'+claveInv(t), data:{ num:t.num } }))).catch(()=>{});
+  }catch(e){}
+  const mostrar = (n) => {
+    if(S.vista!=='lista' || $('#sheet').classList.contains('open')){ if(n < 20) setTimeout(()=>mostrar(n+1), 1500); return; }
+    vib([20,60,20]);
+    abrirSheet(`<h3>${ic('truck')} No te olvides</h3><div class="meta" style="margin-bottom:12px">${nuevos.length>1?'Tienes que ir a estos proveedores':'Tienes que ir al proveedor'} antes del bolo.</div>
+      ${nuevos.map(bannerTarea).join('')}
+      <button class="btn" style="margin-top:4px" onclick="cerrarSheet()">Entendido</button>`);
+  };
+  mostrar(0);
+}
 async function activarNotis(){
   cerrarSheet();
   if(esIOSsinInstalar()){ toast('En iPhone, primero instala la app en la pantalla de inicio'); setTimeout(ayudaInstalar, 300); return; }
@@ -3844,11 +3887,11 @@ function semana(){
   for(let d=0; d<14; d++){ const t = hoy + d*864e5, dt = new Date(t); dias.push({ t: diaDe(dt.getTime()), dt }); }
   const de = t => (S.presus||[]).filter(p => !p.cerrado && enRango(p, t));
   const L = ['D','L','M','X','J','V','S'];
-  const strip = `<div class="semana">${dias.map(({t,dt})=>{ const n = de(t).length; return `<button class="dia ${S.diaSel===t?'on':''} ${t===hoy?'dhoy':''} ${n?'con':''}" onclick="selDia(${t})"><span>${t===hoy?'Hoy':L[dt.getDay()]}</span><b>${dt.getDate()}</b><i>${n?'●'.repeat(Math.min(3,n)):''}</i></button>`; }).join('')}</div>`;
+  const strip = `<div class="semana">${dias.map(({t,dt})=>{ const n = de(t).length, nt = tareasDia(t).length; return `<button class="dia ${S.diaSel===t?'on':''} ${t===hoy?'dhoy':''} ${n?'con':''} ${nt?'trk':''}" onclick="selDia(${t})">${nt?'<em class="dtrk" aria-label="Recogida o devolución">🚚</em>':''}<span>${t===hoy?'Hoy':L[dt.getDay()]}</span><b>${dt.getDate()}</b><i>${n?'●'.repeat(Math.min(3,n)):''}</i></button>`; }).join('')}</div>`;
   if(S.diaSel == null) return strip;
-  const l = de(S.diaSel), dt = new Date(S.diaSel);
+  const l = de(S.diaSel), dt = new Date(S.diaSel), tl = tareasDia(S.diaSel);
   let tit = dt.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' }); tit = tit.charAt(0).toUpperCase()+tit.slice(1);
-  return strip + `<div class="sec">${esc(tit)} <span class="cnt">${l.length}</span></div>` + (l.length ? l.map(p => tarjetaBolo(p).replace('</button>', `${(p.tecnicos||[]).length?`<div class="meta tecs">${ic('users','xs')} ${esc(p.tecnicos.join(', '))}</div>`:`<div class="meta tecs">Sin equipo asignado</div>`}</button>`)).join('') : `<div class="meta" style="margin:0 4px 14px">Sin bolos este día.</div>`);
+  return strip + `<div class="sec">${esc(tit)} <span class="cnt">${l.length + tl.length}</span></div>` + (tl.length ? `<div class="furg lcard">${tl.map(filaTarea).join('')}</div>` : '') + (l.length ? l.map(p => tarjetaBolo(p).replace('</button>', `${(p.tecnicos||[]).length?`<div class="meta tecs">${ic('users','xs')} ${esc(p.tecnicos.join(', '))}</div>`:`<div class="meta tecs">Sin equipo asignado</div>`}</button>`)).join('') : tl.length ? '' : `<div class="meta" style="margin:0 4px 14px">Sin bolos este día.</div>`);
 }
 function selDia(t){ S.diaSel = S.diaSel === t ? null : t; vib(8); render(); }
 
@@ -4564,13 +4607,14 @@ function vistaCalendario(){
   const ocup = {}; l.filter(p=>{ const d = new Date(p.ts||0); return d.getFullYear()===y && d.getMonth()===m; }).forEach(p=>(p.tecnicos||[]).forEach(t=>{ ocup[t] = (ocup[t]||0) + 1; }));
   let celdas = ''; for(let i=0;i<off;i++) celdas += '<div class="cd vac"></div>';
   for(let d=1; d<=dias; d++){ const t = new Date(y, m, d).getTime(), b = de(t);
-    celdas += `<button class="cd ${t===hoy?'hoy':''} ${S.calDia===t?'on':''} ${b.length?'con':''}" onclick="S.calDia=S.calDia===${t}?null:${t};render()"><span>${d}</span>${b.slice(0,2).map(p=>`<i class="cev est-${estadoBolo(p)[0]}">${esc(String(p.evento||p.num).replace(/^Evento\s+/i,'').slice(0,14))}</i>`).join('')}${b.length>2?`<i class="cmas">+${b.length-2}</i>`:''}</button>`; }
-  const sel = S.calDia ? de(S.calDia) : null;
+    const tk = tareasDia(t);
+    celdas += `<button class="cd ${t===hoy?'hoy':''} ${S.calDia===t?'on':''} ${b.length?'con':''}" onclick="S.calDia=S.calDia===${t}?null:${t};render()"><span>${d}</span>${tk.length?`<i class="cev ctrk">🚚 ${esc(tk[0].fase==='rec'?'Recoger':'Devolver')}</i>`:''}${b.slice(0,2).map(p=>`<i class="cev est-${estadoBolo(p)[0]}">${esc(String(p.evento||p.num).replace(/^Evento\s+/i,'').slice(0,14))}</i>`).join('')}${b.length>2?`<i class="cmas">+${b.length-2}</i>`:''}</button>`; }
+  const sel = S.calDia ? de(S.calDia) : null, selT = S.calDia ? tareasDia(S.calDia) : [];
   let tit = new Date(y, m, 1).toLocaleDateString('es-ES', { month:'long', year:'numeric' }); tit = tit.charAt(0).toUpperCase()+tit.slice(1);
   return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Calendario</h1></div>
     <div class="mesnav"><button onclick="moverCal(-1)" aria-label="Mes anterior">‹</button><b>${esc(tit)}</b><button onclick="moverCal(1)" aria-label="Mes siguiente">›</button></div></header>
     <main><div class="calg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${celdas}</div>
-    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${(()=>{ const nd = Object.entries(S.nodisp||{}).filter(([n,l])=>l.includes(fechaISO(S.calDia))).map(([n])=>n); return nd.length ? `<div class="aviso" style="margin:0 0 10px">No pueden: ${esc(nd.join(', '))}</div>` : ''; })()}${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>'}` : ''}
+    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${(()=>{ const nd = Object.entries(S.nodisp||{}).filter(([n,l])=>l.includes(fechaISO(S.calDia))).map(([n])=>n); return nd.length ? `<div class="aviso" style="margin:0 0 10px">No pueden: ${esc(nd.join(', '))}</div>` : ''; })()}${selT.length?`<div class="furg lcard">${selT.map(filaTarea).join('')}</div>`:''}${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || (selT.length ? '' : '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>')}` : ''}
     ${Object.keys(ocup).length ? `<div class="sec">Ocupación del mes</div><div class="furg">${Object.entries(ocup).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="bar2"><span>${esc(n)}</span><div class="bt"><div style="width:${Math.min(100,c/Math.max(...Object.values(ocup))*100)}%"></div></div><b>${c} ${c>1?'bolos':'bolo'}</b></div>`).join('')}</div>` : ''}</main>`;
 }
 
