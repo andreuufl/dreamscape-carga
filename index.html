@@ -329,15 +329,15 @@ header.conpt{background:linear-gradient(rgba(15,26,43,.72),rgba(15,26,43,.96)),v
 .splash.fuera .sp-in{transform:scale(1.14);opacity:0;filter:blur(6px)}
 .splash.fuera .sp-beam{animation:none;opacity:1;filter:brightness(1.7);transition:opacity .5s ease .25s}
 .sp-logo{position:relative;display:inline-block;font-family:Fraunces,"Iowan Old Style",Georgia,serif;color:#f3ede2;font-size:clamp(26px,8vw,40px);letter-spacing:.3em;margin-left:.3em;white-space:nowrap;overflow:hidden;padding:4px 0}
-.sp-logo span{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(18px) scale(.85);text-shadow:0 0 22px rgba(255,200,110,.55);animation:epLetra .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.45s + var(--i) * 75ms)}
+.sp-logo span{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(18px) scale(.85);text-shadow:0 0 22px rgba(255,200,110,.55);animation:epLetra .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.3s + var(--i) * 70ms)}
 @keyframes epLetra{to{opacity:1;filter:none;transform:none}}
 .sp-logo{animation:epAura 2.8s ease-in-out 1.6s infinite}
 @keyframes epAura{0%,100%{filter:drop-shadow(0 0 0 rgba(255,200,110,0))}50%{filter:drop-shadow(0 0 14px rgba(255,200,110,.45))}}
-.sp-sub{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--gold);font-size:11px;letter-spacing:.42em;text-transform:uppercase;margin-top:12px;opacity:0;animation:epSub .9s ease 1.3s forwards}
+.sp-sub{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--gold);font-size:11px;letter-spacing:.42em;text-transform:uppercase;margin-top:12px;opacity:0;animation:epSub .9s ease 1.2s forwards}
 @keyframes epSub{from{opacity:0;letter-spacing:.9em}to{opacity:1;letter-spacing:.42em}}
-.sp-line{width:160px;height:2px;background:rgba(255,255,255,.08);margin:30px auto 0;border-radius:2px;overflow:hidden;opacity:0;animation:epSub .6s ease 1.5s forwards}.sp-line i{display:block;height:100%;width:40%;background:linear-gradient(90deg,transparent,var(--gold),#fff2cf);box-shadow:0 0 10px var(--gold);animation:spl 1.1s ease-in-out infinite}
+.sp-line{width:160px;height:2px;background:rgba(255,255,255,.08);margin:30px auto 0;border-radius:2px;overflow:hidden;opacity:0;animation:epSub .6s ease 1.35s forwards}.sp-line i{display:block;height:100%;width:40%;background:linear-gradient(90deg,transparent,var(--gold),#fff2cf);box-shadow:0 0 10px var(--gold);animation:spl 1.1s ease-in-out infinite}
 @keyframes spl{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
-.sp-msg{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;color:rgba(236,231,222,.6);margin-top:14px;min-height:14px;opacity:0;animation:epSub .6s ease 1.6s forwards;transition:opacity .2s}
+.sp-msg{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.12em;color:rgba(236,231,222,.6);margin-top:14px;min-height:14px;opacity:0;animation:epSub .6s ease 1.45s forwards;transition:opacity .25s}
 @media (prefers-reduced-motion:reduce){.sp-beam,.sp-haz,.sp-escena,.sp-logo{animation:none!important}.sp-beam{opacity:.5}.sp-logo span,.sp-sub,.sp-line,.sp-msg{animation:none!important;opacity:1;filter:none;transform:none}}
 main.anim{animation:paso .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes paso{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
@@ -789,7 +789,7 @@ button.furg.antic.off{box-shadow:var(--ring),var(--sh)}button.furg.antic.off .to
 <body>
 <div id="app"></div>
 <div id="splash" class="splash"><div class="sp-haz"></div><div class="sp-beam b1"></div><div class="sp-beam b2"></div><div class="sp-beam b3"></div><div class="sp-beam b4"></div><div class="sp-escena"></div><div class="sp-in"><div class="sp-logo" aria-label="Dreamscape"><span style="--i:0">D</span><span style="--i:1">R</span><span style="--i:2">E</span><span style="--i:3">A</span><span style="--i:4">M</span><span style="--i:5">S</span><span style="--i:6">C</span><span style="--i:7">A</span><span style="--i:8">P</span><span style="--i:9">E</span></div><div class="sp-sub">Events &amp; Productions</div><div class="sp-line"><i></i></div><div class="sp-msg" id="spMsg">Encendiendo focos…</div></div></div>
-<script>(function(){var m=["Encendiendo focos…","Probando sonido…","Cargando el material…","Preparando la ruta…","Abriendo el telón…"],i=0,el=document.getElementById("spMsg");if(!el)return;var t=setInterval(function(){if(!document.getElementById("splash")){clearInterval(t);return;}i=(i+1)%m.length;el.style.opacity=0;setTimeout(function(){el.textContent=m[i];el.style.opacity=1;},200);},850);})();</script>
+<script>(function(){var m=["Encendiendo focos…","Probando sonido…","Cargando el material…","Preparando la ruta…","Abriendo el telón…"],i=0,el=document.getElementById("spMsg");if(!el)return;function sig(){if(!document.getElementById("splash")||i>=m.length-1)return;i++;el.style.opacity=0;setTimeout(function(){el.textContent=m[i];el.style.opacity=1;},250);setTimeout(sig,700);}setTimeout(sig,2100);})();</script>
 <div class="sheet-bg" id="sbg" onclick="cerrarSheet()"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
@@ -4071,7 +4071,7 @@ function confeti(){
 function animarPaso(){ const m = document.querySelector('main'); if(m){ m.classList.remove('anim'); void m.offsetWidth; m.classList.add('anim'); } }
 
 /* ---------- 11. PANTALLA DE BIENVENIDA ---------- */
-function ocultarSplash(){ const s = $('#splash'); if(!s || s.dataset.fuera) return; s.dataset.fuera = 1; const min = 2000 - (Date.now() - (window.T0||0)); setTimeout(()=>{ s.classList.add('fuera'); setTimeout(()=>s.remove(), 950); }, Math.max(0, min)); }
+function ocultarSplash(){ const s = $('#splash'); if(!s || s.dataset.fuera) return; s.dataset.fuera = 1; const min = 5000 - (Date.now() - (window.T0||0)); setTimeout(()=>{ s.classList.add('fuera'); setTimeout(()=>s.remove(), 950); }, Math.max(0, min)); }
 
 /* ---------- 12. ICONOS POR TIPO DE MATERIAL ---------- */
 const ICOMAT = [
