@@ -3287,7 +3287,25 @@ function abrirMas(){
     ${esAdmin()? it('mail','Enviarme el dossier por correo','dossier(true)','Para reenviarlo al cliente'):''}
     ${esAdmin()? it('clip','Guardar como plantilla','plantillaDeBolo()','Para reutilizar este material en otros bolos'):''}
     ${esAdmin()? it('receipt','Datos para la factura','cerrarSheet();verFactura()','Cliente, CIF, conceptos e importes'):''}
+    ${esAdmin()? it('sliders','Cambiar nº de presupuesto','cambiarNumBolo()','Se cambia en la app, el Drive, EVENTOS, facturación y el calendario'):''}
     ${esAdmin()? `<button class="mitem" onclick="cancelarBolo()"><span class="ic" style="color:var(--bad)">${ic('x')}</span><span><b class="danger">Cancelar bolo</b><small>Se borra de la app, Carga, EVENTOS, calendario, reservas y Bolos</small></span></button>`:''}`}`);
+}
+async function cambiarNumBolo(){
+  const viejo = S.num, p = S.presus.find(x=>x.num===viejo) || {};
+  const nuevo = (prompt(`Nº de presupuesto actual: ${viejo}\n\nEscribe el nº nuevo:`, viejo) || '').trim();
+  if(!nuevo || nuevo===viejo) return;
+  if(!confirm(`¿Cambiar el nº ${viejo} por ${nuevo}?\n\n${p.evento||''}\n\nSe cambiará en la app, en el Drive de presupuestos (Carga, Bolos y demás pestañas), en EVENTOS, en facturación y en el calendario.`)) return;
+  toast('Cambiando el nº en todos lados…');
+  try{
+    const r = await call('ckCambiarNum', viejo, nuevo) || {};
+    (S.presus||[]).forEach(x=>{ if(x.num===viejo) x.num = nuevo; });
+    (S.cobros||[]).forEach(x=>{ if(x.num===viejo) x.num = nuevo; });
+    try{ cacheSet('ckPresupuestos[]', S.presus); }catch(e){}
+    S.num = nuevo; vib(20);
+    toast(`Nº cambiado a ${nuevo}` + (r.celdas!=null ? ` · ${r.celdas} celdas` : '') + (r.eventos ? ` · ${r.eventos} eventos` : ''));
+    try{ S.presus = await call('ckPresupuestos') || S.presus; }catch(e){}
+    abrir(nuevo);
+  }catch(e){ toast(e.red ? 'Necesitas conexión para cambiar el nº' : 'Error: '+e.message); }
 }
 async function cancelarBolo(){
   const num = S.num, p = S.presus.find(x=>x.num===num) || {};
