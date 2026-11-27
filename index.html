@@ -422,6 +422,7 @@ header.hd-listo{background:linear-gradient(135deg,#0f4a32 0%,var(--navy) 65%)}
 .cd.hoy{outline:2px solid var(--gold);outline-offset:-2px}.cd.on{background:var(--navy);color:#fff}
 .cev{font-style:normal;font-size:9.5px;line-height:1.2;padding:2px 3px;border-radius:4px;background:var(--card2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid #9aa3b2}
 .cev.est-prep{border-color:var(--gold)}.cev.est-curso{border-color:var(--dev)}.cev.est-vuelta{border-color:var(--warn)}.cev.est-listo,.cev.est-fin{border-color:var(--ok)}
+.cev.cfuera{opacity:.6;border-left:3px dashed #9aa3b2;background:transparent}
 .cd.on .cev{background:rgba(255,255,255,.12);color:#fff}.cmas{font-style:normal;font-size:10px;color:var(--mut);text-align:center}
 .chkrow{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1.5px solid var(--line);border-radius:14px}
 .chkrow input{width:22px;height:22px;margin-top:2px;accent-color:var(--ok)}.chkrow small{display:block;color:var(--mut);font-size:13px}
@@ -997,7 +998,7 @@ function vistaHoy(){
   let fecha = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' }); fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1);
   const hoy0 = diaDe(Date.now());
   const heroes = tarjetasHoy();
-  const man0 = diaDe(hoy0 + 36*36e5), prox = (S.presus||[]).filter(p => !p.cerrado && rangoBolo(p)[0] != null && rangoBolo(p)[0] > man0 && !enRango(p, hoy0)).sort((a,b)=>rangoBolo(a)[0]-rangoBolo(b)[0]);
+  const man0 = diaDe(hoy0 + 36*36e5), prox = (S.presus||[]).filter(p => !p.cerrado && proxTrabajo(p, hoy0) != null && proxTrabajo(p, hoy0) > man0).sort((a,b)=>proxTrabajo(a, hoy0)-proxTrabajo(b, hoy0));
   let hero = heroes, resto = prox;
   if(!heroes && prox.length){ hero = heroBolo(prox[0], 'PRÓXIMO BOLO', 'man'); resto = prox.slice(1); }
   const cargando = !S.presus.length && !S.listo;
@@ -2953,8 +2954,8 @@ function heroBolo(p, lbl, cls){
 }
 function tarjetasHoy(){
   const hoy = diaDe(Date.now()), man = diaDe(hoy + 36*36e5);
-  const l = (S.presus||[]).filter(p => !p.cerrado && (enRango(p, hoy) || enRango(p, man))).sort((a,b)=>rangoBolo(a)[0]-rangoBolo(b)[0]);
-  return l.map(p => { const esHoy = enRango(p, hoy); return heroBolo(p, esHoy?'HOY':'MAÑANA', esHoy?'':'man'); }).join('');
+  const l = (S.presus||[]).filter(p => !p.cerrado && (diaTrabajo(p, hoy) || diaTrabajo(p, man))).sort((a,b)=>proxTrabajo(a, hoy)-proxTrabajo(b, hoy));
+  return l.map(p => { const esHoy = diaTrabajo(p, hoy); return heroBolo(p, esHoy?'HOY':'MAÑANA', esHoy?'':'man'); }).join('');
 }
 function heroTecnico(p, lbl, cls, pt){
   const f = fichaDe(p.num), hoy = diaDe(Date.now()), d = diasLista(p), n = d.indexOf(hoy) + 1;
@@ -3903,7 +3904,7 @@ async function quitarFotoMat(n){
 function semana(){
   const hoy = diaDe(Date.now()), dias = [];
   for(let d=0; d<14; d++){ const t = hoy + d*864e5, dt = new Date(t); dias.push({ t: diaDe(dt.getTime()), dt }); }
-  const de = t => (S.presus||[]).filter(p => !p.cerrado && enRango(p, t));
+  const de = t => (S.presus||[]).filter(p => !p.cerrado && diaTrabajo(p, t));
   const L = ['D','L','M','X','J','V','S'];
   const strip = `<div class="semana">${dias.map(({t,dt})=>{ const n = de(t).length, nt = tareasDia(t).length; return `<button class="dia ${S.diaSel===t?'on':''} ${t===hoy?'dhoy':''} ${n?'con':''} ${nt?'trk':''}" onclick="selDia(${t})">${nt?'<em class="dtrk" aria-label="Recogida o devolución">🚚</em>':''}<span>${t===hoy?'Hoy':L[dt.getDay()]}</span><b>${dt.getDate()}</b><i>${n?'●'.repeat(Math.min(3,n)):''}</i></button>`; }).join('')}</div>`;
   if(S.diaSel == null) return strip;
@@ -4345,6 +4346,11 @@ function rangoBolo(p){
   return RANGO_MEMO[p.num] = [i, j];
 }
 function enRango(p, t){ const [i, j] = rangoBolo(p); return i != null && t >= i && t <= j; }
+/* Bolos con material de varios días: solo se trabaja el día de montaje y el de desmontaje; los de en medio el material está fuera y no cuentan como ocupado. Los de solo técnico cuentan todos los días. */
+function diasTrabajo(p){ const [i, j] = rangoBolo(p); if(i == null) return []; if(esSoloTec(p)) return diasLista(p); return j > i ? [i, j] : [i]; }
+function diaTrabajo(p, t){ return diasTrabajo(p).includes(t); }
+function proxTrabajo(p, desde){ return diasTrabajo(p).find(t => t >= desde); }
+function materialFuera(p, t){ return enRango(p, t) && !diaTrabajo(p, t); }
 function diasLista(p){ const [i, j] = rangoBolo(p), l = []; if(i == null) return [diaDe(Date.now())]; for(let t = i; t <= j && l.length < 62; t = diaDe(t + 36*36e5)) l.push(t); return l; }
 function horasSeg(x, ahora){ if(x.s && !x.sm) return x.h || 0; return Math.max(0, ((x.sm || ahora || Date.now()) - x.em) / 36e5); }
 function segsDia(l, t){ return l.filter(x => diaDe(x.em) === t); }
@@ -4621,18 +4627,18 @@ function moverCal(d){ const [y,m] = S.calMes, x = new Date(y, m+d, 1); S.calMes 
 function vistaCalendario(){
   const [y, m] = S.calMes, l = S.cal || S.presus || [];
   const ini = new Date(y, m, 1), dias = new Date(y, m+1, 0).getDate(), off = (ini.getDay()+6)%7, hoy = diaDe(Date.now());
-  const de = t => l.filter(p => enRango(p, t));
+  const de = t => l.filter(p => diaTrabajo(p, t)), fuera = t => l.filter(p => materialFuera(p, t));
   const ocup = {}; l.filter(p=>{ const d = new Date(p.ts||0); return d.getFullYear()===y && d.getMonth()===m; }).forEach(p=>(p.tecnicos||[]).forEach(t=>{ ocup[t] = (ocup[t]||0) + 1; }));
   let celdas = ''; for(let i=0;i<off;i++) celdas += '<div class="cd vac"></div>';
   for(let d=1; d<=dias; d++){ const t = new Date(y, m, d).getTime(), b = de(t);
     const tk = tareasDia(t);
-    celdas += `<button class="cd ${t===hoy?'hoy':''} ${S.calDia===t?'on':''} ${b.length?'con':''}" onclick="S.calDia=S.calDia===${t}?null:${t};render()"><span>${d}</span>${tk.length?`<i class="cev ctrk">🚚 ${esc(tk[0].fase==='rec'?'Recoger':'Devolver')}</i>`:''}${b.slice(0,2).map(p=>`<i class="cev est-${estadoBolo(p)[0]}">${esc(String(p.evento||p.num).replace(/^Evento\s+/i,'').slice(0,14))}</i>`).join('')}${b.length>2?`<i class="cmas">+${b.length-2}</i>`:''}</button>`; }
-  const sel = S.calDia ? de(S.calDia) : null, selT = S.calDia ? tareasDia(S.calDia) : [];
+    celdas += `<button class="cd ${t===hoy?'hoy':''} ${S.calDia===t?'on':''} ${b.length?'con':''}" onclick="S.calDia=S.calDia===${t}?null:${t};render()"><span>${d}</span>${tk.length?`<i class="cev ctrk">🚚 ${esc(tk[0].fase==='rec'?'Recoger':'Devolver')}</i>`:''}${b.slice(0,2).map(p=>`<i class="cev est-${estadoBolo(p)[0]}">${esc(String(p.evento||p.num).replace(/^Evento\s+/i,'').slice(0,14))}</i>`).join('')}${b.length>2?`<i class="cmas">+${b.length-2}</i>`:''}${!b.length && fuera(t).length ? `<i class="cev cfuera" title="Material fuera">📦 ${esc(String(fuera(t)[0].evento||fuera(t)[0].num).replace(/^Evento\s+/i,'').slice(0,12))}</i>` : ''}</button>`; }
+  const sel = S.calDia ? de(S.calDia) : null, selF = S.calDia ? fuera(S.calDia) : [], selT = S.calDia ? tareasDia(S.calDia) : [];
   let tit = new Date(y, m, 1).toLocaleDateString('es-ES', { month:'long', year:'numeric' }); tit = tit.charAt(0).toUpperCase()+tit.slice(1);
   return `<header class="top">${BRAND}<div class="hrow"><button class="back" onclick="S.vista='lista';render()" aria-label="Volver">${ic('back')}</button><h1>Calendario</h1></div>
     <div class="mesnav"><button onclick="moverCal(-1)" aria-label="Mes anterior">‹</button><b>${esc(tit)}</b><button onclick="moverCal(1)" aria-label="Mes siguiente">›</button></div></header>
     <main><div class="calg">${['L','M','X','J','V','S','D'].map(x=>`<div class="cdh">${x}</div>`).join('')}${celdas}</div>
-    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${(()=>{ const nd = Object.entries(S.nodisp||{}).filter(([n,l])=>l.includes(fechaISO(S.calDia))).map(([n])=>n); return nd.length ? `<div class="aviso" style="margin:0 0 10px">No pueden: ${esc(nd.join(', '))}</div>` : ''; })()}${selT.length?`<div class="furg lcard">${selT.map(filaTarea).join('')}</div>`:''}${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || (selT.length ? '' : '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>')}` : ''}
+    ${sel ? `<div class="sec">${esc(new Date(S.calDia).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))} <span class="cnt">${sel.length}</span></div>${(()=>{ const nd = Object.entries(S.nodisp||{}).filter(([n,l])=>l.includes(fechaISO(S.calDia))).map(([n])=>n); return nd.length ? `<div class="aviso" style="margin:0 0 10px">No pueden: ${esc(nd.join(', '))}</div>` : ''; })()}${selT.length?`<div class="furg lcard">${selT.map(filaTarea).join('')}</div>`:''}${selF.length ? `<div class="meta" style="margin:0 4px 10px">📦 Material fuera (sin trabajo este día): ${esc(selF.map(p=>p.evento||p.num).join(', '))}</div>` : ''}${sel.map(p=>`<button class="card est-${estadoBolo(p)[0]}" onclick="abrir('${esc(p.num)}')"><div class="top"><span class="num">${esc(p.num)}</span><span class="date">${esc(p.montaje||'')}</span></div><div class="ev">${esc(p.evento)}</div><div class="meta">${ic('users','xs')} ${esc((p.tecnicos||[]).join(', ')||'Sin equipo')}${p.furgo?` · ${ic('truck','xs')} ${esc(p.furgo)}`:''}</div></button>`).join('') || (selT.length || selF.length ? '' : '<div class="meta" style="margin:0 4px">Sin bolos este día.</div>')}` : ''}
     ${Object.keys(ocup).length ? `<div class="sec">Ocupación del mes</div><div class="furg">${Object.entries(ocup).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="bar2"><span>${esc(n)}</span><div class="bt"><div style="width:${Math.min(100,c/Math.max(...Object.values(ocup))*100)}%"></div></div><b>${c} ${c>1?'bolos':'bolo'}</b></div>`).join('')}</div>` : ''}</main>`;
 }
 
@@ -4922,7 +4928,9 @@ function tarjetaHorario0(){
   if(h.fMontaje || h.hMontaje) l.push(['🔧','Montaje', [h.fMontaje ? fechaCorta(h.fMontaje) : '', esc(h.hMontaje||'')].filter(Boolean).join(' · ')]);
   if(h.hEvento) l.push(['🎤','Evento', esc(h.hEvento) + (h.hFin ? ' – ' + esc(h.hFin) + ` <small class="hdur">(${duracionTxt(h.hEvento, h.hFin)})</small>` : '')]);
   if(h.fDesmontaje || h.hDesmontaje) l.push(['📦','Desmontaje', [h.fDesmontaje ? fechaCorta(h.fDesmontaje) : '', esc(h.hDesmontaje||'')].filter(Boolean).join(' · ')]);
-  if(h.diasHoras && h.fMontaje !== h.fDesmontaje) l.push(['🗓️','Cada día', esc(h.diasHoras).replace(/\n/g,'<br>')]);
+  if(h.diasHoras && h.fMontaje !== h.fDesmontaje){ const kd = f => { const m = String(f||'').match(/^(\d{1,2})\/(\d{1,2})/); return m ? (+m[1])+'/'+(+m[2]) : ''; }, st = esSoloTec(), ks = [kd(h.fMontaje), kd(h.fDesmontaje)];
+    const tx = st ? h.diasHoras : String(h.diasHoras).split(/\n|;/).filter(x => { const m = x.trim().match(/^(\d{1,2})\/(\d{1,2})/); return m && ks.includes((+m[1])+'/'+(+m[2])); }).join('\n');
+    if(tx) l.push(['🗓️', st ? 'Cada día' : 'Montaje y desmontaje', esc(tx).replace(/\n/g,'<br>')]); }
   if(!l.length && !h.notas && !esAdmin()) return '';
   return `<div class="furg hcard"><div class="top"><b>${ic('today','s')} Horario del bolo</b>${esAdmin() ? `<button class="edit" onclick="editarHorario()">Cambiar</button>` : ''}</div>
     ${l.length ? `<div class="hgr">${l.map(([e,t,v])=>`<div class="hit"><span class="ipe" aria-hidden="true">${e}</span><span><small>${t}</small>${v}</span></div>`).join('')}</div>` : `<div class="meta">Aún sin horario. ${esAdmin() ? 'Pulsa «Cambiar» o rellénalo en la pestaña Horarios del Drive.' : ''}</div>`}
@@ -4949,10 +4957,11 @@ function diasHorario(fa, fb){ const p = s => { const m = String(s||'').match(/^(
 function horasDiaMapa(txt){ const o = {}; String(txt||'').split(/\n|;/).forEach(l => { const m = l.match(/(\d{1,2})\/(\d{1,2})\D+?(\d{1,2})[:.h](\d{2})\s*[-–a]\s*(\d{1,2})[:.h](\d{2})/); if(m) o[(+m[1])+'/'+(+m[2])] = [String(m[3]).padStart(2,'0')+':'+m[4], String(m[5]).padStart(2,'0')+':'+m[6]]; }); return o; }
 function pintarHorasDia(){
   const c = $('#ho_dias'); if(!c) return;
-  const ds = diasHorario(($('#ho_fMontaje')||{}).value, ($('#ho_fDesmontaje')||{}).value);
+  let ds = diasHorario(($('#ho_fMontaje')||{}).value, ($('#ho_fDesmontaje')||{}).value);
   if(ds.length < 2){ c.innerHTML = ''; return; }
+  const st = esSoloTec(); if(!st) ds = [ds[0], ds[ds.length-1]];
   const mp = horasDiaMapa(c.dataset.txt), hi = ($('#ho_hMontaje')||{}).value || '', hf = ($('#ho_hDesmontaje')||{}).value || '', n = ds.length;
-  c.innerHTML = `<span>🗓️ Horario de cada día <small style="font-weight:400">(llegada y salida · un evento por día en el Calendar)</small></span>` + ds.map((d,k) => {
+  c.innerHTML = `<span>🗓️ ${st ? 'Horario de cada día' : 'Día de montaje y día de desmontaje'} <small style="font-weight:400">${st ? '(llegada y salida de cada día)' : '(los días de en medio el material está fuera: no salen como ocupados; en el Calendar el evento ocupa todos los días)'}</small></span>` + ds.map((d,k) => {
     const key = d.getDate()+'/'+(d.getMonth()+1), v = mp[key] || [hi, hf], a = k===0 && hi ? hi : (v[0]||hi), b = k===n-1 && hf ? hf : (v[1]||hf);
     return `<div class="hgrid hdia" data-k="${key}"><label><small>${DIAS_SEM[d.getDay()]} ${key} · llegada</small><input type="time" class="hd_i" value="${esc(a)}" step="300"${k===0 && hi ? ' readonly title="Es la hora de montaje"' : ''}></label><label><small>salida</small><input type="time" class="hd_f" value="${esc(b)}" step="300"${k===n-1 && hf ? ' readonly title="Es la hora de desmontaje"' : ''}></label></div>`;
   }).join('');
